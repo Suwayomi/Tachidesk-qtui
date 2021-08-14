@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ApplicationContent.qml</file>
+        <file>NavigationHome.qml</file>
+        <file>Library.qml</file>
+        <file>MangaDetails.qml</file>
+        <file>WebtoonViewer.qml</file>
+        <file>BackGestureDetector.qml</file>
+    </qresource>
+</RCC>
