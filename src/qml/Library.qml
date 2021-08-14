@@ -9,7 +9,7 @@ Item {
     id: libraryModel
     nm: networkManager
   }
-  //property int cellSize: (base.width / 150)
+
   function setHeight(height) {
     if (height > grid.cellHeight) {
       grid.cellHeight = height + 20
@@ -25,8 +25,6 @@ Item {
     delegate: Rectangle {
       width: grid.cellWidth
       height: grid.cellHeight
-      //width: image.width > listView.width ? listView.width - 8 : image.width + 4
-      //height: image.height + infoText.height + 4
 
       Image {
         id: image

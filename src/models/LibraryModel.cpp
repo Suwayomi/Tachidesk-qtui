@@ -44,8 +44,11 @@ LibraryModel::LibraryModel(QObject* parent)
  *****************************************************************************/
 void LibraryModel::recievedReply(const QJsonDocument& reply)
 {
+  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+
   beginResetModel();
   _entries.clear();
+
 
   for (const auto& entry_arr : reply.array()) {
     const auto& entry = entry_arr.toObject();

@@ -5,7 +5,7 @@
 #include <QCommandLineParser>
 #include <QUrl>
 
-#include "ircchat.h"
+#include "App.h"
 #include "commandline.h"
 
 #include <csignal>
