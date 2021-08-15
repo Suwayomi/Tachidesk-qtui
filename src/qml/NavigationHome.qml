@@ -22,7 +22,8 @@ Item {
     Button {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      text: qsTr("Extentions")
+      text: qsTr("Extensions")
+      onClicked: navigatePage(Qt.resolvedUrl("Extensions.qml"), {})
     }
     Button {
       Layout.fillWidth: true

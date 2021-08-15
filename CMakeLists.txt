@@ -25,6 +25,8 @@ find_package(Qt5QuickCompiler)
 
 add_executable(Tachidesk-qtui src/qml/qml.qrc)
 
+add_subdirectory(libs/SortFilterProxyModel)
+
 function(include_directories_recurse dir)
 	include_directories(${dir})
 	file(GLOB subs "${dir}/*")
@@ -55,7 +57,8 @@ target_link_libraries(Tachidesk-qtui
   Qt::Quick
   Qt::Core
   Qt::Widgets
-  Qt::Gui)
+  Qt::Gui
+  SortFilterProxyModel)
 
 target_include_directories(Tachidesk-qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 

@@ -33,7 +33,7 @@ void ChaptersModel::classBegin() { }
 void ChaptersModel::componentComplete()
 {
   _networkManager->get(QStringLiteral("manga/%1/chapters").arg(_mangaNumber));
-  disconnect(this, &ChaptersModel::networkManagerChanged, this, nullptr);
+  //disconnect(this, &ChaptersModel::networkManagerChanged, this, nullptr);
 
   connect(
       _networkManager,
@@ -55,7 +55,7 @@ void ChaptersModel::recievedReply(const QJsonDocument& reply)
   for (const auto& entry_arr : reply.array()) {
     const auto& entry = entry_arr.toObject();
     auto& info        = _chapters.emplace_back();
-    info.url          = entry["url"].toInt();
+    info.url          = entry["url"].toString();
     info.name         = entry["name"].toString();
     info.chapterNumber= entry["chapterNumber"].toInt();
     info.read         = entry["read"].toBool();
