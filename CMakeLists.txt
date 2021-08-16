@@ -13,13 +13,8 @@ find_package(
   COMPONENTS Core
              Gui
              Quick
-             Multimedia
              Network
-             Positioning
              Widgets
-             Test
-             Location
-             QmlImportScanner
   REQUIRED)
 find_package(Qt5QuickCompiler)
 

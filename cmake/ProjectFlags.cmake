@@ -24,7 +24,7 @@ if(MSVC)
     )
   endif()
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
   add_compile_options("$<$<CONFIG:Debug>:-ggdb3;-O0>")
 
   # These GNU extensions are supported by all of the compilers we use
