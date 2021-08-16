@@ -8,5 +8,6 @@
         <file>WebtoonViewer.qml</file>
         <file>BackGestureDetector.qml</file>
         <file>Sources.qml</file>
+        <file>Extensions.qml</file>
     </qresource>
 </RCC>
