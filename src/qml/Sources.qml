@@ -6,34 +6,23 @@ import Tachidesk.Models 1.0
 import SortFilterProxyModel 0.2
 
 Item {
-  ExtensionModel {
-    id: extensionModel
+  SourcesModel {
+    id: sourcesModel
     nm: networkManager
   }
 
   SortFilterProxyModel {
-    id: extensions
-    sourceModel: extensionModel
+    id: sources
+    sourceModel: sourcesModel
     filterCaseSensitivity: Qt.CaseInsensitive
-    filterRoleName: "name"
+    filterRoleName: "lang"
     filterPattern: base.value
-
-    sorters: [
-      RoleSorter {
-        roleName: "installed"
-        sortOrder: Qt.DescendingOrder
-      },
-      RoleSorter {
-        roleName: "hasUpdate"
-        sortOrder: Qt.DescendingOrder
-      }
-    ]
   }
 
   TextField {
     id: searchBox
-    placeholderText: qsTr("Search")
-    onAccepted: extensions.filterPattern = text
+    placeholderText: qsTr("Language Filter")
+    onAccepted: sources.filterPattern = text
   }
 
   ListView {
@@ -44,9 +33,8 @@ Item {
       left: parent.left
       bottom: parent.bottom
     }
-    model: extensions
     clip: true
-
+    model: sources
     delegate: RowLayout {
       width: layout.width
       Image {
@@ -63,17 +51,8 @@ Item {
       Button {
         Layout.alignment: Qt.AlignRight
         Layout.rightMargin: 4
-
-        text: installed ? hasUpdate ? "update" : "uninstall" : "install"
-        onClicked: {
-          if (hasUpdate) {
-            extensionModel.update(pkgName, row)
-          } else if (installed) {
-            extensionModel.uninstall(pkgName, row)
-          } else {
-            extensionModel.install(pkgName, row)
-          }
-        }
+        text: qsTr("Browse")
+        onClicked: sourcesModel.browse(id)
       }
     }
   }

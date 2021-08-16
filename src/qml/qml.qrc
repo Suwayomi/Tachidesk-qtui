@@ -7,5 +7,6 @@
         <file>MangaDetails.qml</file>
         <file>WebtoonViewer.qml</file>
         <file>BackGestureDetector.qml</file>
+        <file>Sources.qml</file>
     </qresource>
 </RCC>
