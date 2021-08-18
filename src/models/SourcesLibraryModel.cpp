@@ -1,4 +1,4 @@
-#include "SourcesModel.h"
+#include "SourcesLibraryModel.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -11,34 +11,34 @@
   void register ## cls ## Type() { exportQmlType(ns, cls); } \
   Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
 
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, SourcesModel)
+IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, SourcesLibraryModel)
 
 /******************************************************************************
  *
- * SourcesModel
+ * SourcesLibraryModel
  *
  *****************************************************************************/
-SourcesModel::SourcesModel(QObject* parent)
+SourcesLibraryModel::SourcesLibraryModel(QObject* parent)
   : QAbstractListModel(parent)
 {
 }
 
-void SourcesModel::classBegin() { }
+void SourcesLibraryModel::classBegin() { }
 
 /******************************************************************************
  *
  * componentComplete
  *
  *****************************************************************************/
-void SourcesModel::componentComplete()
+void SourcesLibraryModel::componentComplete()
 {
-  _networkManager->get("source/list");
+  _networkManager->get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(_pageNumber));
 
   connect(
       _networkManager,
       &NetworkManager::recievedReply,
       this,
-      &SourcesModel::recievedReply);
+      &SourcesLibraryModel::recievedReply);
 }
 
 /******************************************************************************
@@ -46,22 +46,26 @@ void SourcesModel::componentComplete()
  * Method: recieveReply()
  *
  *****************************************************************************/
-void SourcesModel::recievedReply(const QJsonDocument& reply)
+void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
 {
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
   beginResetModel();
   _sources.clear();
 
-  for (const auto& entry_arr : reply.array()) {
+  const auto& mangaList = reply["mangaList"].toArray();
+  for (const auto& entry_arr : mangaList) {
     const auto& entry   = entry_arr.toObject();
     auto& info          = _sources.emplace_back();
-    info.iconUrl        = entry["iconUrl"].toString();
-    info.name           = entry["name"].toString();
-    info.lang           = entry["lang"].toString();
     info.id             = entry["id"].toString();
-    info.supportsLatest = entry["supportsLatest"].toBool();
-    info.isConfigurable = entry["isConfigurable"].toBool();
+    info.title          = entry["title"].toString();
+    info.thumbnailUrl   = entry["thumbnailUrl"].toString();
+    info.url            = entry["url"].toString();
+    info.isInitialized  = entry["isInitialized"].toBool();
+    info.inLibrary      = entry["inLibrary"].toBool();
+    if (info.isInitialized) {
+      // TODO: fill in details
+    }
   }
 
   endResetModel();
@@ -72,7 +76,7 @@ void SourcesModel::recievedReply(const QJsonDocument& reply)
  * Method: rowCount()
  *
  *****************************************************************************/
-int SourcesModel::rowCount(const QModelIndex &parent) const {
+int SourcesLibraryModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) {
     return 0;
   }
@@ -85,7 +89,7 @@ int SourcesModel::rowCount(const QModelIndex &parent) const {
  * Method: data()
  *
  *****************************************************************************/
-QVariant SourcesModel::data(const QModelIndex &index, int role) const {
+QVariant SourcesLibraryModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) &&
        (index.row() >= 0) &&
        (index.row() < rowCount())))
@@ -97,29 +101,33 @@ QVariant SourcesModel::data(const QModelIndex &index, int role) const {
 
   switch (role)
   {
-    case RoleIconUrl:
+    case RoleThumbnailUrl:
       {
-        return QStringLiteral("%1:%2%3").arg(_networkManager->hostname()).arg(_networkManager->port()).arg(entry.iconUrl);
+        return QStringLiteral("%1:%2%3").arg(_networkManager->hostname()).arg(_networkManager->port()).arg(entry.thumbnailUrl);
       }
-    case RoleName:
+    case RoleTitle:
       {
-        return entry.name;
+        return entry.title;
       }
-    case RoleLang:
+    case RoleUrl:
       {
-        return entry.lang;
+        return entry.url;
       }
     case RoleId:
       {
         return entry.id;
       }
-    case RoleSupportsLatest:
+    case RoleInitialized:
       {
-        return entry.supportsLatest;
+        return entry.isInitialized;
       }
-    case RoleConfigurable:
+    case RoleInLibrary:
       {
-        return entry.isConfigurable;
+        return entry.inLibrary;
+      }
+    case RoleFreshData:
+      {
+        return entry.freshData;
       }
     //case Role
     default:
@@ -134,13 +142,14 @@ QVariant SourcesModel::data(const QModelIndex &index, int role) const {
  * Method: roleNames()
  *
  *****************************************************************************/
-QHash<int, QByteArray> SourcesModel::roleNames() const {
-  static QHash<int, QByteArray> roles = { {RoleIconUrl,       "iconUrl"},
-                                          {RoleName,          "name"},
+QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
+  static QHash<int, QByteArray> roles = { {RoleThumbnailUrl,  "thumbnailUrl"},
+                                          {RoleTitle,         "title"},
                                           {RoleId,            "id"},
-                                          {RoleLang,          "lang"},
-                                          {RoleSupportsLatest,"supportsLatest"},
-                                          {RoleConfigurable,  "isConfigurable"},};
+                                          {RoleUrl,           "url"},
+                                          {RoleInitialized,   "isInitialized"},
+                                          {RoleFreshData,     "freshData"},
+                                          {RoleInLibrary,     "inLibrary"},};
 
   return roles;
 }

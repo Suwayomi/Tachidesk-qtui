@@ -16,7 +16,6 @@ Item {
     sourceModel: sourcesModel
     filterCaseSensitivity: Qt.CaseInsensitive
     filterRoleName: "lang"
-    filterPattern: base.value
   }
 
   TextField {
@@ -52,7 +51,10 @@ Item {
         Layout.alignment: Qt.AlignRight
         Layout.rightMargin: 4
         text: qsTr("Browse")
-        onClicked: sourcesModel.browse(id)
+        onClicked: {
+          navigatePage(Qt.resolvedUrl("SourceLibrary.qml"),
+                                       { source: id })
+        }
       }
     }
   }
