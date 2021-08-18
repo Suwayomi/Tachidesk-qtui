@@ -1,7 +1,7 @@
 #include "commandline.h"
 
 const QCommandLineOption CommandLine::hostname(
-    "hostname", "server's hostname", "hostname", "127.0.0.1");
+    "hostname", "server's hostname", "hostname", "http://127.0.0.1");
 
 const QCommandLineOption CommandLine::port(
     "port", "server's port", "port", "4567");
