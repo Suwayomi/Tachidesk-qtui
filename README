@@ -7,6 +7,13 @@ this is very much a WIP right now
 what works:
   selecting manga and viewing and selecting chapters
   installing/uninstalling/updaing extensions
+  viewing latest library from sources
 
 what doesn't work:
-  everything else
+  can't add manga to library
+  no backup/restore
+  no settings
+  no downloads
+
+
+check CONTRIBUTING.md file for build instructions
