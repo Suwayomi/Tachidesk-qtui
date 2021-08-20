@@ -96,8 +96,8 @@ Item {
       onClicked: {
         chaptersModel.getChapter(index)
         navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
-                                     { pagecount: pageCount,
-                                         chapter: chapterUrl })
+                                     { mangaNumber: detailsModel.mangaNumber,
+                                         chapter: index })
       }
     }
   }

@@ -7,26 +7,18 @@ Rectangle {
 
   Image {
     id: image
-    //anchors.fill: parent
     fillMode: Image.PreserveAspectFit
-    source: chapter + index
+    source: chapterUrl
     width: parent.width
+    // this is only needed for resizing windows
     onWidthChanged: if (paintedHeight != 0) parent.height = paintedHeight
     onStatusChanged: {
       if(image.status == Image.Ready ) {
+        // max size the height can be
         parent.height = sourceSize.height
+        // size the height will actually be
         parent.height = paintedHeight
-        //console.log(paintedWidth, sourceSize.width, width)
       }
-      //if(image.status == Image.Ready ) {
-      //  parent.height = sourceSize.height
-      //  //height = sourceSize.height
-      //}
-      //if (image.status == Image.Loading) sourceSize.width = parent.width
-      //else if (image.status == Image.Ready) {
-      //  height = sourceSize.height
-      //  width = listView.width
-      //}
     }
   }
 }

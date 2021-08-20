@@ -118,8 +118,6 @@ void NetworkManager::endpointReply()
   QJsonParseError error;
   QJsonDocument doc = QJsonDocument::fromJson(data,&error);
 
-  qDebug() << doc;
-
   emit recievedReply(doc);
   reply->deleteLater();
 }

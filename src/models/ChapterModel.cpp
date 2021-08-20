@@ -1,4 +1,4 @@
-#include "ChaptersModel.h"
+#include "ChapterModel.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -11,34 +11,34 @@
   void register ## cls ## Type() { exportQmlType(ns, cls); } \
   Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
 
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChaptersModel)
+IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChapterModel)
 
 /******************************************************************************
  *
- * ChaptersModel
+ * ChapterModel
  *
  *****************************************************************************/
-ChaptersModel::ChaptersModel(QObject* parent)
+ChapterModel::ChapterModel(QObject* parent)
   : QAbstractListModel(parent)
 {
 }
 
-void ChaptersModel::classBegin() { }
+void ChapterModel::classBegin() { }
 
 /******************************************************************************
  *
  * componentComplete
  *
  *****************************************************************************/
-void ChaptersModel::componentComplete()
+void ChapterModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1/chapters").arg(_mangaNumber));
+  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber));
 
   connect(
       _networkManager,
       &NetworkManager::recievedReply,
       this,
-      &ChaptersModel::recievedReply);
+      &ChapterModel::recievedReply);
 }
 
 /******************************************************************************
@@ -46,29 +46,28 @@ void ChaptersModel::componentComplete()
  * Method: recieveReply()
  *
  *****************************************************************************/
-void ChaptersModel::recievedReply(const QJsonDocument& reply)
+void ChapterModel::recievedReply(const QJsonDocument& reply)
 {
-  if (reply.isArray()) {
+  if (reply.isObject()) {
     disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
   } else {
     return;
   }
 
   beginResetModel();
-  _chapters.clear();
+  _chapters.reset();
 
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry = entry_arr.toObject();
-    auto& info        = _chapters.emplace_back();
-    info.url          = entry["url"].toString();
-    info.name         = entry["name"].toString();
-    info.chapterNumber= entry["chapterNumber"].toInt();
-    info.read         = entry["read"].toBool();
-    info.index        = entry["index"].toInt();
-    info.pageCount    = entry["pageCount"].toInt();
-    info.chapterCount = entry["chapterCount"].toInt();
-    //info. author artist genre status
-  }
+  const auto& entry = reply.object();
+  auto& info        = _chapters.emplace();
+  info.url          = entry["url"].toString();
+  info.name         = entry["name"].toString();
+  info.uploadDate   = entry["uploadDate"].toInt();
+  info.chapterNumber= entry["chapterNumber"].toInt();
+  info.read         = entry["read"].toBool();
+  info.index        = entry["index"].toInt();
+  info.pageCount    = entry["pageCount"].toInt();
+  info.chapterCount = entry["chapterCount"].toInt();
+  //info. author artist genre status
 
   endResetModel();
 }
@@ -78,12 +77,12 @@ void ChaptersModel::recievedReply(const QJsonDocument& reply)
  * Method: rowCount()
  *
  *****************************************************************************/
-int ChaptersModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid()) {
+int ChapterModel::rowCount(const QModelIndex &parent) const {
+  if (parent.isValid() && _chapters.has_value()) {
     return 0;
   }
 
-  return _chapters.size();
+  return _chapters->pageCount;
 }
 
 /******************************************************************************
@@ -91,15 +90,16 @@ int ChaptersModel::rowCount(const QModelIndex &parent) const {
  * Method: data()
  *
  *****************************************************************************/
-QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
+QVariant ChapterModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) &&
        (index.row() >= 0) &&
-       (index.row() < rowCount())))
+       (index.row() < rowCount())) ||
+      !_chapters.has_value())
   {
     return {};
   }
 
-  const auto& entry = _chapters[index.row()];
+  const auto& entry = *_chapters;
 
   switch (role)
   {
@@ -131,6 +131,12 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       {
         return entry.chapterCount;
       }
+    case RoleChapterUrl:
+      {
+        return _networkManager->hostname() +
+                  QStringLiteral(":%1/api/v1/manga/%2/chapter/%3/page/%4")
+                    .arg(_networkManager->port()).arg(_mangaNumber).arg(entry.index).arg(index.row() + 1);
+      }
     //case Role
     default:
       return {};
@@ -144,24 +150,15 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
  * Method: roleNames()
  *
  *****************************************************************************/
-QHash<int, QByteArray> ChaptersModel::roleNames() const {
+QHash<int, QByteArray> ChapterModel::roleNames() const {
   static QHash<int, QByteArray> roles = { {RoleUrl,           "url"},
                                           {RoleName,          "name"},
                                           {RoleChapterNumber, "chapterNumber"},
                                           {RoleRead,          "read"},
                                           {RoleIndex,         "index"},
                                           {RolePageCount,     "pageCount"},
+                                          {RoleChapterUrl,    "chapterUrl"},
                                           {RoleChapterCount,  "chapterCount"},};
 
   return roles;
-}
-
-/******************************************************************************
- *
- * Method: getChapter()
- *
- *****************************************************************************/
-void ChaptersModel::getChapter(qint32 chapter)
-{
-  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
 }

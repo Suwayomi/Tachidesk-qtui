@@ -6,6 +6,7 @@
         <file>Library.qml</file>
         <file>MangaDetails.qml</file>
         <file>WebtoonViewer.qml</file>
+        <file>WebtoonImage.qml</file>
         <file>BackGestureDetector.qml</file>
         <file>Sources.qml</file>
         <file>SourceLibrary.qml</file>
