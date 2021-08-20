@@ -5,40 +5,33 @@
 
 #include "networkmanager.h"
 
-#include <optional>
-
-class SourcesLibraryModel : public QAbstractListModel, public QQmlParserStatus
+class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-  Q_PROPERTY(QString source MEMBER _source NOTIFY sourceChanged)
+  Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY mangaNumberChanged)
 
   NetworkManager* _networkManager = nullptr;
 
-  struct SourceDetails {
+  struct EntryInfo {
+    uint32_t id;
+    QString  sourceId;
+    QString  url;
+    QString  title;
+    QString  thumbnailUrl;
+    bool     initalized = false;
     QString  artist;
     QString  author;
     QString  description;
     QString  genre;
     QString  status;
+    // supportsLatest
+    // isConfigurable
   };
+  std::vector<EntryInfo> _entries;
 
-  struct SourceInfo {
-    qint32   id;
-    QString  title;
-    QString  thumbnailUrl;
-    QString  url;
-    bool     isInitialized;
-    bool     inLibrary;
-    bool     freshData;
-
-    std::optional<SourceDetails> details;
-  };
-  std::vector<SourceInfo> _sources;
-
-  QString _source;
-  qint32 _pageNumber = 1;
+  qint32 _mangaNumber;
 
 protected:
 
@@ -51,16 +44,20 @@ protected:
 public:
 
   enum Role {
-    RoleThumbnailUrl = Qt::UserRole + 1,
-    RoleTitle,
-    RoleId,
+    RoleId = Qt::UserRole + 1,
+    RoleSourceId,
     RoleUrl,
+    RoleTitle,
+    RoleThumbnailUrl,
     RoleInitialized,
-    RoleInLibrary,
-    RoleFreshData,
+    RoleAuthor,
+    RoleArtist,
+    RoleDescription,
+    RoleGenre,
+    RoleStatus,
   };
 
-  SourcesLibraryModel(QObject* parent = nullptr);
+  MangaDetailsModel(QObject* parent = nullptr);
 
   virtual int rowCount(
      const QModelIndex &parent = QModelIndex()) const override;
@@ -81,7 +78,10 @@ public:
 
   void recievedReply(const QJsonDocument& reply);
 
+  Q_INVOKABLE QVariantMap get(int row) const;
+
 signals:
-  void sourceChanged();
-  void networkManagerChanged();
+   void networkManagerChanged();
+   void mangaNumberChanged();
+   void loaded();
 };

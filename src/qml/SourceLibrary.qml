@@ -17,20 +17,32 @@ Item {
     model: sourcesModel
     cellWidth: 200
     cellHeight: 324
-    delegate: Column {
-      spacing: 8
-      Image {
-        id: image
-        source: thumbnailUrl
-        fillMode: Image.PreserveAspectFit
-        width: 200
-        sourceSize.height: 300
+    delegate: Item {
+      Column {
+        id: mangaInfo
+        spacing: 8
+        anchors.fill: parent
+        Image {
+          id: image
+          source: thumbnailUrl
+          fillMode: Image.PreserveAspectFit
+          width: layout.cellWidth
+          sourceSize.height: 300
+          MouseArea {
+            anchors.fill: parent
+            onClicked: {
+              console.log("navigate to:", mangaId)
+              navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
+            }
+          }
+        }
+        Text {
+          Layout.alignment: Qt.AlignLeft
+          horizontalAlignment: Text.AlignLeft
+          text: title
+        }
       }
-      Text {
-        Layout.alignment: Qt.AlignLeft
-        horizontalAlignment: Text.AlignLeft
-        text: title
-      }
+
     }
   }
 }

@@ -59,7 +59,10 @@ void LibraryModel::recievedReply(const QJsonDocument& reply)
     info.title        = entry["title"].toString();
     info.thumbnailUrl = entry["thumbnailUrl"].toString();
     info.initalized   = entry["intialized"].toBool();
-    //info. author artist genre status
+    info.author       = entry["author"].toString();
+    info.artist       = entry["artist"].toString();
+    info.genre        = entry["genre"].toString();
+    info.status       = entry["status"].toString();
   }
 
   endResetModel();

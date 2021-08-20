@@ -57,7 +57,7 @@ void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
   for (const auto& entry_arr : mangaList) {
     const auto& entry   = entry_arr.toObject();
     auto& info          = _sources.emplace_back();
-    info.id             = entry["id"].toString();
+    info.id             = entry["id"].toInt();
     info.title          = entry["title"].toString();
     info.thumbnailUrl   = entry["thumbnailUrl"].toString();
     info.url            = entry["url"].toString();
@@ -145,7 +145,7 @@ QVariant SourcesLibraryModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
   static QHash<int, QByteArray> roles = { {RoleThumbnailUrl,  "thumbnailUrl"},
                                           {RoleTitle,         "title"},
-                                          {RoleId,            "id"},
+                                          {RoleId,            "mangaId"},
                                           {RoleUrl,           "url"},
                                           {RoleInitialized,   "isInitialized"},
                                           {RoleFreshData,     "freshData"},
