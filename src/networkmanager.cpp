@@ -85,6 +85,25 @@ void NetworkManager::get(const QString& endpoint)
 
 /********************************************************************
  *
+ *  get()
+ *
+ ********************************************************************/
+void NetworkManager::deleteResource(const QString& endpoint)
+{
+  QNetworkRequest request;
+  request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+
+  QNetworkReply *reply = man.deleteResource(request);
+
+  connect(
+      reply,
+      &QNetworkReply::finished,
+      this,
+      &NetworkManager::endpointReply);
+}
+
+/********************************************************************
+ *
  *  userReply()
  *
  ********************************************************************/
@@ -98,6 +117,8 @@ void NetworkManager::endpointReply()
 
   QJsonParseError error;
   QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+
+  qDebug() << doc;
 
   emit recievedReply(doc);
   reply->deleteLater();

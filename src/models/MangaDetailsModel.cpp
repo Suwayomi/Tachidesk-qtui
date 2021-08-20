@@ -48,11 +48,16 @@ void MangaDetailsModel::componentComplete()
  *****************************************************************************/
 void MangaDetailsModel::recievedReply(const QJsonDocument& reply)
 {
-  if (reply.isObject()) {
-    disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
-  } else {
+  if (!reply.isObject()) {
+    if (reply.isEmpty()) {
+      qDebug() << "requesting library";
+      _networkManager->get("library");
+    }
     return;
   }
+
+  qDebug() << "got details";
+
 
   beginResetModel();
   _entries.clear();
@@ -71,6 +76,7 @@ void MangaDetailsModel::recievedReply(const QJsonDocument& reply)
   info.description  = entry["description"].toString();
   info.genre        = entry["genre"].toString();
   info.status       = entry["status"].toString();
+  info.inLibrary    = entry["inLibrary"].toBool();
 
   endResetModel();
 
@@ -151,6 +157,10 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
       {
         return entry.status;
       }
+    case RoleInLibrary:
+      {
+        return entry.inLibrary;
+      }
     //case Role
     default:
       return {};
@@ -177,6 +187,7 @@ QHash<int, QByteArray> MangaDetailsModel::roleNames() const {
     {RoleArtist, "artist"},
     {RoleDescription, "description"},
     {RoleGenre, "genre"},
+    {RoleInLibrary, "inLibrary"},
     {RoleStatus, "status"}};
 
   return roles;
@@ -192,5 +203,32 @@ QVariantMap MangaDetailsModel::get(int row) const
     map.insert(it.value(), data(modelIndex, it.key()));
   }
   return map;
+}
+
+
+/******************************************************************************
+ *
+ * Method: addToLibrary()
+ *
+ *****************************************************************************/
+void MangaDetailsModel::addToLibrary()
+{
+  _networkManager->get(QStringLiteral("manga/%1/library").arg(_mangaNumber));
+
+  _entries[0].inLibrary = true;
+  emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});
+}
+
+/******************************************************************************
+ *
+ * Method: removeToLibrary()
+ *
+ *****************************************************************************/
+void MangaDetailsModel::removeFromLibrary()
+{
+  _networkManager->deleteResource(QStringLiteral("manga/%1/library").arg(_mangaNumber));
+
+  _entries[0].inLibrary = false;
+  emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});
 }
 

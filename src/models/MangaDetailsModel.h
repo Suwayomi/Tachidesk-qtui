@@ -15,7 +15,7 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
   NetworkManager* _networkManager = nullptr;
 
   struct EntryInfo {
-    uint32_t id;
+    qint32   id;
     QString  sourceId;
     QString  url;
     QString  title;
@@ -26,6 +26,7 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
     QString  description;
     QString  genre;
     QString  status;
+    bool     inLibrary;
     // supportsLatest
     // isConfigurable
   };
@@ -55,6 +56,7 @@ public:
     RoleDescription,
     RoleGenre,
     RoleStatus,
+    RoleInLibrary,
   };
 
   MangaDetailsModel(QObject* parent = nullptr);
@@ -79,6 +81,9 @@ public:
   void recievedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE QVariantMap get(int row) const;
+
+  Q_INVOKABLE void addToLibrary();
+  Q_INVOKABLE void removeFromLibrary();
 
 signals:
    void networkManagerChanged();

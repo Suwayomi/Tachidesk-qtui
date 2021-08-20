@@ -34,7 +34,6 @@ Item {
         id: image
         source: details.thumbnailUrl
         fillMode: Image.PreserveAspectFit
-        //sourceSize.width: 200
         sourceSize.height: 250
       }
       ColumnLayout {
@@ -62,6 +61,20 @@ Item {
       text: details.genre
       wrapMode: Text.WordWrap
       width: parent.width
+    }
+    RowLayout {
+      width: parent.width
+      height: 150
+      Button {
+        text: details.inLibrary ? qsTr("In Library") : qsTr("Add to Library")
+        onClicked:  {
+          details.inLibrary ? detailsModel.removeFromLibrary() : detailsModel.addToLibrary()
+          details = detailsModel.get(0)
+        }
+      }
+      Button {
+        text: qsTr("View in Browser")
+      }
     }
   }
 

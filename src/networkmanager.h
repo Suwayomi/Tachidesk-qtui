@@ -32,6 +32,7 @@ public:
   ~NetworkManager() = default;
 
   void get(const QString& endpoint);
+  void deleteResource(const QString& endpoint);
 
   const QString& hostname() const {
     return _host;
