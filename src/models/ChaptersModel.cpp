@@ -163,3 +163,12 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
   return roles;
 }
 
+/******************************************************************************
+ *
+ * Method: getChapter()
+ *
+ *****************************************************************************/
+void ChaptersModel::getChapter(qint32 chapter)
+{
+  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+}

@@ -69,6 +69,7 @@ public:
 
   void recievedReply(const QJsonDocument& reply);
 
+  Q_INVOKABLE void getChapter(qint32 chapter);
 signals:
    void networkManagerChanged();
 };

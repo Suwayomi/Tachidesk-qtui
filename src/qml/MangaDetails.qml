@@ -94,6 +94,7 @@ Item {
       height: 150
       text: qsTr("chapter: %1").arg(name)
       onClicked: {
+        chaptersModel.getChapter(index)
         navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                      { pagecount: pageCount,
                                          chapter: chapterUrl })
