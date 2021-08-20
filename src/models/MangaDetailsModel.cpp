@@ -50,7 +50,6 @@ void MangaDetailsModel::recievedReply(const QJsonDocument& reply)
 {
   if (!reply.isObject()) {
     if (reply.isEmpty()) {
-      qDebug() << "requesting library";
       _networkManager->get("library");
     }
     return;
