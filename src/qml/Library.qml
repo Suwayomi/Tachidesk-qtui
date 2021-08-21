@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.15
 import Tachidesk.Models 1.0
 
 Item {
-  id: base
+  id: libraryBase
   LibraryModel {
     id: libraryModel
     nm: networkManager
@@ -14,6 +14,10 @@ Item {
     if (height > grid.cellHeight) {
       grid.cellHeight = height + 20
     }
+  }
+
+  function onMangaChanged() {
+    libraryModel.refreshLibrary()
   }
 
   GridView {
@@ -57,7 +61,10 @@ Item {
       }
       MouseArea {
         anchors.fill: parent
-        onClicked: navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
+        onClicked: {
+          var details = navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
+          details.mangaChanged.connect(onMangaChanged)
+        }
       }
     }
   }

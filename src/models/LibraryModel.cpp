@@ -135,3 +135,14 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
   return roles;
 }
 
+/******************************************************************************
+ *
+ * Method: refreshLibrary()
+ *
+ *****************************************************************************/
+void LibraryModel::refreshLibrary()
+{
+  _entries.clear();
+  _networkManager->get("category", gotCategory);
+}
+

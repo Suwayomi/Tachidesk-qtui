@@ -34,6 +34,7 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
 
+  std::function<void (const QJsonDocument& )> gotDetails;
 protected:
 
   void classBegin() override;
@@ -77,8 +78,6 @@ public:
     _networkManager = nm;
     networkManagerChanged();
   }
-
-  void recievedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE QVariantMap get(int row) const;
 

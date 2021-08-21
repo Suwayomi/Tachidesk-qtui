@@ -23,7 +23,33 @@ MangaDetailsModel::MangaDetailsModel(QObject* parent)
 {
 }
 
-void MangaDetailsModel::classBegin() { }
+void MangaDetailsModel::classBegin()
+{
+  gotDetails = [&](const QJsonDocument& reply) {
+    beginResetModel();
+    _entries.clear();
+
+
+    const auto& entry = reply.object();
+    auto& info        = _entries.emplace_back();
+    info.id           = entry["id"].toInt();
+    info.sourceId     = entry["sourceId"].toString();
+    info.url          = entry["url"].toString();
+    info.title        = entry["title"].toString();
+    info.thumbnailUrl = entry["thumbnailUrl"].toString();
+    info.initalized   = entry["intialized"].toBool();
+    info.author       = entry["author"].toString();
+    info.artist       = entry["artist"].toString();
+    info.description  = entry["description"].toString();
+    info.genre        = entry["genre"].toString();
+    info.status       = entry["status"].toString();
+    info.inLibrary    = entry["inLibrary"].toBool();
+
+    endResetModel();
+
+    emit loaded();
+  };
+}
 
 /******************************************************************************
  *
@@ -32,54 +58,7 @@ void MangaDetailsModel::classBegin() { }
  *****************************************************************************/
 void MangaDetailsModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1").arg(_mangaNumber));
-
-  connect(
-      _networkManager,
-      &NetworkManager::recievedReply,
-      this,
-      &MangaDetailsModel::recievedReply);
-}
-
-/******************************************************************************
- *
- * Method: recieveReply()
- *
- *****************************************************************************/
-void MangaDetailsModel::recievedReply(const QJsonDocument& reply)
-{
-  if (!reply.isObject()) {
-    if (reply.isEmpty()) {
-      _networkManager->get("library");
-    }
-    return;
-  }
-
-  qDebug() << "got details";
-
-
-  beginResetModel();
-  _entries.clear();
-
-
-  const auto& entry = reply.object();
-  auto& info        = _entries.emplace_back();
-  info.id           = entry["id"].toInt();
-  info.sourceId     = entry["sourceId"].toString();
-  info.url          = entry["url"].toString();
-  info.title        = entry["title"].toString();
-  info.thumbnailUrl = entry["thumbnailUrl"].toString();
-  info.initalized   = entry["intialized"].toBool();
-  info.author       = entry["author"].toString();
-  info.artist       = entry["artist"].toString();
-  info.description  = entry["description"].toString();
-  info.genre        = entry["genre"].toString();
-  info.status       = entry["status"].toString();
-  info.inLibrary    = entry["inLibrary"].toBool();
-
-  endResetModel();
-
-  emit loaded();
+  _networkManager->get(QStringLiteral("manga/%1").arg(_mangaNumber), gotDetails);
 }
 
 /******************************************************************************

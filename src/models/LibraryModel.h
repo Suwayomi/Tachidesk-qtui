@@ -65,6 +65,8 @@ public:
     networkManagerChanged();
   }
 
+  Q_INVOKABLE void refreshLibrary();
+
 signals:
    void networkManagerChanged();
 

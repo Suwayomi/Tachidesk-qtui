@@ -58,12 +58,6 @@ bool NetworkManager::handleNetworkError(QNetworkReply* reply)
   return true;
 }
 
-// TODO: add different paths
-//void NetworkManager::getManga(const Qstring& endpoint)
-//{
-//  get("/manga" + endpoint);
-//}
-
 /********************************************************************
  *
  *  get()
@@ -83,6 +77,11 @@ void NetworkManager::get(const QString& endpoint)
       &NetworkManager::endpointReply);
 }
 
+/********************************************************************
+ *
+ *  get()
+ *
+ ********************************************************************/
 void NetworkManager::get(
     const QString& endpoint,
     const std::function<void(const QJsonDocument&)>& func)

@@ -35,7 +35,7 @@ Item {
       stack.replace(Qt.resolvedUrl(source), properties, StackView.Immediate)
     }
     else {
-      stack.push(Qt.resolvedUrl(source), properties, StackView.Immediate)
+      return stack.push(Qt.resolvedUrl(source), properties, StackView.Immediate)
     }
   }
 

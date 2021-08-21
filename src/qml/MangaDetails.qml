@@ -7,6 +7,8 @@ import Tachidesk.Models 1.0
 Item {
   property alias mangaNumber: detailsModel.mangaNumber
 
+  signal mangaChanged();
+
   MangaDetailsModel {
     id: detailsModel
     nm: networkManager
@@ -68,6 +70,7 @@ Item {
       Button {
         text: details.inLibrary ? qsTr("In Library") : qsTr("Add to Library")
         onClicked:  {
+          mangaChanged()
           details.inLibrary ? detailsModel.removeFromLibrary() : detailsModel.addToLibrary()
           details = detailsModel.get(0)
         }
