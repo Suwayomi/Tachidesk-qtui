@@ -83,6 +83,34 @@ void NetworkManager::get(const QString& endpoint)
       &NetworkManager::endpointReply);
 }
 
+void NetworkManager::get(
+    const QString& endpoint,
+    const std::function<void(const QJsonDocument&)>& func)
+{
+  QNetworkRequest request;
+  request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+
+  QNetworkReply *reply = man.get(request);
+
+  connect(
+      reply,
+      &QNetworkReply::finished,
+      this,
+      [&]() {
+        QNetworkReply* r = qobject_cast<QNetworkReply *>(sender());
+        if (!handleNetworkError(r)) {
+            return;
+        }
+        QByteArray data = r->readAll();
+
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+
+        func(doc);
+        r->deleteLater();
+      });
+}
+
 /********************************************************************
  *
  *  get()

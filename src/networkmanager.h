@@ -32,6 +32,7 @@ public:
   ~NetworkManager() = default;
 
   void get(const QString& endpoint);
+  void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
   void deleteResource(const QString& endpoint);
 
   const QString& hostname() const {

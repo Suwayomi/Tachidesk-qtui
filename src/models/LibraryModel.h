@@ -1,9 +1,10 @@
 #pragma once
 #include <QAbstractListModel>
+#include <QQmlParserStatus>
 
 #include "networkmanager.h"
 
-class LibraryModel : public QAbstractListModel
+class LibraryModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
 
@@ -26,8 +27,15 @@ class LibraryModel : public QAbstractListModel
   };
   std::vector<EntryInfo> _entries;
 
+  std::function<void (const QJsonDocument& )> gotCategory;
+  std::function<void (const QJsonDocument& )> gotCategoryId;
+
 protected:
   virtual QHash<int, QByteArray> roleNames() const override;
+
+  void classBegin() override;
+
+  void componentComplete() override;
 
 public:
 
@@ -57,8 +65,8 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
-
 signals:
    void networkManagerChanged();
+
+public slots:
 };

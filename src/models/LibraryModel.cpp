@@ -21,55 +21,55 @@ IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, LibraryModel)
 LibraryModel::LibraryModel(QObject* parent)
   : QAbstractListModel(parent)
 {
-  connect(
-      this,
-      &LibraryModel::networkManagerChanged,
-      [&]() {
-        _networkManager->get("library");
-        disconnect(this, &LibraryModel::networkManagerChanged, this, nullptr);
+}
 
-        connect(
-            _networkManager,
-            &NetworkManager::recievedReply,
-            this,
-            &LibraryModel::recievedReply);
-      });
+void LibraryModel::classBegin()
+{
+  gotCategory = [&](const auto& reply) {
+    for (const auto& entry_arr : reply.array()) {
+      const auto& entry = entry_arr.toObject();
+      _networkManager->get(QStringLiteral("category/%1").arg(entry["id"].toInt()), gotCategoryId);
+    }
+  };
 
+  /******************************************************************************
+   *
+   * Method: recieveReply()
+   *
+   *****************************************************************************/
+  gotCategoryId = [&](const QJsonDocument& reply)
+  {
+    beginResetModel();
+
+    for (const auto& entry_arr : reply.array()) {
+      const auto& entry = entry_arr.toObject();
+      auto& info        = _entries.emplace_back();
+      info.id           = entry["id"].toInt();
+      info.sourceId     = entry["sourceId"].toString();
+      info.url          = entry["url"].toString();
+      info.title        = entry["title"].toString();
+      info.thumbnailUrl = entry["thumbnailUrl"].toString();
+      info.initalized   = entry["intialized"].toBool();
+      info.author       = entry["author"].toString();
+      info.artist       = entry["artist"].toString();
+      info.genre        = entry["genre"].toString();
+      info.status       = entry["status"].toString();
+    }
+
+    endResetModel();
+  };
 }
 
 /******************************************************************************
  *
- * Method: recieveReply()
+ * componentComplete
  *
  *****************************************************************************/
-void LibraryModel::recievedReply(const QJsonDocument& reply)
+void LibraryModel::componentComplete()
 {
-  //disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
-  if (!reply.isArray()) {
-    return;
-  }
-
-  beginResetModel();
-  _entries.clear();
-
-
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry = entry_arr.toObject();
-    auto& info        = _entries.emplace_back();
-    info.id           = entry["id"].toInt();
-    info.sourceId     = entry["sourceId"].toString();
-    info.url          = entry["url"].toString();
-    info.title        = entry["title"].toString();
-    info.thumbnailUrl = entry["thumbnailUrl"].toString();
-    info.initalized   = entry["intialized"].toBool();
-    info.author       = entry["author"].toString();
-    info.artist       = entry["artist"].toString();
-    info.genre        = entry["genre"].toString();
-    info.status       = entry["status"].toString();
-  }
-
-  endResetModel();
+  _networkManager->get("category", gotCategory);
 }
+
 
 /******************************************************************************
  *
