@@ -56,13 +56,8 @@ public:
     connect(
         reply,
         &QNetworkReply::finished,
-        [&]() {
-          if (!handleNetworkError(reply)) {
-              return;
-          }
-          reply->deleteLater();
-          patchData->deleteLater();
-        });
+        this,
+        &NetworkManager::endpointReply);
   }
 
   template<typename First, typename Second, typename... Args>
