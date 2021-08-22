@@ -45,7 +45,7 @@ bool NetworkManager::handleNetworkError(QNetworkReply* reply)
       }
     }
 
-    qDebug() << reply->errorString();
+    //qDebug() << reply->errorString();
 
     return false;
   }

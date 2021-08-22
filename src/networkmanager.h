@@ -23,8 +23,6 @@ class NetworkManager : public QObject
   static const quint16 PORT;
   static const QString Kraken;
 
-  QHttpMultiPart* patchData = nullptr;
-
 signals:
   void recievedReply(const QJsonDocument& reply);
 
@@ -47,7 +45,7 @@ public:
     return _port;
   }
 
-  void patch(const QString& endpoint) {
+  void patch(QHttpMultiPart* patchData, const QString& endpoint) {
     QNetworkRequest request;
     request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
 
@@ -63,21 +61,25 @@ public:
               return;
           }
           reply->deleteLater();
-          patchData = nullptr;
+          patchData->deleteLater();
         });
   }
 
   template<typename First, typename Second, typename... Args>
-  void patch(const First& first, const Second& second, Args... args) {
+  void patch(QHttpMultiPart* patchData, const First& first, const Second& second, Args... args) {
     QHttpPart part;
     part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(QStringLiteral("form-data; name=\"%1\"").arg(first)));
     part.setBody(QByteArray(QStringLiteral("%1").arg(second).toUtf8()));
     if (!patchData) {
-      patchData = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     }
     patchData->append(part);
-
     patch(args...);
+  }
+
+  template<typename... Args>
+  void patch(Args... args) {
+    auto patchData = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    patch(patchData, args...);
   }
 
 private:
