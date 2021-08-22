@@ -6,6 +6,7 @@ import Tachidesk.Models 1.0
 
 Item {
   property alias mangaNumber: detailsModel.mangaNumber
+  property var doWrap: false
 
   signal mangaChanged();
 
@@ -54,10 +55,24 @@ Item {
         }
       }
     }
+
     Text {
       text: details.description
-      wrapMode: Text.WordWrap
+      //wrapMode: Text.WordWrap
+      elide: Text.ElideRight
       width: parent.width
+      MouseArea {
+        anchors.fill: parent
+        onClicked: {
+          if (!doWrap) {
+            parent.wrapMode = Text.WordWrap
+            doWrap = true
+          } else {
+            parent.wrapMode = Text.NoWrap
+            doWrap = false
+          }
+        }
+      }
     }
     Text {
       text: details.genre
@@ -65,9 +80,14 @@ Item {
       width: parent.width
     }
     RowLayout {
-      width: parent.width
+      width: parent.width - 8
       height: 150
+      Layout.margins: 4
+      anchors.left: parent.left
+      anchors.leftMargin: 4
+
       Button {
+        Layout.fillWidth: true
         text: details.inLibrary ? qsTr("In Library") : qsTr("Add to Library")
         onClicked:  {
           mangaChanged()
@@ -76,7 +96,9 @@ Item {
         }
       }
       Button {
+        Layout.fillWidth: true
         text: qsTr("View in Browser")
+        onClicked: detailsModel.test();
       }
     }
   }
@@ -97,10 +119,9 @@ Item {
       height: 150
       text: qsTr("chapter: %1").arg(name)
       onClicked: {
-        chaptersModel.getChapter(index)
         navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                      { mangaNumber: detailsModel.mangaNumber,
-                                         chapter: index })
+                                         chapter: chapterIndex })
       }
     }
   }

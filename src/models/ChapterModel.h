@@ -73,6 +73,7 @@ public:
 
   void recievedReply(const QJsonDocument& reply);
 
+  Q_INVOKABLE void updateChapter(qint32 page, bool read);
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();

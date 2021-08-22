@@ -27,6 +27,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
 
+  std::function<void (const QJsonDocument& )> gotChapters;
 protected:
 
   void classBegin() override;
@@ -42,7 +43,7 @@ public:
     RoleName,
     RoleChapterNumber,
     RoleRead,
-    RoleIndex,
+    RoleChapterIndex,
     RolePageCount,
     RoleChapterCount,
   };
@@ -66,9 +67,6 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
-
-  Q_INVOKABLE void getChapter(qint32 chapter);
 signals:
    void networkManagerChanged();
 };

@@ -83,7 +83,6 @@ public:
 
   Q_INVOKABLE void addToLibrary();
   Q_INVOKABLE void removeFromLibrary();
-
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();

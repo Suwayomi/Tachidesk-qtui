@@ -31,7 +31,6 @@ Item {
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              console.log("navigate to:", mangaId)
               navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
             }
           }

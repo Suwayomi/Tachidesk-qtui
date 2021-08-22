@@ -162,3 +162,15 @@ QHash<int, QByteArray> ChapterModel::roleNames() const {
 
   return roles;
 }
+
+/******************************************************************************
+ *
+ * Method: lastPageRead()
+ *
+ *****************************************************************************/
+void ChapterModel::updateChapter(qint32 page, bool read)
+{
+  _networkManager->patch("lastPageRead", page, "read", read ? "true" : "false",
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber));
+}
+

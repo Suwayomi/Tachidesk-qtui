@@ -1,5 +1,4 @@
 #include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QJsonParseError>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -148,4 +147,5 @@ void NetworkManager::endpointReply()
   emit recievedReply(doc);
   reply->deleteLater();
 }
+
 

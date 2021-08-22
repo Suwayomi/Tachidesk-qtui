@@ -4,6 +4,8 @@
 #include <QSslSocket>
 #include <QNetworkAccessManager>
 #include <QTimer>
+#include <QHttpMultiPart>
+#include <QNetworkReply>
 
 #include <memory>
 
@@ -20,6 +22,8 @@ class NetworkManager : public QObject
 
   static const quint16 PORT;
   static const QString Kraken;
+
+  QHttpMultiPart* patchData = nullptr;
 
 signals:
   void recievedReply(const QJsonDocument& reply);
@@ -41,6 +45,39 @@ public:
 
   const auto& port() const {
     return _port;
+  }
+
+  void patch(const QString& endpoint) {
+    QNetworkRequest request;
+    request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+
+    auto reply = man.sendCustomRequest(request, "PATCH", patchData);
+
+    patchData->setParent(reply);
+
+    connect(
+        reply,
+        &QNetworkReply::finished,
+        [&]() {
+          if (!handleNetworkError(reply)) {
+              return;
+          }
+          reply->deleteLater();
+          patchData = nullptr;
+        });
+  }
+
+  template<typename First, typename Second, typename... Args>
+  void patch(const First& first, const Second& second, Args... args) {
+    QHttpPart part;
+    part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(QStringLiteral("form-data; name=\"%1\"").arg(first)));
+    part.setBody(QByteArray(QStringLiteral("%1").arg(second).toUtf8()));
+    if (!patchData) {
+      patchData = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    }
+    patchData->append(part);
+
+    patch(args...);
   }
 
 private:

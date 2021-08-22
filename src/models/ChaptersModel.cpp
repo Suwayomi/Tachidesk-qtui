@@ -23,7 +23,28 @@ ChaptersModel::ChaptersModel(QObject* parent)
 {
 }
 
-void ChaptersModel::classBegin() { }
+void ChaptersModel::classBegin()
+{
+  gotChapters = [&](const QJsonDocument& reply) {
+    beginResetModel();
+    _chapters.clear();
+
+    for (const auto& entry_arr : reply.array()) {
+      const auto& entry = entry_arr.toObject();
+      auto& info        = _chapters.emplace_back();
+      info.url          = entry["url"].toString();
+      info.name         = entry["name"].toString();
+      info.chapterNumber= entry["chapterNumber"].toInt();
+      info.read         = entry["read"].toBool();
+      info.index        = entry["index"].toInt();
+      info.pageCount    = entry["pageCount"].toInt();
+      info.chapterCount = entry["chapterCount"].toInt();
+      //info. author artist genre status
+    }
+
+    endResetModel();
+  };
+}
 
 /******************************************************************************
  *
@@ -32,45 +53,7 @@ void ChaptersModel::classBegin() { }
  *****************************************************************************/
 void ChaptersModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1/chapters").arg(_mangaNumber));
-
-  connect(
-      _networkManager,
-      &NetworkManager::recievedReply,
-      this,
-      &ChaptersModel::recievedReply);
-}
-
-/******************************************************************************
- *
- * Method: recieveReply()
- *
- *****************************************************************************/
-void ChaptersModel::recievedReply(const QJsonDocument& reply)
-{
-  if (reply.isArray()) {
-    disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
-  } else {
-    return;
-  }
-
-  beginResetModel();
-  _chapters.clear();
-
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry = entry_arr.toObject();
-    auto& info        = _chapters.emplace_back();
-    info.url          = entry["url"].toString();
-    info.name         = entry["name"].toString();
-    info.chapterNumber= entry["chapterNumber"].toInt();
-    info.read         = entry["read"].toBool();
-    info.index        = entry["index"].toInt();
-    info.pageCount    = entry["pageCount"].toInt();
-    info.chapterCount = entry["chapterCount"].toInt();
-    //info. author artist genre status
-  }
-
-  endResetModel();
+  _networkManager->get(QStringLiteral("manga/%1/chapters").arg(_mangaNumber), gotChapters);
 }
 
 /******************************************************************************
@@ -119,7 +102,7 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       {
         return entry.read;
       }
-    case RoleIndex:
+    case RoleChapterIndex:
       {
         return entry.index;
       }
@@ -149,19 +132,9 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
                                           {RoleName,          "name"},
                                           {RoleChapterNumber, "chapterNumber"},
                                           {RoleRead,          "read"},
-                                          {RoleIndex,         "index"},
+                                          {RoleChapterIndex,  "chapterIndex"},
                                           {RolePageCount,     "pageCount"},
                                           {RoleChapterCount,  "chapterCount"},};
 
   return roles;
-}
-
-/******************************************************************************
- *
- * Method: getChapter()
- *
- *****************************************************************************/
-void ChaptersModel::getChapter(qint32 chapter)
-{
-  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
 }
