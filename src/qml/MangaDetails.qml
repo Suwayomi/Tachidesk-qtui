@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 import Tachidesk.Models 1.0
 
 Item {
+  id: base
   property alias mangaNumber: detailsModel.mangaNumber
   property var doWrap: false
 
@@ -29,6 +30,13 @@ Item {
     id: detailsColumn
     spacing: 8
     width: parent.width
+    height: {
+      var heightLimit = parent.height * 3/8
+      if (heightLimit < detailsColumn.childrenRect.height) {
+        return heightLimit
+      }
+      return detailsColumn.childrenRect.height + 4 // 4 margin
+    }
 
     RowLayout {
       width: parent.width
@@ -37,7 +45,7 @@ Item {
         id: image
         source: details.thumbnailUrl
         fillMode: Image.PreserveAspectFit
-        sourceSize.height: 250
+        sourceSize.height: detailsColumn.height * 1/3
       }
       ColumnLayout {
         Layout.fillWidth: true
@@ -58,17 +66,19 @@ Item {
 
     Text {
       text: details.description
-      //wrapMode: Text.WordWrap
       elide: Text.ElideRight
       width: parent.width
+      maximumLineCount: 2
       MouseArea {
         anchors.fill: parent
         onClicked: {
           if (!doWrap) {
             parent.wrapMode = Text.WordWrap
+            parent.maximumLineCount = 40
             doWrap = true
           } else {
             parent.wrapMode = Text.NoWrap
+            parent.maximumLineCount = 2
             doWrap = false
           }
         }
@@ -79,15 +89,19 @@ Item {
       wrapMode: Text.WordWrap
       width: parent.width
     }
+
     RowLayout {
       width: parent.width - 8
-      height: 150
+      height: 50
       Layout.margins: 4
-      anchors.left: parent.left
-      anchors.leftMargin: 4
+      anchors {
+        left: parent.left
+        leftMargin: 4
+      }
 
       Button {
         Layout.fillWidth: true
+        Layout.fillHeight: true
         text: details.inLibrary ? qsTr("In Library") : qsTr("Add to Library")
         onClicked:  {
           mangaChanged()
@@ -96,6 +110,7 @@ Item {
         }
       }
       Button {
+        Layout.fillHeight: true
         Layout.fillWidth: true
         text: qsTr("View in Browser")
         onClicked: detailsModel.test();
@@ -110,13 +125,16 @@ Item {
       bottom: parent.bottom
       left: parent.left
       right: parent.right
-      top: detailsColumn.bottom
     }
+    height: {
+      return base.height - detailsColumn.childrenRect.height - 4
+    }
+
 
     model: chaptersModel
     delegate: Button {
       width: chapterView.width
-      height: 150
+      height: 100
       text: qsTr("chapter: %1").arg(name)
       onClicked: {
         navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
