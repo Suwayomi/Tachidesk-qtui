@@ -7,6 +7,7 @@
 
 #include "commandline.h"
 #include "networkmanager.h"
+#include "settings.h"
 
 #include <memory>
 
@@ -15,7 +16,7 @@ class App : public QObject
 {
   Q_OBJECT
 
-  QSettings _settings;
+  std::unique_ptr<Settings> _settings;
 
   std::unique_ptr<NetworkManager> _nm;
 
@@ -35,7 +36,6 @@ private:
   QUrl makeUrl(const QString& path) const;
   void disconnect();
   void initalize();
-  void saveSettings();
 };
 
 #endif //IRCCHAT_H

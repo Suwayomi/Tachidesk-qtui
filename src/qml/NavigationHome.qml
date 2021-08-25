@@ -35,6 +35,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       text: qsTr("Settings")
+      onClicked: navigatePage(Qt.resolvedUrl("Settings.qml"), {})
     }
   }
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QSettings>
 #include <QSslSocket>
 #include <QNetworkAccessManager>
 #include <QTimer>
@@ -13,7 +12,6 @@ class NetworkManager : public QObject
 {
   Q_OBJECT
 
-  QSettings _settings;
   QString   _host;
   QString   _port;
 

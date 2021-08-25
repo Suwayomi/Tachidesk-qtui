@@ -22,7 +22,6 @@ NetworkManager::NetworkManager(
   const QString& port,
   QObject* parent)
     : QObject(parent)
-    , _settings("Tachidesk-qtui", "Suwayomi")
     , _host(host)
     , _port(port)
 {

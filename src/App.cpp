@@ -10,8 +10,14 @@
 
 App::App(const CommandLine& cmd, QObject * parent)
   : QObject(parent)
-  , _settings("Tachidesk-qtui", "Suwayomi")
-  , _nm(std::make_unique<NetworkManager>(cmd.value(CommandLine::hostname), cmd.value(CommandLine::port)))
+  , _settings(std::make_unique<Settings>())
+  , _nm(std::make_unique<NetworkManager>(
+          cmd.isSet(CommandLine::hostname)
+            ? cmd.value(CommandLine::hostname)
+            : _settings->hostname()
+        , cmd.isSet(CommandLine::port)
+            ? cmd.value(CommandLine::port)
+            : _settings->port()))
   , _commandLine(cmd)
   , _engine(new QQmlApplicationEngine())
 {
@@ -19,12 +25,6 @@ App::App(const CommandLine& cmd, QObject * parent)
 }
 
 App::~App() {
-  saveSettings();
-}
-
-void App::saveSettings()
-{
-  // TODO settings
 }
 
 /****************************************************************************
@@ -44,12 +44,17 @@ QUrl App::makeUrl(const QString& path) const
   }
 }
 
-
+/****************************************************************************
+ *
+ * Method::initalize()
+ *
+ ***************************************************************************/
 void App::initalize()
 {
   // Global context variables to inject into QML
   const std::pair<const char*, QObject*> contextVars[] = {
     { "networkManager", _nm.get()},
+    { "settings", _settings.get()},
   };
   auto context = _engine->rootContext();
   for (auto& var : contextVars) {
