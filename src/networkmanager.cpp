@@ -45,7 +45,7 @@ bool NetworkManager::handleNetworkError(QNetworkReply* reply)
       }
     }
 
-    //qDebug() << reply->errorString();
+    qDebug() << reply->errorString();
 
     return false;
   }
@@ -149,3 +149,17 @@ void NetworkManager::endpointReply()
 }
 
 
+/********************************************************************
+ *
+ *  patchReply()
+ *
+ ********************************************************************/
+void NetworkManager::patchReply()
+{
+  QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+  if (!handleNetworkError(reply)) {
+      return;
+  }
+
+  reply->deleteLater();
+}

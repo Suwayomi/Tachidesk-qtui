@@ -28,6 +28,7 @@ signals:
 
 private slots:
   void endpointReply();
+  void patchReply();
 
 public:
   NetworkManager(const QString& host, const QString& port, QObject* parent = 0);
@@ -50,7 +51,6 @@ public:
     request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
 
     auto reply = man.sendCustomRequest(request, "PATCH", patchData);
-
     patchData->setParent(reply);
 
     connect(
@@ -58,6 +58,7 @@ public:
         &QNetworkReply::finished,
         this,
         &NetworkManager::endpointReply);
+
   }
 
   template<typename First, typename Second, typename... Args>
@@ -65,10 +66,9 @@ public:
     QHttpPart part;
     part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(QStringLiteral("form-data; name=\"%1\"").arg(first)));
     part.setBody(QByteArray(QStringLiteral("%1").arg(second).toUtf8()));
-    if (!patchData) {
-    }
+
     patchData->append(part);
-    patch(args...);
+    patch(patchData, args...);
   }
 
   template<typename... Args>

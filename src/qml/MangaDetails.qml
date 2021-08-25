@@ -113,7 +113,6 @@ Item {
         Layout.fillHeight: true
         Layout.fillWidth: true
         text: qsTr("View in Browser")
-        onClicked: detailsModel.test();
       }
     }
   }
@@ -132,14 +131,30 @@ Item {
 
 
     model: chaptersModel
-    delegate: Button {
+    delegate: Rectangle {
       width: chapterView.width
       height: 100
-      text: qsTr("chapter: %1").arg(name)
-      onClicked: {
-        navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
-                                     { mangaNumber: detailsModel.mangaNumber,
-                                         chapter: chapterIndex })
+      color: "black"
+      border {
+        width: 1
+        color: "white"
+      }
+      Text {
+        text: name
+        color: read ? "grey" : "white"
+        anchors.fill: parent
+        horizontalAlignment: Text.AlignCenter
+        verticalAlignment: Text.AlignVCenter
+        leftPadding: 12
+        font.pixelSize: 24
+      }
+      MouseArea {
+        anchors.fill: parent
+        onClicked: {
+          navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+                                       { mangaNumber: detailsModel.mangaNumber,
+                                           chapter: chapterIndex })
+        }
       }
     }
   }

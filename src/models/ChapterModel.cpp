@@ -82,7 +82,7 @@ int ChapterModel::rowCount(const QModelIndex &parent) const {
     return 0;
   }
 
-  return _chapters->pageCount;
+  return _chapters->pageCount - 1;
 }
 
 /******************************************************************************
