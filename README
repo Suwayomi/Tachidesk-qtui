@@ -8,12 +8,13 @@ what works:
   selecting manga and viewing and selecting chapters
   installing/uninstalling/updaing extensions
   viewing latest library from sources
+  adding/removing manga
+  basic settings
 
 what doesn't work:
-  can't add manga to library
   no backup/restore
-  no settings
   no downloads
+  not sure it updates chapters list
 
 
 check CONTRIBUTING.md file for build instructions
