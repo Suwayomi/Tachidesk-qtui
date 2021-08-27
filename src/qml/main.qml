@@ -85,7 +85,7 @@ ApplicationWindow {
   }
 
   onClosing: {
-    if (ac.canClose) {
+    if (Qt.platform.os != "android" || ac.canClose) {
       close.accepted = true
       Qt.quit()
     } else {

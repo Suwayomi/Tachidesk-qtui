@@ -86,7 +86,6 @@ Item {
     if (event.key === Qt.Key_Back || event.key === Qt.Key_Backspace) {
       stack.depth <= 1 ? canClose = true : canClose = false
       stack.pop()
-      console.log(canClose)
     }
   }
 }

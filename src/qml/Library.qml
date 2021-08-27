@@ -1,9 +1,10 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.15
+import QtGraphicalEffects 1.0
 
 import Tachidesk.Models 1.0
 
-Item {
+Rectangle {
   id: libraryBase
   LibraryModel {
     id: libraryModel
@@ -20,13 +21,15 @@ Item {
     libraryModel.refreshLibrary()
   }
 
+  color: "#333333"
+
   GridView {
     id: grid
     anchors.fill: parent
     model: libraryModel
     cellWidth: 200
     clip: true
-    delegate: Rectangle {
+    delegate: Item {
       width: grid.cellWidth
       height: grid.cellHeight
 
@@ -45,20 +48,40 @@ Item {
             setHeight(image.height)
           }
         }
-      }
 
-      border {
-        width: 2
-      }
-      Text {
-        id: infoText
-        anchors {
-          top: image.bottom
-          topMargin: 4
+        OpacityMask {
+          source: mask
+          maskSource: image
         }
 
-        text: title
+        LinearGradient {
+          id: mask
+          anchors.fill: image
+          gradient: Gradient {
+              GradientStop { position: 0.6;  color: "transparent"}
+              GradientStop { position: 0.95; color: "black" }
+          }
+        }
+
+        Text {
+          id: infoText
+          anchors {
+            margins: 4
+            bottom: image.bottom
+            left: image.left
+            right: image.right
+          }
+          color: "white"
+          font.bold: true
+          font.pixelSize: 16
+          wrapMode: Text.WordWrap
+          text: title
+          style: Text.Outline
+          styleColor: "black"
+        }
+
       }
+
       MouseArea {
         anchors.fill: parent
         onClicked: {
