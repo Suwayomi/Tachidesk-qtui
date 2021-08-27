@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 
 
 Item {
+  property bool canClose: false
+
   function navigateHome() {
     if (stack.currentItem.url.toString() !== stack.initialItem.toString()) {
       stack.replace(null, stack.initialItem, {
@@ -12,6 +14,7 @@ Item {
   }
 
   function navigatePage(source, properties) {
+    canClose = false
     if (Qt.resolvedUrl(stack.currentItem.url) === Qt.resolvedUrl(source)) {
       for (var i in properties) {
         if (i !== "replace") {
@@ -75,6 +78,15 @@ Item {
         top: parent.top
         left: parent.left
         bottom: parent.bottom
+    }
+  }
+
+  focus: true
+  Keys.onReleased: {
+    if (event.key === Qt.Key_Back || event.key === Qt.Key_Backspace) {
+      stack.depth <= 1 ? canClose = true : canClose = false
+      stack.pop()
+      console.log(canClose)
     }
   }
 }

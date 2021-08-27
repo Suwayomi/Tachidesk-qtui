@@ -18,8 +18,6 @@ find_package(
   REQUIRED)
 find_package(Qt5QuickCompiler)
 
-add_executable(Tachidesk-qtui src/qml/qml.qrc)
-
 add_subdirectory(libs/SortFilterProxyModel)
 
 function(include_directories_recurse dir)
@@ -44,9 +42,12 @@ list(APPEND src_files ${add_src_files})
 include_directories_recurse(src)
 
 set(lib_srcs ${src_files})
-target_sources(
-  Tachidesk-qtui
-  PRIVATE ${lib_srcs})
+
+if (ANDROID)
+  add_library(Tachidesk-qtui SHARED ${lib_srcs} src/qml/qml.qrc)
+else()
+  add_executable(Tachidesk-qtui ${lib_srcs} src/qml/qml.qrc)
+endif()
 
 target_link_libraries(Tachidesk-qtui
   Qt::Quick

@@ -85,10 +85,16 @@ ApplicationWindow {
   }
 
   onClosing: {
+    if (ac.canClose) {
+      close.accepted = true
       Qt.quit()
+    } else {
+      close.accepted = false
+    }
   }
 
   ApplicationContent {
+    id: ac
     anchors.fill: parent
   }
 

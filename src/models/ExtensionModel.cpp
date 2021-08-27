@@ -167,7 +167,7 @@ QHash<int, QByteArray> ExtensionModel::roleNames() const {
 
 void ExtensionModel::update(const QString& pkgName, qint32 row)
 {
-  _extensions[row].installed = false;
+  _extensions[row].hasUpdate = false;
   _networkManager->get("extension/update/" + pkgName);
 
   emit dataChanged(index(row, 0), index(row, 0), {RoleUpdate});

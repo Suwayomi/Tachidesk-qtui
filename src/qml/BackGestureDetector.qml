@@ -5,7 +5,7 @@ MouseArea {
   hoverEnabled: true
   scrollGestureEnabled: false
   propagateComposedEvents: true
-  //enabled: Qt.platform.os === "ios"
+  enabled: Qt.platform.os !== "android"
 
   signal backGestureDetected()
 
