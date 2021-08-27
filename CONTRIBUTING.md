@@ -11,5 +11,5 @@ I don't currently have a road map as i'm working on getting basic features imple
     - `qt5` (must include development pacakges!)
     - `ninja` (optional)
 4. From the root dir run:
-    1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -B./.build -G Ninja` leave off ninja if you didn't install it
+    1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -B./.build -G Ninja` leave off the `-G Ninja` if you didn't install ninja
     2. `cmake --build .build --config Debug --target all -- -j12` (or how ever many threads you want to build with)
