@@ -1,5 +1,5 @@
 ## contributing
-I don't currently have a road map as i'm working on getting basic features implemented, if you want to help, hop onto [the Suwayomi discord server](https://discord.gg/DDZdqZWaHA) and send me, `@norm#8295` a message.
+I don't currently have a road map as i'm working on getting basic features implemented, if you want to help, hop onto [the Suwayomi discord server](https://discord.gg/DDZdqZWaHA) and send `@norm#8295` a message.
 
 ## building
 - clone the repo, be sure to initialize submodules
