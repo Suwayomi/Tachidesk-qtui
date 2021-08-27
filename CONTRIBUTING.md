@@ -1,7 +1,7 @@
-## contributing
+## Contributing
 I don't currently have a road map as i'm working on getting basic features implemented, if you want to help, hop onto [the Suwayomi discord server](https://discord.gg/DDZdqZWaHA) and send `@norm#8295` a message.
 
-## building
+## Bbuilding
 - clone the repo, be sure to initialize submodules
 - install qt5 and optionally ninja
 - from the root dir run:
