@@ -8,6 +8,8 @@
 
 #include <memory>
 
+class Settings;
+
 class NetworkManager : public QObject
 {
   Q_OBJECT
@@ -21,6 +23,8 @@ class NetworkManager : public QObject
   static const quint16 PORT;
   static const QString Kraken;
 
+  std::shared_ptr<Settings> _settings;
+
 signals:
   void recievedReply(const QJsonDocument& reply);
 
@@ -29,7 +33,7 @@ private slots:
   void patchReply();
 
 public:
-  NetworkManager(const QString& host, const QString& port, QObject* parent = 0);
+  NetworkManager(std::shared_ptr<Settings>& settings, const QString& host, const QString& port, QObject* parent = 0);
   ~NetworkManager() = default;
 
   void get(const QString& endpoint);

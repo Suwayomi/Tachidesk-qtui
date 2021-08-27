@@ -2,8 +2,6 @@ Tachidesk-qtui
 
 a c++/qt client app for use with Tachidesk server
 
-this is very much a WIP right now
-
 what works:
   selecting manga and viewing and selecting chapters
   installing/uninstalling/updaing extensions

@@ -11,6 +11,7 @@
 
 #include "networkmanager.h"
 #include "client_info.h"
+#include "settings.h"
 
 /********************************************************************
  *
@@ -18,13 +19,28 @@
  *
  ********************************************************************/
 NetworkManager::NetworkManager(
+  std::shared_ptr<Settings>& settings,
   const QString& host,
   const QString& port,
   QObject* parent)
     : QObject(parent)
     , _host(host)
     , _port(port)
+    , _settings(settings)
 {
+  connect(
+      _settings.get(),
+      &Settings::hostnameChanged,
+      [&]() {
+        _host = _settings->hostname();
+      });
+
+  connect(
+      _settings.get(),
+      &Settings::portChanged,
+      [&]() {
+        _port = _settings->port();
+      });
 }
 
 /********************************************************************

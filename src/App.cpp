@@ -10,8 +10,9 @@
 
 App::App(const CommandLine& cmd, QObject * parent)
   : QObject(parent)
-  , _settings(std::make_unique<Settings>())
+  , _settings(std::make_shared<Settings>())
   , _nm(std::make_unique<NetworkManager>(
+          _settings,
           cmd.isSet(CommandLine::hostname)
             ? cmd.value(CommandLine::hostname)
             : _settings->hostname()

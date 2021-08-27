@@ -16,7 +16,7 @@ class App : public QObject
 {
   Q_OBJECT
 
-  std::unique_ptr<Settings> _settings;
+  std::shared_ptr<Settings> _settings;
 
   std::unique_ptr<NetworkManager> _nm;
 
