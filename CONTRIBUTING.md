@@ -9,7 +9,7 @@ I don't currently have a road map as i'm working on getting basic features imple
 2. Install the dependencies
     - `cmake`
     - `qt5` (must include development pacakges!)
-    -  `ninja` (optional)
+    - `ninja` (optional)
 4. From the root dir run:
     1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -B./.build -G Ninja` leave off ninja if you didn't install it
     2. `cmake --build .build --config Debug --target all -- -j12` (or how ever many threads you want to build with)
