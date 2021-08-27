@@ -12,19 +12,69 @@ Item {
     }
     spacing: 2
 
-    TextField {
+    RowLayout {
       Layout.fillWidth: true
       Layout.preferredHeight: 100
-      placeholderText: qsTr("%1").arg(settings.hostname)
-      inputMethodHints: Qt.ImhUrlCharactersOnly
-      onAccepted: settings.hostname = text
+      spacing: 4
+      Text {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .20
+        text: "Server's\nHostname"
+        font.pixelSize: 18
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        fontSizeMode: Text.Fit
+      }
+      TextField {
+        id: hostTextField
+        Layout.fillWidth: true
+        Layout.preferredWidth: parent.width * .75
+        Layout.preferredHeight: 100
+        font.pixelSize: 18
+        placeholderText: qsTr("%1").arg(settings.hostname)
+        inputMethodHints: Qt.ImhUrlCharactersOnly
+        onAccepted: settings.hostname = text
+      }
+      Button {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        text: "enter"
+        onClicked: settings.hostname = hostTextField.text
+      }
     }
 
-    TextField {
+    RowLayout {
       Layout.fillWidth: true
       Layout.preferredHeight: 100
-      placeholderText: qsTr("Port: %1").arg(settings.port)
-      onAccepted: settings.port = text
+      spacing: 4
+      Text {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .20
+        text: "Server's\nPort"
+        font.pixelSize: 18
+        fontSizeMode: Text.Fit
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+
+      }
+
+      TextField {
+        id: portTextField
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .75
+        font.pixelSize: 18
+        placeholderText: settings.port
+        onAccepted: settings.port = text
+      }
+      Button {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        text: "enter"
+        onClicked: settings.port = portTextField.text
+      }
     }
   }
 }
