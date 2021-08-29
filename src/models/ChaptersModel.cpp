@@ -159,3 +159,15 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
 
   return roles;
 }
+
+/******************************************************************************
+ *
+ * Method: chapterRead()
+ *
+ *****************************************************************************/
+void ChaptersModel::chapterRead(qint32 chapter)
+{
+  auto chapterIndex = _chapters.size() - chapter;
+  _chapters[chapterIndex].read = true;
+  emit dataChanged(index(chapterIndex, 0), index(chapterIndex, 0));
+}

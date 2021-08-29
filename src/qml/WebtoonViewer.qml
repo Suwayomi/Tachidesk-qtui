@@ -8,6 +8,7 @@ Item {
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
   property bool read: false
+  signal chapterRead(int chapter)
 
   ChapterModel {
     id: chapterModel
@@ -26,6 +27,7 @@ Item {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       if (indexIs == count - 1) {
         read = true
+        chapterRead(chapter)
       }
       chapterModel.updateChapter(indexIs, read)
     }

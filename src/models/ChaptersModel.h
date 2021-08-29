@@ -70,6 +70,8 @@ public:
     networkManagerChanged();
   }
 
+  Q_INVOKABLE void chapterRead(qint32 chapter);
+
 signals:
    void networkManagerChanged();
 };

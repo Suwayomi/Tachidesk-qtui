@@ -59,7 +59,7 @@ Item {
           text: details.artist
         }
         Text {
-          text: details.status //+ " " + source.name
+          text: details.status
         }
       }
     }
@@ -151,9 +151,12 @@ Item {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                            chapter: chapterIndex })
+          viewer.chapterRead.connect((chapter) => {
+            chaptersModel.chapterRead(chapter)
+          })
         }
       }
     }
