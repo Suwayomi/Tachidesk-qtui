@@ -13,6 +13,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY networkManagerChanged)
 
   NetworkManager* _networkManager = nullptr;
+  bool _cachedChapters = false;
 
   struct ChapterInfo {
     QString  url;
@@ -28,6 +29,8 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
   qint32 _mangaNumber;
 
   std::function<void (const QJsonDocument& )> gotChapters;
+
+  void requestChapters(bool onlineFetch);
 protected:
 
   void classBegin() override;

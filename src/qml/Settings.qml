@@ -20,7 +20,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
-        text: "Server's\nHostname"
+        text: qsTr("Server's\nHostname")
         font.pixelSize: 18
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -52,7 +52,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
-        text: "Server's\nPort"
+        text: qsTr("Server's\nPort")
         font.pixelSize: 18
         fontSizeMode: Text.Fit
         horizontalAlignment: Text.AlignHCenter

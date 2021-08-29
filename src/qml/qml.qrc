@@ -4,6 +4,7 @@
         <file>ApplicationContent.qml</file>
         <file>NavigationHome.qml</file>
         <file>Library.qml</file>
+        <file>LibraryBase.qml</file>
         <file>MangaDetails.qml</file>
         <file>WebtoonViewer.qml</file>
         <file>WebtoonImage.qml</file>

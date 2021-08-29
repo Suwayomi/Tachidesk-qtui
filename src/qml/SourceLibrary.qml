@@ -4,44 +4,13 @@ import QtQuick.Layouts 1.0
 import Tachidesk.Models 1.0
 
 Item {
-  property alias source: sourcesModel.source
+  property alias source: libraryModel.source
   SourcesLibraryModel {
-    id: sourcesModel
+    id: libraryModel
     nm: networkManager
   }
 
-  GridView {
-    id: layout
+  LibraryBase {
     anchors.fill: parent
-    clip: true
-    model: sourcesModel
-    cellWidth: 200
-    cellHeight: 324
-    delegate: Item {
-      Column {
-        id: mangaInfo
-        spacing: 8
-        anchors.fill: parent
-        Image {
-          id: image
-          source: thumbnailUrl
-          fillMode: Image.PreserveAspectFit
-          width: layout.cellWidth
-          sourceSize.height: 300
-          MouseArea {
-            anchors.fill: parent
-            onClicked: {
-              navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
-            }
-          }
-        }
-        Text {
-          Layout.alignment: Qt.AlignLeft
-          horizontalAlignment: Text.AlignLeft
-          text: title
-        }
-      }
-
-    }
   }
 }

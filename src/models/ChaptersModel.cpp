@@ -23,6 +23,11 @@ ChaptersModel::ChaptersModel(QObject* parent)
 {
 }
 
+/******************************************************************************
+ *
+ * requestChapters
+ *
+ *****************************************************************************/
 void ChaptersModel::classBegin()
 {
   gotChapters = [&](const QJsonDocument& reply) {
@@ -43,7 +48,23 @@ void ChaptersModel::classBegin()
     }
 
     endResetModel();
+
+    if (!_cachedChapters) {
+      _cachedChapters = true;
+      requestChapters(true);
+    }
   };
+}
+
+/******************************************************************************
+ *
+ * requestChapters
+ *
+ *****************************************************************************/
+void ChaptersModel::requestChapters(bool onlineFetch)
+{
+  _networkManager->get(QStringLiteral("manga/%1/chapters/?onlineFetch=${%2}")
+      .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"), gotChapters);
 }
 
 /******************************************************************************
@@ -53,7 +74,7 @@ void ChaptersModel::classBegin()
  *****************************************************************************/
 void ChaptersModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1/chapters").arg(_mangaNumber), gotChapters);
+  requestChapters(_cachedChapters);
 }
 
 /******************************************************************************
