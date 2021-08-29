@@ -153,7 +153,7 @@ Item {
         onClicked: {
           var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
-                                           chapter: chapterIndex })
+                                         chapter: chapterIndex })
           viewer.chapterRead.connect((chapter) => {
             chaptersModel.chapterRead(chapter)
           })

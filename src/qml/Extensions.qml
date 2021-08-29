@@ -16,7 +16,6 @@ Item {
     sourceModel: extensionModel
     filterCaseSensitivity: Qt.CaseInsensitive
     filterRoleName: "name"
-    filterPattern: base.value
 
     sorters: [
       RoleSorter {

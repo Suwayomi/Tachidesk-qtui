@@ -23,7 +23,28 @@ ChapterModel::ChapterModel(QObject* parent)
 {
 }
 
-void ChapterModel::classBegin() { }
+void ChapterModel::classBegin()
+{
+  gotChapter = [&](const QJsonDocument& reply)
+  {
+    beginResetModel();
+    _chapters.reset();
+
+    const auto& entry = reply.object();
+    auto& info        = _chapters.emplace();
+    info.url          = entry["url"].toString();
+    info.name         = entry["name"].toString();
+    info.uploadDate   = entry["uploadDate"].toInt();
+    info.chapterNumber= entry["chapterNumber"].toInt();
+    info.read         = entry["read"].toBool();
+    info.index        = entry["index"].toInt();
+    info.pageCount    = entry["pageCount"].toInt();
+    info.chapterCount = entry["chapterCount"].toInt();
+    //info. author artist genre status
+
+    endResetModel();
+  };
+}
 
 /******************************************************************************
  *
@@ -32,44 +53,7 @@ void ChapterModel::classBegin() { }
  *****************************************************************************/
 void ChapterModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber));
-
-  connect(
-      _networkManager,
-      &NetworkManager::recievedReply,
-      this,
-      &ChapterModel::recievedReply);
-}
-
-/******************************************************************************
- *
- * Method: recieveReply()
- *
- *****************************************************************************/
-void ChapterModel::recievedReply(const QJsonDocument& reply)
-{
-  if (reply.isObject()) {
-    disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
-  } else {
-    return;
-  }
-
-  beginResetModel();
-  _chapters.reset();
-
-  const auto& entry = reply.object();
-  auto& info        = _chapters.emplace();
-  info.url          = entry["url"].toString();
-  info.name         = entry["name"].toString();
-  info.uploadDate   = entry["uploadDate"].toInt();
-  info.chapterNumber= entry["chapterNumber"].toInt();
-  info.read         = entry["read"].toBool();
-  info.index        = entry["index"].toInt();
-  info.pageCount    = entry["pageCount"].toInt();
-  info.chapterCount = entry["chapterCount"].toInt();
-  //info. author artist genre status
-
-  endResetModel();
+  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber), gotChapter);
 }
 
 /******************************************************************************

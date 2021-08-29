@@ -44,6 +44,7 @@ void ChaptersModel::classBegin()
       info.index        = entry["index"].toInt();
       info.pageCount    = entry["pageCount"].toInt();
       info.chapterCount = entry["chapterCount"].toInt();
+      info.lastPageRead = entry["lastPageRead"].toInt();
       //info. author artist genre status
     }
 
@@ -135,6 +136,11 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       {
         return entry.chapterCount;
       }
+
+    case RoleLastPageRead:
+      {
+        return entry.lastPageRead;
+      }
     //case Role
     default:
       return {};
@@ -155,6 +161,7 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
                                           {RoleRead,          "read"},
                                           {RoleChapterIndex,  "chapterIndex"},
                                           {RolePageCount,     "pageCount"},
+                                          {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},};
 
   return roles;

@@ -23,6 +23,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
     quint32  index;
     quint32  pageCount;
     quint32  chapterCount;
+    quint32  lastPageRead;
   };
   std::vector<ChapterInfo> _chapters;
 
@@ -49,6 +50,7 @@ public:
     RoleChapterIndex,
     RolePageCount,
     RoleChapterCount,
+    RoleLastPageRead,
   };
 
   ChaptersModel(QObject* parent = nullptr);

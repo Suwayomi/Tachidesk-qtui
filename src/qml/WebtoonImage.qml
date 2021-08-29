@@ -3,7 +3,8 @@ import QtQuick 2.8
 Rectangle {
   color: "black"
   width: listView.width
-  height: listView.width * 1.5
+  height: listView.width * 2
+  signal imageLoaded()
 
   Image {
     id: image
@@ -18,6 +19,7 @@ Rectangle {
         parent.height = sourceSize.height
         // size the height will actually be
         parent.height = paintedHeight
+        imageLoaded()
       }
     }
   }

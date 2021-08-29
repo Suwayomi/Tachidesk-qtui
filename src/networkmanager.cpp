@@ -119,7 +119,9 @@ void NetworkManager::get(
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(data,&error);
 
-        func(doc);
+        if (func) {
+          func(doc);
+        }
         r->deleteLater();
       });
 }

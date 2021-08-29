@@ -16,6 +16,12 @@ Item {
     sourceModel: sourcesModel
     filterCaseSensitivity: Qt.CaseInsensitive
     filterRoleName: "lang"
+    filters: [
+      ValueFilter {
+        roleName: "lang"
+        value: settings.lang
+      }
+    ]
   }
 
   TextField {

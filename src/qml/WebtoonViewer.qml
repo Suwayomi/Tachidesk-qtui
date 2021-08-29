@@ -20,9 +20,9 @@ Item {
     anchors.fill: parent
     model: chapterModel
     cacheBuffer: 10000
-    delegate: Loader {
-      source: "WebtoonImage.qml"
-    }
+    delegate: WebtoonImage {}
+    // TODO position at last page read
+    //Component.onCompleted: positionViewAtIndex(
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       if (indexIs == count - 1) {

@@ -28,6 +28,8 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   };
   std::optional<ChapterInfo> _chapters;
 
+  std::function<void (const QJsonDocument& )> gotChapter;
+
   qint32 _mangaNumber;
   qint32 _chapterNumber;
 
@@ -70,8 +72,6 @@ public:
     _networkManager = nm;
     networkManagerChanged();
   }
-
-  void recievedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void updateChapter(qint32 page, bool read);
 signals:
