@@ -2,8 +2,8 @@ import QtQuick 2.8
 
 Rectangle {
   color: "black"
-  width: listView.width
-  height: listView.width * 2
+  width: base.width
+  height: base.width * 2
   signal imageLoaded()
 
   Image {

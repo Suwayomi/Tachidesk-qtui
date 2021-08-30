@@ -20,9 +20,24 @@ Item {
     anchors.fill: parent
     model: chapterModel
     cacheBuffer: 10000
+    maximumFlickVelocity: 100000
     delegate: WebtoonImage {}
+    // debug rectangle
+    //delegate: Rectangle {
+    //  width: base.width
+    //  height: 500
+    //  Text {
+    //    font.pixelSize: 30
+    //    width: base.width
+    //    wrapMode: Text.Wrap
+    //    text: name +  chapterUrl
+    //  }
+    //}
+    property bool listviewLoaded: false
     // TODO position at last page read
-    //Component.onCompleted: positionViewAtIndex(
+    Component.onCompleted: {
+      listviewLoaded = true
+    }
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       if (indexIs == count - 1) {
@@ -30,6 +45,16 @@ Item {
         chapterRead(chapter)
       }
       chapterModel.updateChapter(indexIs, read)
+    }
+    onAtYEndChanged: {
+      if (!listviewLoaded) {
+        console.log("not done")
+        return
+      }
+      if (listView.atYEnd) {
+        chapterModel.chapterNumber++
+        chapterModel.requestChapter(chapterModel.chapterNumber)
+      }
     }
   }
 }

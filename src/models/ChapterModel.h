@@ -2,7 +2,6 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
-#include <optional>
 
 #include "networkmanager.h"
 
@@ -26,13 +25,15 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
     quint32  pageCount;
     quint32  chapterCount;
   };
-  std::optional<ChapterInfo> _chapters;
+  std::vector<ChapterInfo> _chapters;
 
   std::function<void (const QJsonDocument& )> gotChapter;
 
   qint32 _mangaNumber;
   qint32 _chapterNumber;
+  quint32 _chapterCount;
 
+  const ChapterInfo* getChapterByRow(const QModelIndex& index, quint32& chapterNumber) const;
 protected:
 
   void classBegin() override;
@@ -74,6 +75,7 @@ public:
   }
 
   Q_INVOKABLE void updateChapter(qint32 page, bool read);
+  Q_INVOKABLE void requestChapter(quint32 chapter);
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();
