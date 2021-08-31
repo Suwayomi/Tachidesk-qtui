@@ -8,7 +8,7 @@ I don't currently have a road map as i'm working on getting basic features imple
     - `git submodule update`
 2. Install the dependencies
     - `cmake >= 3.14`
-    - `qt5` (must include development pacakges!)
+    - `qt5 >= 5.15.0` (must include development pacakges!)
     - `ninja` (optional)
 4. From the project root dir run:
     1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -B./.build -G Ninja` leave off the `-G Ninja` part if you didn't install ninja
