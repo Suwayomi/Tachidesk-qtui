@@ -81,15 +81,15 @@ void ChapterModel::componentComplete()
  * Method: getChapterByRow()
  *
  *****************************************************************************/
-const ChapterModel::ChapterInfo* ChapterModel::getChapterByRow(const QModelIndex& index, quint32& chapterNumber) const
+const ChapterModel::ChapterInfo* ChapterModel::getChapterByRow(qint32 index, quint32& chapterNumber) const
 {
   for (const auto& chapter : _chapters) {
-    if (index.row() < chapter.pageCount + chapterNumber) {
+    if (index < chapter.pageCount + chapterNumber) {
       return &chapter;
     }
     chapterNumber += chapter.pageCount;
   }
-  qDebug() << "not found!" << index.row();
+  qDebug() << "not found!" << index;
   return nullptr;
 }
 
@@ -124,7 +124,7 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
   }
 
   quint32 chapterNumber = 0;
-  const auto entry = getChapterByRow(index, chapterNumber);
+  const auto entry = getChapterByRow(index.row(), chapterNumber);
   if (!entry) {
     qDebug() << "entry not found";
     return {};
@@ -197,10 +197,13 @@ QHash<int, QByteArray> ChapterModel::roleNames() const {
  * Method: lastPageRead()
  *
  *****************************************************************************/
-void ChapterModel::updateChapter(qint32 page, bool read)
+void ChapterModel::updateChapter(qint32 page)
 {
-  _networkManager->patch("lastPageRead", page, "read", read ? "true" : "false",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber));
+  quint32 chapterNumber = 0;
+  const auto entry = getChapterByRow(page, chapterNumber);
+
+  _networkManager->patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
 }
 
 /******************************************************************************
@@ -213,7 +216,10 @@ void ChapterModel::requestChapter(quint32 chapter)
   if (chapter > _chapterCount) {
     return;
   }
-  for (auto& c: _chapters) {
+  _networkManager->patch("read", "true",
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber - 1));
+
+  for (auto& c : _chapters) {
     if (c.index == chapter) {
       return;
     }

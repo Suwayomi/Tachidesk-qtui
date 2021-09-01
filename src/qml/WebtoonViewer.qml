@@ -7,7 +7,6 @@ Item {
   id: base
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
-  property bool read: false
   signal chapterRead(int chapter)
 
   ChapterModel {
@@ -40,18 +39,14 @@ Item {
     }
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
-      if (indexIs == count - 1) {
-        read = true
-        chapterRead(chapter)
-      }
-      chapterModel.updateChapter(indexIs, read)
+      chapterModel.updateChapter(indexIs)
     }
     onAtYEndChanged: {
       if (!listviewLoaded) {
-        console.log("not done")
         return
       }
       if (listView.atYEnd) {
+        chapterRead(chapterModel.chapterNumber)
         chapterModel.chapterNumber++
         chapterModel.requestChapter(chapterModel.chapterNumber)
       }

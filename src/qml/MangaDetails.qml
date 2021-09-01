@@ -151,7 +151,6 @@ Item {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          console.log("chapter index? ", chapterIndex)
           var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                          chapter: chapterIndex })

@@ -33,7 +33,7 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   qint32 _chapterNumber;
   quint32 _chapterCount;
 
-  const ChapterInfo* getChapterByRow(const QModelIndex& index, quint32& chapterNumber) const;
+  const ChapterInfo* getChapterByRow(qint32 index, quint32& chapterNumber) const;
 protected:
 
   void classBegin() override;
@@ -74,7 +74,7 @@ public:
     networkManagerChanged();
   }
 
-  Q_INVOKABLE void updateChapter(qint32 page, bool read);
+  Q_INVOKABLE void updateChapter(qint32 page);
   Q_INVOKABLE void requestChapter(quint32 chapter);
 signals:
    void networkManagerChanged();
