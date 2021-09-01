@@ -103,7 +103,7 @@ QVariant SourcesLibraryModel::data(const QModelIndex &index, int role) const {
   {
     case RoleThumbnailUrl:
       {
-        return QStringLiteral("%1:%2%3").arg(_networkManager->hostname()).arg(_networkManager->port()).arg(entry.thumbnailUrl);
+        return _networkManager->resolvedPath().arg(entry.thumbnailUrl);
       }
     case RoleTitle:
       {

@@ -99,7 +99,7 @@ QVariant SourcesModel::data(const QModelIndex &index, int role) const {
   {
     case RoleIconUrl:
       {
-        return QStringLiteral("%1:%2%3").arg(_networkManager->hostname()).arg(_networkManager->port()).arg(entry.iconUrl);
+        return _networkManager->resolvedPath().arg(entry.iconUrl);
       }
     case RoleName:
       {

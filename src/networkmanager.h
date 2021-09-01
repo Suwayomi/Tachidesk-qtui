@@ -16,6 +16,7 @@ class NetworkManager : public QObject
 
   QString   _host;
   QString   _port;
+  QString   _baseUrl;
 
   QNetworkAccessManager man;
   bool connectionOK = false;
@@ -33,24 +34,26 @@ private slots:
   void patchReply();
 
 public:
-  NetworkManager(std::shared_ptr<Settings>& settings, const QString& host, const QString& port, QObject* parent = 0);
+  NetworkManager(
+      std::shared_ptr<Settings>& settings,
+      const QString& host,
+      const QString& port,
+      const QString& baseUrl,
+      QObject* parent = 0);
+
   ~NetworkManager() = default;
 
   void get(const QString& endpoint);
   void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
   void deleteResource(const QString& endpoint);
 
-  const QString& hostname() const {
-    return _host;
-  }
-
-  const auto& port() const {
-    return _port;
+  auto resolvedPath() const {
+    return QStringLiteral("%1:%2%3%4").arg(_host).arg(_port).arg(_baseUrl);
   }
 
   void patch(QHttpMultiPart* patchData, const QString& endpoint) {
     QNetworkRequest request;
-    request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+    request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
 
     auto reply = man.sendCustomRequest(request, "PATCH", patchData);
     patchData->setParent(reply);

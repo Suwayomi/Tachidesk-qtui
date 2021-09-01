@@ -85,6 +85,39 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
+        text: qsTr("Server's\nBase Url")
+        font.pixelSize: 18
+        fontSizeMode: Text.Fit
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+
+      }
+
+      TextField {
+        id: baseUrlTextField
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .75
+        font.pixelSize: 18
+        placeholderText: settings.baseUrl
+        onAccepted: settings.baseUrl = text
+      }
+      Button {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        text: "enter"
+        onClicked: settings.baseUrl = baseUrlTextField.text
+      }
+    }
+
+    RowLayout {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 100
+      spacing: 4
+      Text {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .20
         text: qsTr("language")
         font.pixelSize: 18
         fontSizeMode: Text.Fit

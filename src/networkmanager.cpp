@@ -22,10 +22,12 @@ NetworkManager::NetworkManager(
   std::shared_ptr<Settings>& settings,
   const QString& host,
   const QString& port,
+  const QString& baseUrl,
   QObject* parent)
     : QObject(parent)
     , _host(host)
     , _port(port)
+    , _baseUrl(baseUrl)
     , _settings(settings)
 {
   connect(
@@ -40,6 +42,13 @@ NetworkManager::NetworkManager(
       &Settings::portChanged,
       [&]() {
         _port = _settings->port();
+      });
+
+  connect(
+      _settings.get(),
+      &Settings::baseUrlChanged,
+      [&]() {
+        _baseUrl = _settings->baseUrl();
       });
 }
 
@@ -80,7 +89,7 @@ bool NetworkManager::handleNetworkError(QNetworkReply* reply)
 void NetworkManager::get(const QString& endpoint)
 {
   QNetworkRequest request;
-  request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
 
   QNetworkReply *reply = man.get(request);
 
@@ -101,7 +110,7 @@ void NetworkManager::get(
     const std::function<void(const QJsonDocument&)>& func)
 {
   QNetworkRequest request;
-  request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
 
   QNetworkReply *reply = man.get(request);
 
@@ -134,7 +143,7 @@ void NetworkManager::get(
 void NetworkManager::deleteResource(const QString& endpoint)
 {
   QNetworkRequest request;
-  request.setUrl(QUrl(QStringLiteral("%1:%2/api/v1/%3").arg(_host).arg(_port).arg(endpoint)));
+  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
 
   QNetworkReply *reply = man.deleteResource(request);
 

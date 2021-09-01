@@ -162,9 +162,9 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
       }
     case RoleChapterUrl:
       {
-        return _networkManager->hostname() +
-                  QStringLiteral(":%1/api/v1/manga/%2/chapter/%3/page/%4")
-                    .arg(_networkManager->port()).arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber);
+        return _networkManager->resolvedPath().arg(
+                  QStringLiteral("/api/v1/manga/%1/chapter/%2/page/%3")
+                    .arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber));
       }
     //case Role
     default:
