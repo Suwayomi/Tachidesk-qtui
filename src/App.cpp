@@ -15,11 +15,7 @@ App::App(const CommandLine& cmd, QObject * parent)
           _settings,
           cmd.isSet(CommandLine::hostname)
             ? cmd.value(CommandLine::hostname)
-            : _settings->hostname()
-        , cmd.isSet(CommandLine::port)
-            ? cmd.value(CommandLine::port)
-            : _settings->port()
-        , _settings->baseUrl()))
+            : _settings->hostname()))
   , _commandLine(cmd)
   , _engine(new QQmlApplicationEngine())
 {

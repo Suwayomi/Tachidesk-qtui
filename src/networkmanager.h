@@ -15,14 +15,9 @@ class NetworkManager : public QObject
   Q_OBJECT
 
   QString   _host;
-  QString   _port;
-  QString   _baseUrl;
 
   QNetworkAccessManager man;
   bool connectionOK = false;
-
-  static const quint16 PORT;
-  static const QString Kraken;
 
   std::shared_ptr<Settings> _settings;
 
@@ -37,8 +32,6 @@ public:
   NetworkManager(
       std::shared_ptr<Settings>& settings,
       const QString& host,
-      const QString& port,
-      const QString& baseUrl,
       QObject* parent = 0);
 
   ~NetworkManager() = default;
@@ -48,7 +41,7 @@ public:
   void deleteResource(const QString& endpoint);
 
   auto resolvedPath() const {
-    return QStringLiteral("%1:%2%3%4").arg(_host).arg(_port).arg(_baseUrl);
+    return QStringLiteral("%1%2").arg(_host);
   }
 
   void patch(QHttpMultiPart* patchData, const QString& endpoint) {

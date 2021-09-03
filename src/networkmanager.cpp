@@ -21,13 +21,9 @@
 NetworkManager::NetworkManager(
   std::shared_ptr<Settings>& settings,
   const QString& host,
-  const QString& port,
-  const QString& baseUrl,
   QObject* parent)
     : QObject(parent)
     , _host(host)
-    , _port(port)
-    , _baseUrl(baseUrl)
     , _settings(settings)
 {
   connect(
@@ -37,19 +33,6 @@ NetworkManager::NetworkManager(
         _host = _settings->hostname();
       });
 
-  connect(
-      _settings.get(),
-      &Settings::portChanged,
-      [&]() {
-        _port = _settings->port();
-      });
-
-  connect(
-      _settings.get(),
-      &Settings::baseUrlChanged,
-      [&]() {
-        _baseUrl = _settings->baseUrl();
-      });
 }
 
 /********************************************************************
