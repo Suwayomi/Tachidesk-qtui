@@ -1,6 +1,7 @@
 import QtQuick 2.8
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtGraphicalEffects 1.12
 
 import Tachidesk.Models 1.0
 
@@ -25,6 +26,24 @@ Item {
 
   property var details: detailsModel.get(0)
 
+  Image {
+    id: backgroundImage
+    source: details.thumbnailUrl
+    fillMode: Image.PreserveAspectCrop
+    width: detailsColumn.width
+    anchors {
+      top: parent.top
+      topMargin: (height / 1.2) - height
+    }
+  }
+
+  Colorize {
+    anchors.fill: backgroundImage
+    source: backgroundImage
+    lightness: 0.75
+    saturation: 0.5
+    hue: 0.5
+  }
 
   Column {
     id: detailsColumn
@@ -45,7 +64,7 @@ Item {
         id: image
         source: details.thumbnailUrl
         fillMode: Image.PreserveAspectFit
-        sourceSize.height: detailsColumn.height * 1/3
+        sourceSize.height: detailsColumn.height * 1/1.5
       }
       ColumnLayout {
         Layout.fillWidth: true
