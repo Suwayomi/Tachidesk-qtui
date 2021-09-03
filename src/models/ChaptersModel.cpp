@@ -64,7 +64,7 @@ void ChaptersModel::classBegin()
  *****************************************************************************/
 void ChaptersModel::requestChapters(bool onlineFetch)
 {
-  _networkManager->get(QStringLiteral("manga/%1/chapters/?onlineFetch=${%2}")
+  _networkManager->get(QStringLiteral("manga/%1/chapters/?onlineFetch=%2")
       .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"), gotChapters);
 }
 
