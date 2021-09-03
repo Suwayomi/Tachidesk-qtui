@@ -2,7 +2,9 @@ import QtQuick 2.8
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
 
-Item {
+Rectangle {
+  color: "#333333"
+
   ColumnLayout {
     anchors {
       top: parent.top
@@ -17,6 +19,7 @@ Item {
       Layout.preferredHeight: 100
       spacing: 4
       Text {
+        color: "white"
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
@@ -49,6 +52,7 @@ Item {
       Layout.preferredHeight: 100
       spacing: 4
       Text {
+        color: "white"
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
@@ -86,6 +90,7 @@ Item {
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
         text: qsTr("Server's\nBase Url")
+        color: "white"
         font.pixelSize: 18
         fontSizeMode: Text.Fit
         horizontalAlignment: Text.AlignHCenter
@@ -119,6 +124,7 @@ Item {
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
         text: qsTr("language")
+        color: "white"
         font.pixelSize: 18
         fontSizeMode: Text.Fit
         horizontalAlignment: Text.AlignHCenter

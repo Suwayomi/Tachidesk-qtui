@@ -4,12 +4,13 @@ import QtQuick.Controls 2.15
 
 Item {
   property bool canClose: false
+  property bool navigationVisible: true
 
   function navigateHome() {
     if (stack.currentItem.url.toString() !== stack.initialItem.toString()) {
       stack.replace(null, stack.initialItem, {
                       "url": stack.initialItem
-                    }, StackView.Immediate)
+                    })
     }
   }
 
@@ -35,10 +36,12 @@ Item {
     properties["url"] = source
 
     if (properties["replace"]) {
-      stack.replace(Qt.resolvedUrl(source), properties, StackView.Immediate)
+      stack.replace(Qt.resolvedUrl(source), properties)
+      navigationVisible = true
     }
     else {
-      return stack.push(Qt.resolvedUrl(source), properties, StackView.Immediate)
+      navigationVisible = false
+      return stack.push(Qt.resolvedUrl(source), properties)
     }
   }
 
@@ -65,14 +68,86 @@ Item {
 
   StackView {
     id: stack
-    anchors.fill: parent
-    initialItem: Qt.resolvedUrl("NavigationHome.qml")
+    anchors {
+      left: parent.left
+      right: parent.right
+      bottom: navigation.visible ? navigation.top : parent.bottom
+      top: parent.top
+    }
+    initialItem: Qt.resolvedUrl("Library.qml")
+
+    pushEnter: Transition {
+      PropertyAnimation {
+        property: "opacity"
+        from: 0
+        to:1
+        duration: 200
+      }
+    }
+    pushExit: Transition {
+      PropertyAnimation {
+        property: "opacity"
+        from: 1
+        to:0
+        duration: 200
+      }
+    }
+    popEnter: Transition {
+        PropertyAnimation {
+          property: "opacity"
+          from: 0
+          to:1
+          duration: 200
+        }
+    }
+    popExit: Transition {
+        PropertyAnimation {
+          property: "opacity"
+          from: 1
+          to:0
+          duration: 200
+        }
+    }
+    replaceEnter: Transition {
+      PropertyAnimation {
+        property: "opacity"
+        from: 0
+        to:1
+        duration: 200
+      }
+    }
+    replaceExit: Transition {
+      PropertyAnimation {
+        property: "opacity"
+        from: 1
+        to:0
+        duration: 200
+      }
+    }
+  }
+
+  Rectangle {
+    id: navigation
+    visible: navigationVisible
+    color: "#333333"
+    anchors {
+      left: parent.left
+      right: parent.right
+      bottom: parent.bottom
+    }
+    height: 100
+    NavigationHome {
+      anchors.fill: parent
+    }
   }
 
   // Swipe back to navigate
   BackGestureDetector {
     allowedToWork: stack.depth > 1
-    onBackGestureDetected: stack.pop()
+    onBackGestureDetected: {
+      stack.pop()
+      stack.depth > 1 ? navigationVisible = false : navigationVisible = true
+    }
 
     anchors {
         top: parent.top

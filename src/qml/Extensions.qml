@@ -5,7 +5,10 @@ import QtQuick.Layouts 1.0
 import Tachidesk.Models 1.0
 import SortFilterProxyModel 0.2
 
-Item {
+Rectangle {
+
+  color: "#333333"
+
   ExtensionModel {
     id: extensionModel
     nm: networkManager
@@ -55,9 +58,11 @@ Item {
         Layout.alignment: Qt.AlignLeft
         horizontalAlignment: Text.AlignLeft
         text: name
+        color: "white"
       }
       Text {
         text: lang
+        color: "white"
       }
       Button {
         Layout.alignment: Qt.AlignRight
