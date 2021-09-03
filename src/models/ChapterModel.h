@@ -27,8 +27,6 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   };
   std::vector<ChapterInfo> _chapters;
 
-  std::function<void (const QJsonDocument& )> gotChapter;
-
   qint32 _mangaNumber;
   qint32 _chapterNumber;
   quint32 _chapterCount;
@@ -80,4 +78,7 @@ signals:
    void networkManagerChanged();
    void mangaNumberChanged();
    void chapterNumberChanged();
+
+public slots:
+  void gotChapter(const QJsonDocument& reply);
 };

@@ -30,40 +30,52 @@ ChapterModel::ChapterModel(QObject* parent)
  *****************************************************************************/
 void ChapterModel::classBegin()
 {
-  gotChapter = [&](const QJsonDocument& reply)
-  {
-    auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
-      vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
-            [](const auto& a, const auto&b){ return a.index < b.index; }), item);
-    };
+}
 
-    qint32 pageStart = 0;
-    qint32 pageEnd = 0;
-    for (auto& chapter : _chapters) {
-      pageStart += chapter.pageCount;
-    }
+/******************************************************************************
+ *
+ * gotChapter
+ *
+ *****************************************************************************/
+void ChapterModel::gotChapter(const QJsonDocument& reply)
+{
+  if (reply.isEmpty()) {
+    return;
+  }
 
-    const auto& entry = reply.object();
-    ChapterInfo info;
-    info.url          = entry["url"].toString();
-    info.name         = entry["name"].toString();
-    info.uploadDate   = entry["uploadDate"].toInt();
-    info.chapterNumber= entry["chapterNumber"].toInt();
-    info.read         = entry["read"].toBool();
-    info.index        = entry["index"].toInt();
-    info.pageCount    = entry["pageCount"].toInt();
-    info.chapterCount = entry["chapterCount"].toInt();
+  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
-    _chapterCount = info.chapterCount;
-
-    pageEnd = info.pageCount + pageStart - 1;
-
-    beginInsertRows({}, pageStart, pageEnd);
-
-    insert_sorted(_chapters, info);
-
-    endInsertRows();
+  auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
+    vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
+          [](const auto& a, const auto&b){ return a.index < b.index; }), item);
   };
+
+  qint32 pageStart = 0;
+  qint32 pageEnd = 0;
+  for (auto& chapter : _chapters) {
+    pageStart += chapter.pageCount;
+  }
+
+  const auto& entry = reply.object();
+  ChapterInfo info;
+  info.url          = entry["url"].toString();
+  info.name         = entry["name"].toString();
+  info.uploadDate   = entry["uploadDate"].toInt();
+  info.chapterNumber= entry["chapterNumber"].toInt();
+  info.read         = entry["read"].toBool();
+  info.index        = entry["index"].toInt();
+  info.pageCount    = entry["pageCount"].toInt();
+  info.chapterCount = entry["chapterCount"].toInt();
+
+  _chapterCount = info.chapterCount;
+
+  pageEnd = info.pageCount + pageStart - 1;
+
+  beginInsertRows({}, pageStart, pageEnd);
+
+  insert_sorted(_chapters, info);
+
+  endInsertRows();
 }
 
 /******************************************************************************
@@ -201,6 +213,9 @@ void ChapterModel::updateChapter(qint32 page)
 {
   quint32 chapterNumber = 0;
   const auto entry = getChapterByRow(page, chapterNumber);
+  if (!entry) {
+    return;
+  }
 
   _networkManager->patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
@@ -213,16 +228,25 @@ void ChapterModel::updateChapter(qint32 page)
  *****************************************************************************/
 void ChapterModel::requestChapter(quint32 chapter)
 {
-  if (chapter > _chapterCount) {
+  if (_chapterCount) {
+    _networkManager->patch("read", "true",
+        QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber - 1));
+  }
+
+  if (chapter > _chapterCount && _chapterCount != 0) {
     return;
   }
-  _networkManager->patch("read", "true",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber - 1));
 
   for (auto& c : _chapters) {
     if (c.index == chapter) {
       return;
     }
   }
-  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter), gotChapter);
+  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &ChapterModel::gotChapter);
 }
