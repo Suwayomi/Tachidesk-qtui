@@ -158,9 +158,12 @@ Item {
 
   focus: true
   Keys.onReleased: {
-    if (event.key === Qt.Key_Back || event.key === Qt.Key_Backspace) {
+    if (event.key === Qt.Key_Back ||
+    ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Backspace))
+    {
       stack.depth <= 1 ? canClose = true : canClose = false
       stack.pop()
+      stack.depth > 1 ? navigationVisible = false : navigationVisible = true
     }
   }
 }

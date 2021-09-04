@@ -1,5 +1,6 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.0
+import QtQuick.Controls 2.15
 
 import Tachidesk.Models 1.0
 
@@ -10,7 +11,26 @@ Item {
     nm: networkManager
   }
 
+  TextField {
+    id: search
+    anchors {
+      left: parent.left
+      right: parent.right
+      top: parent.top
+      margins: 4
+    }
+    height: 100
+    placeholderText: "search"
+    onAccepted: libraryModel.search(search.text)
+  }
+
   LibraryBase {
-    anchors.fill: parent
+    anchors {
+      top: search.bottom
+      topMargin: 4
+      left: parent.left
+      right: parent.right
+      bottom: parent.bottom
+    }
   }
 }

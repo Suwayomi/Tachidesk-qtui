@@ -29,8 +29,6 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
 
-  std::function<void (const QJsonDocument& )> gotChapters;
-
   void requestChapters(bool onlineFetch);
 protected:
 
@@ -76,4 +74,7 @@ public:
 
 signals:
    void networkManagerChanged();
+
+public slots:
+  void gotChapters(const QJsonDocument& reply);
 };

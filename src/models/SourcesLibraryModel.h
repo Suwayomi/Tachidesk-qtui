@@ -81,6 +81,7 @@ public:
 
   void recievedReply(const QJsonDocument& reply);
 
+  Q_INVOKABLE void search(const QString& searchTerm);
 signals:
   void sourceChanged();
   void networkManagerChanged();

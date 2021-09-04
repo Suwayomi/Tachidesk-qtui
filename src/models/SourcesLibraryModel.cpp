@@ -153,3 +153,19 @@ QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
 
   return roles;
 }
+
+/******************************************************************************
+ *
+ * Method: search()
+ *
+ *****************************************************************************/
+void SourcesLibraryModel::search(const QString& searchTerm)
+{
+  _networkManager->get(QStringLiteral("source/%1/search/%2/0").arg(_source).arg(searchTerm));
+
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &SourcesLibraryModel::recievedReply);
+}

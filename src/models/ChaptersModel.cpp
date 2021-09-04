@@ -30,31 +30,35 @@ ChaptersModel::ChaptersModel(QObject* parent)
  *****************************************************************************/
 void ChaptersModel::classBegin()
 {
-  gotChapters = [&](const QJsonDocument& reply) {
-    beginResetModel();
-    _chapters.clear();
+}
 
-    for (const auto& entry_arr : reply.array()) {
-      const auto& entry = entry_arr.toObject();
-      auto& info        = _chapters.emplace_back();
-      info.url          = entry["url"].toString();
-      info.name         = entry["name"].toString();
-      info.chapterNumber= entry["chapterNumber"].toInt();
-      info.read         = entry["read"].toBool();
-      info.index        = entry["index"].toInt();
-      info.pageCount    = entry["pageCount"].toInt();
-      info.chapterCount = entry["chapterCount"].toInt();
-      info.lastPageRead = entry["lastPageRead"].toInt();
-      //info. author artist genre status
-    }
+void ChaptersModel::gotChapters(const QJsonDocument& reply)
+{
+  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
-    endResetModel();
+  beginResetModel();
+  _chapters.clear();
 
-    if (!_cachedChapters) {
-      _cachedChapters = true;
-      requestChapters(true);
-    }
-  };
+  for (const auto& entry_arr : reply.array()) {
+    const auto& entry = entry_arr.toObject();
+    auto& info        = _chapters.emplace_back();
+    info.url          = entry["url"].toString();
+    info.name         = entry["name"].toString();
+    info.chapterNumber= entry["chapterNumber"].toInt();
+    info.read         = entry["read"].toBool();
+    info.index        = entry["index"].toInt();
+    info.pageCount    = entry["pageCount"].toInt();
+    info.chapterCount = entry["chapterCount"].toInt();
+    info.lastPageRead = entry["lastPageRead"].toInt();
+    //info. author artist genre status
+  }
+
+  endResetModel();
+
+  if (!_cachedChapters) {
+    _cachedChapters = true;
+    requestChapters(true);
+  }
 }
 
 /******************************************************************************
@@ -64,8 +68,14 @@ void ChaptersModel::classBegin()
  *****************************************************************************/
 void ChaptersModel::requestChapters(bool onlineFetch)
 {
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &ChaptersModel::gotChapters);
+
   _networkManager->get(QStringLiteral("manga/%1/chapters/?onlineFetch=%2")
-      .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"), gotChapters);
+      .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"));
 }
 
 /******************************************************************************
