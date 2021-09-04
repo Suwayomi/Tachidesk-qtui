@@ -27,6 +27,11 @@ void MangaDetailsModel::classBegin()
 {
 }
 
+/******************************************************************************
+ *
+ * gotDetails
+ *
+ *****************************************************************************/
 void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
 {
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);

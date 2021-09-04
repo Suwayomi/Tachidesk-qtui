@@ -1,6 +1,7 @@
 import QtQuick 2.8
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
+import QtQuick.Dialogs 1.0
 
 Rectangle {
   color: "#333333"
@@ -79,5 +80,22 @@ Rectangle {
         onClicked: settings.lang = langTextField.text
       }
     }
+
+    Button {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 100
+      text: settings.nsfw ? "NSFW enabled" : "NSFW disabled"
+      onClicked: settings.nsfw = !settings.nsfw
+    }
+
+    //FileDialog {
+    //  id: fileDialog
+    //  title: "Backup File"
+    //  folder: shortucts.home
+    //  onAccepted: {
+    //    console.log("you chose:" + fileDialog.fileUrls)
+    //  }
+    //  Component.onCompleted: visible = true
+    //}
   }
 }

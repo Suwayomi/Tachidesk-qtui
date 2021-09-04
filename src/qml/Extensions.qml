@@ -30,6 +30,16 @@ Rectangle {
         sortOrder: Qt.DescendingOrder
       }
     ]
+    filters: AnyOf {
+      ValueFilter {
+        roleName: "isNsfw"
+        value: settings.nsfw
+      }
+      ValueFilter {
+        roleName: "isNsfw"
+        value: false
+      }
+    }
   }
 
   TextField {

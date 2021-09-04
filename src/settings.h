@@ -6,9 +6,11 @@ class Settings : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString hostname MEMBER _hostname NOTIFY hostnameChanged)
   Q_PROPERTY(QString lang MEMBER _lang NOTIFY langChanged)
+  Q_PROPERTY(bool nsfw MEMBER _nsfw NOTIFY nsfwChanged)
 
   QString _hostname = "http://127.0.0.1";
   QString _lang;
+  bool _nsfw = false;
 
   QSettings _settings;
 
@@ -23,7 +25,12 @@ public:
     return _hostname;
   }
 
+  auto& nsfw() {
+    return _nsfw;
+  }
+
 signals:
   void hostnameChanged();
   void langChanged();
+  void nsfwChanged();
 };
