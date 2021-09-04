@@ -34,7 +34,6 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
 
-  std::function<void (const QJsonDocument& )> gotDetails;
 protected:
 
   void classBegin() override;
@@ -87,4 +86,6 @@ signals:
    void networkManagerChanged();
    void mangaNumberChanged();
    void loaded();
+public slots:
+  void gotDetails(const QJsonDocument&);
 };

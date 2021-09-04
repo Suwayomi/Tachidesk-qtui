@@ -17,15 +17,17 @@ class NetworkManager : public QObject
   QString   _host;
 
   QNetworkAccessManager man;
-  bool connectionOK = false;
 
   std::shared_ptr<Settings> _settings;
 
 signals:
   void recievedReply(const QJsonDocument& reply);
+  void recieveChapters(const QJsonDocument& reply);
+  void abortChapterRequest();
 
 private slots:
   void endpointReply();
+  void chaptersReply();
   void patchReply();
 
 public:
@@ -38,6 +40,7 @@ public:
 
   void get(const QString& endpoint);
   void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
+  void getChapters(const QString& endpoint);
   void deleteResource(const QString& endpoint);
 
   auto resolvedPath() const {
@@ -75,6 +78,31 @@ public:
     patch(patchData, args...);
   }
 
+  void abortRequest()
+  {
+    emit abortChapterRequest();
+  }
 private:
-  bool handleNetworkError(QNetworkReply* reply);
+
+  template<typename F>
+  void getEndpoint(const QString& endpoint, F f)
+  {
+    QNetworkRequest request;
+    request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+
+    QNetworkReply *reply = man.get(request);
+
+    connect(
+        reply,
+        &QNetworkReply::finished,
+        this, f);
+
+    connect(
+        this,
+        &NetworkManager::abortChapterRequest,
+        reply,
+        &QNetworkReply::abort);
+  }
+  QJsonDocument processReply();
+
 };

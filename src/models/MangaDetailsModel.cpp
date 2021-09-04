@@ -25,30 +25,34 @@ MangaDetailsModel::MangaDetailsModel(QObject* parent)
 
 void MangaDetailsModel::classBegin()
 {
-  gotDetails = [&](const QJsonDocument& reply) {
-    beginResetModel();
-    _entries.clear();
+}
+
+void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
+{
+  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+
+  beginResetModel();
+  _entries.clear();
 
 
-    const auto& entry = reply.object();
-    auto& info        = _entries.emplace_back();
-    info.id           = entry["id"].toInt();
-    info.sourceId     = entry["sourceId"].toString();
-    info.url          = entry["url"].toString();
-    info.title        = entry["title"].toString();
-    info.thumbnailUrl = entry["thumbnailUrl"].toString();
-    info.initalized   = entry["intialized"].toBool();
-    info.author       = entry["author"].toString();
-    info.artist       = entry["artist"].toString();
-    info.description  = entry["description"].toString();
-    info.genre        = entry["genre"].toString();
-    info.status       = entry["status"].toString();
-    info.inLibrary    = entry["inLibrary"].toBool();
+  const auto& entry = reply.object();
+  auto& info        = _entries.emplace_back();
+  info.id           = entry["id"].toInt();
+  info.sourceId     = entry["sourceId"].toString();
+  info.url          = entry["url"].toString();
+  info.title        = entry["title"].toString();
+  info.thumbnailUrl = entry["thumbnailUrl"].toString();
+  info.initalized   = entry["intialized"].toBool();
+  info.author       = entry["author"].toString();
+  info.artist       = entry["artist"].toString();
+  info.description  = entry["description"].toString();
+  info.genre        = entry["genre"].toString();
+  info.status       = entry["status"].toString();
+  info.inLibrary    = entry["inLibrary"].toBool();
 
-    endResetModel();
+  endResetModel();
 
-    emit loaded();
-  };
+  emit loaded();
 }
 
 /******************************************************************************
@@ -58,7 +62,13 @@ void MangaDetailsModel::classBegin()
  *****************************************************************************/
 void MangaDetailsModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("manga/%1").arg(_mangaNumber), gotDetails);
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &MangaDetailsModel::gotDetails);
+
+  _networkManager->get(QStringLiteral("manga/%1").arg(_mangaNumber));
 }
 
 /******************************************************************************

@@ -52,6 +52,7 @@ public:
   };
 
   ChaptersModel(QObject* parent = nullptr);
+  ~ChaptersModel();
 
   virtual int rowCount(
      const QModelIndex &parent = QModelIndex()) const override;

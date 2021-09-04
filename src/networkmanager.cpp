@@ -40,25 +40,18 @@ NetworkManager::NetworkManager(
  * handleNetworkError
  *
  ********************************************************************/
-bool NetworkManager::handleNetworkError(QNetworkReply* reply)
+bool handleNetworkError(QNetworkReply* reply)
 {
   if (reply->error() != QNetworkReply::NoError)
   {
     if (reply->error() >= 1 && reply->error() <= 199)
     {
-      if (connectionOK == true)
-      {
-        connectionOK = false;
-      }
+      // no connection
     }
 
     qDebug() << reply->errorString();
 
     return false;
-  }
-
-  if (!connectionOK) {
-    connectionOK = true;
   }
 
   return true;
@@ -71,16 +64,37 @@ bool NetworkManager::handleNetworkError(QNetworkReply* reply)
  ********************************************************************/
 void NetworkManager::get(const QString& endpoint)
 {
-  QNetworkRequest request;
-  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+  getEndpoint(endpoint, &NetworkManager::endpointReply);
+}
 
-  QNetworkReply *reply = man.get(request);
+/********************************************************************
+ *
+ *  get()
+ *
+ ********************************************************************/
+void NetworkManager::getChapters(const QString& endpoint)
+{
+  getEndpoint(endpoint, &NetworkManager::chaptersReply);
+}
 
-  connect(
-      reply,
-      &QNetworkReply::finished,
-      this,
-      &NetworkManager::endpointReply);
+/********************************************************************
+ *
+ *  processReply()
+ *
+ ********************************************************************/
+QJsonDocument NetworkManager::processReply()
+{
+  QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+  if (!handleNetworkError(reply)) {
+      return QJsonDocument();
+  }
+  QByteArray data = reply->readAll();
+
+  QJsonParseError error;
+  QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+
+  reply->deleteLater();
+  return doc;
 }
 
 /********************************************************************
@@ -144,19 +158,19 @@ void NetworkManager::deleteResource(const QString& endpoint)
  ********************************************************************/
 void NetworkManager::endpointReply()
 {
-  QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-  if (!handleNetworkError(reply)) {
-      return;
-  }
-  QByteArray data = reply->readAll();
-
-  QJsonParseError error;
-  QJsonDocument doc = QJsonDocument::fromJson(data,&error);
-
-  emit recievedReply(doc);
-  reply->deleteLater();
+  emit recievedReply(processReply());
 }
 
+
+/********************************************************************
+ *
+ *  userReply()
+ *
+ ********************************************************************/
+void NetworkManager::chaptersReply()
+{
+  emit recieveChapters(processReply());
+}
 
 /********************************************************************
  *

@@ -19,7 +19,7 @@ Item {
     anchors.fill: parent
     model: chapterModel
     cacheBuffer: 10000
-    maximumFlickVelocity: 100000
+    maximumFlickVelocity: 10000
     delegate: WebtoonImage {}
     // debug rectangle
     //delegate: Rectangle {
