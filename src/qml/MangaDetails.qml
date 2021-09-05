@@ -65,11 +65,12 @@ Item {
   Image {
     id: backgroundImage
     source: details.thumbnailUrl
-    fillMode: Image.PreserveAspectCrop
+    fillMode: Image.Tile
     width: detailsColumn.width
     anchors {
       top: parent.top
-      topMargin: (height / 1.2) - height
+      bottom: parent.bottom
+      //topMargin: (height / 1.2) - height
     }
   }
 

@@ -38,17 +38,26 @@ Rectangle {
       width: downloadView.width
 
       RowLayout {
-        anchors.fill: parent
+        anchors {
+          fill: parent
+          margins: 4
+        }
+
         Text {
+          Layout.fillWidth: true
           text: name
+          fontSizeMode: Text.Fit
         }
         Text {
+          Layout.fillWidth: true
           text: qsTr("tries %1").arg(tries)
         }
         Text {
-          text: qsTr("progress %1").arg(progress)
+          Layout.fillWidth: true
+          text: qsTr("progress %1%").arg(progress)
         }
         Button {
+          Layout.fillWidth: true
           text: qsTr("cancel")
         }
       }

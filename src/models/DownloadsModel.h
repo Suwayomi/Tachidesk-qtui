@@ -23,7 +23,7 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
     quint32  chapterIndex;
     quint32  mangaId;
     QString  state;
-    qreal    progress;
+    quint32  progress;
     quint32  tries;
     ChaptersModel::ChapterInfo chapterInfo;
   };

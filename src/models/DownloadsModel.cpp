@@ -21,9 +21,6 @@ IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, DownloadsModel)
 DownloadsModel::DownloadsModel(QObject* parent)
   : QAbstractListModel(parent)
 {
-  connect(&_webSocket, &QWebSocket::connected, this, &DownloadsModel::onConnected);
-  connect(&_webSocket, &QWebSocket::disconnected, this, &DownloadsModel::closed);
-  _webSocket.open(QUrl("ws://192.168.0.130:4567/api/v1/downloads"));
 }
 
 /******************************************************************************
@@ -42,6 +39,13 @@ void DownloadsModel::classBegin()
  *****************************************************************************/
 void DownloadsModel::componentComplete()
 {
+  connect(&_webSocket, &QWebSocket::connected, this, &DownloadsModel::onConnected);
+  connect(&_webSocket, &QWebSocket::disconnected, this, &DownloadsModel::closed);
+  auto resolved = _networkManager->resolvedPath().arg("/api/v1/downloads");
+  resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
+  resolved = QStringLiteral("ws://%1").arg(resolved);
+
+  _webSocket.open(QUrl(resolved));
 }
 
 void DownloadsModel::closed()

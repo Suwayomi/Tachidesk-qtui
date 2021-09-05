@@ -213,7 +213,7 @@ void ChaptersModel::downloadChapter(qint32 downloadOption)
   auto downloadEndpoint = QStringLiteral("download/%1/chapter/%2");
   auto getChapter = [&](const auto& check) {
     for (const auto& chapter : _chapters) {
-      if (check(chapter)) {
+      if (check(chapter) || chapter.downloaded) {
         continue;
       }
       _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
