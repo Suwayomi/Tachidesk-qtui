@@ -15,6 +15,7 @@ find_package(
              Quick
              Network
              Widgets
+             WebSockets
   REQUIRED)
 find_package(Qt5QuickCompiler)
 
@@ -54,6 +55,7 @@ target_link_libraries(Tachidesk-qtui
   Qt::Core
   Qt::Widgets
   Qt::Gui
+  Qt::WebSockets
   SortFilterProxyModel)
 
 target_include_directories(Tachidesk-qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

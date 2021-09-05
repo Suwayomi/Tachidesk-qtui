@@ -13,5 +13,6 @@
         <file>SourceLibrary.qml</file>
         <file>Extensions.qml</file>
         <file>Settings.qml</file>
+        <file>Downloads.qml</file>
     </qresource>
 </RCC>

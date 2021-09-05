@@ -2,23 +2,33 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
+#include <QtWebSockets/QtWebSockets>
 
+#include "ChaptersModel.h"
 #include "networkmanager.h"
 
-class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
+class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-  Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY mangaNumberChanged)
+  Q_PROPERTY(QString status MEMBER _status NOTIFY statusChanged)
 
+  QString _status;
   NetworkManager* _networkManager = nullptr;
-  bool _cachedChapters = false;
 
+  QWebSocket _webSocket;
 
-  qint32 _mangaNumber;
+  struct QueueInfo {
+    quint32  chapterIndex;
+    quint32  mangaId;
+    QString  state;
+    qreal    progress;
+    quint32  tries;
+    ChaptersModel::ChapterInfo chapterInfo;
+  };
+  std::vector<QueueInfo> _queue;
 
-  void requestChapters(bool onlineFetch);
 protected:
 
   void classBegin() override;
@@ -28,27 +38,6 @@ protected:
   virtual QHash<int, QByteArray> roleNames() const override;
 
 public:
-  struct ChapterInfo {
-    QString  url;
-    QString  name;
-    qint32   chapterNumber;
-    bool     read;
-    bool     downloaded;
-    quint32  index;
-    quint32  pageCount;
-    quint32  chapterCount;
-    quint32  lastPageRead;
-  };
-private:
-  std::vector<ChapterInfo> _chapters;
-
-public:
-  enum DownloadOption {
-    DownloadAll,
-    DownloadUnread,
-    DownloadCustom,
-  };
-  Q_ENUM(DownloadOption)
 
   enum Role {
     RoleUrl = Qt::UserRole + 1,
@@ -60,10 +49,16 @@ public:
     RoleChapterCount,
     RoleLastPageRead,
     RoleDownloaded,
+
+    // info
+    // ChapterIndex
+    RoleMangaId,
+    RoleState,
+    RoleProgress,
+    RoleTries,
   };
 
-  ChaptersModel(QObject* parent = nullptr);
-  ~ChaptersModel();
+  DownloadsModel(QObject* parent = nullptr);
 
   virtual int rowCount(
      const QModelIndex &parent = QModelIndex()) const override;
@@ -82,13 +77,13 @@ public:
     networkManagerChanged();
   }
 
-  Q_INVOKABLE void chapterRead(qint32 chapter);
-  Q_INVOKABLE void downloadChapter(qint32 downloadOption);
-
+  Q_INVOKABLE void clear();
 signals:
-   void networkManagerChanged();
-   void mangaNumberChanged();
+  void statusChanged();
+  void networkManagerChanged();
 
 public slots:
-  void gotChapters(const QJsonDocument& reply);
+  void onConnected();
+  void closed();
+  void onTextMessageReceived(const QString& message);
 };

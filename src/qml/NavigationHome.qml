@@ -30,6 +30,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       text: qsTr("Downloads")
+      onClicked: navigatePage(Qt.resolvedUrl("Downloads.qml"), {replace: true})
     }
     Button {
       Layout.fillWidth: true

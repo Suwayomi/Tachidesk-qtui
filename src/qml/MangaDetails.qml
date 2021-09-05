@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.12
 import QtQuick.Window 2.2
+import QtWebSockets 1.0
 
 import Tachidesk.Models 1.0
 
@@ -193,29 +194,37 @@ Item {
     model: chaptersModel
     delegate: Rectangle {
       width: chapterView.width
-      height: 100
+      height: 60
       color: "black"
       border {
         width: 1
         color: "white"
       }
       Text {
+        anchors {
+          left: parent.left
+          right: downloadedText.left
+          top: parent.top
+          bottom: parent.bottom
+          margins: 4
+        }
         text: name
         color: read ? "grey" : "white"
-        anchors.fill: parent
         horizontalAlignment: Text.AlignCenter
         verticalAlignment: Text.AlignVCenter
         leftPadding: 12
         font.pixelSize: 24
+        fontSizeMode: Text.Fit
       }
       Text {
+        id: downloadedText
         anchors {
           right: parent.right
           top: parent.top
           bottom: parent.bottom
         }
         color: "white"
-        text: downloaded ? "Downloaded" : ""
+        text: downloaded ? "✅" : "⬇"
         horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         rightPadding: 12

@@ -23,6 +23,11 @@ ChaptersModel::ChaptersModel(QObject* parent)
 {
 }
 
+/******************************************************************************
+ *
+ * ChaptersModel
+ *
+ *****************************************************************************/
 ChaptersModel::~ChaptersModel()
 {
   _networkManager->abortRequest();
