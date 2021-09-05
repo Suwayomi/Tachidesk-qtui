@@ -57,6 +57,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     info.pageCount    = entry["pageCount"].toInt();
     info.chapterCount = entry["chapterCount"].toInt();
     info.lastPageRead = entry["lastPageRead"].toInt();
+    info.downloaded   = entry["downloaded"].toBool();
     //info. author artist genre status
   }
 
@@ -158,6 +159,11 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       {
         return entry.lastPageRead;
       }
+
+    case RoleDownloaded:
+      {
+        return entry.downloaded;
+      }
     //case Role
     default:
       return {};
@@ -178,6 +184,7 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
                                           {RoleRead,          "read"},
                                           {RoleChapterIndex,  "chapterIndex"},
                                           {RolePageCount,     "pageCount"},
+                                          {RoleDownloaded,    "downloaded"},
                                           {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},};
 
@@ -194,4 +201,34 @@ void ChaptersModel::chapterRead(qint32 chapter)
   auto chapterIndex = _chapters.size() - chapter;
   _chapters[chapterIndex].read = true;
   emit dataChanged(index(chapterIndex, 0), index(chapterIndex, 0));
+}
+
+void ChaptersModel::downloadChapter(qint32 downloadOption)
+{
+  auto downloadEndpoint = QStringLiteral("download/%1/chapter/%2");
+  auto getChapter = [&](const auto& check) {
+    for (const auto& chapter : _chapters) {
+      if (check(chapter)) {
+        continue;
+      }
+      _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
+    }
+  };
+
+  switch (downloadOption) {
+    case DownloadAll:
+      {
+        getChapter([&](const auto&){ return false; });
+        break;
+      }
+    case DownloadUnread:
+      {
+        getChapter([&](const auto& chapter){ return chapter.read; });
+        break;
+      }
+    case DownloadCustom:
+      {
+        break;
+      }
+  }
 }

@@ -20,6 +20,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
     QString  name;
     qint32   chapterNumber;
     bool     read;
+    bool     downloaded;
     quint32  index;
     quint32  pageCount;
     quint32  chapterCount;
@@ -40,6 +41,13 @@ protected:
 
 public:
 
+  enum DownloadOption {
+    DownloadAll,
+    DownloadUnread,
+    DownloadCustom,
+  };
+  Q_ENUM(DownloadOption)
+
   enum Role {
     RoleUrl = Qt::UserRole + 1,
     RoleName,
@@ -49,6 +57,7 @@ public:
     RolePageCount,
     RoleChapterCount,
     RoleLastPageRead,
+    RoleDownloaded,
   };
 
   ChaptersModel(QObject* parent = nullptr);
@@ -72,6 +81,7 @@ public:
   }
 
   Q_INVOKABLE void chapterRead(qint32 chapter);
+  Q_INVOKABLE void downloadChapter(qint32 downloadOption);
 
 signals:
    void networkManagerChanged();

@@ -2,6 +2,7 @@ import QtQuick 2.8
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.12
+import QtQuick.Window 2.2
 
 import Tachidesk.Models 1.0
 
@@ -25,6 +26,40 @@ Item {
   }
 
   property var details: detailsModel.get(0)
+
+  Popup {
+    id: popup
+    width: 200
+    height: 300
+    modal: true
+    focus: true
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnReleaseOutside
+    anchors.centerIn: parent
+
+    ColumnLayout {
+      anchors.fill: parent
+      Button {
+        Layout.fillWidth: true
+        text: qsTr("Download All")
+        onClicked: {
+          chaptersModel.downloadChapter(ChaptersModel.DownloadAll)
+          popup.close()
+        }
+      }
+      Button {
+        Layout.fillWidth: true
+        text: qsTr("Download Unread")
+        onClicked: {
+          chaptersModel.downloadChapter(ChaptersModel.DownloadUnread)
+          popup.close()
+        }
+      }
+      Button {
+        Layout.fillWidth: true
+        text: qsTr("Download Custom")
+      }
+    }
+  }
 
   Image {
     id: backgroundImage
@@ -133,6 +168,12 @@ Item {
         Layout.fillWidth: true
         text: qsTr("View in Browser")
       }
+      Button {
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+        text: qsTr("Download")
+        onClicked: popup.open()
+      }
     }
   }
 
@@ -165,6 +206,19 @@ Item {
         horizontalAlignment: Text.AlignCenter
         verticalAlignment: Text.AlignVCenter
         leftPadding: 12
+        font.pixelSize: 24
+      }
+      Text {
+        anchors {
+          right: parent.right
+          top: parent.top
+          bottom: parent.bottom
+        }
+        color: "white"
+        text: downloaded ? "Downloaded" : ""
+        horizontalAlignment: Text.AlignRight
+        verticalAlignment: Text.AlignVCenter
+        rightPadding: 12
         font.pixelSize: 24
       }
       MouseArea {
