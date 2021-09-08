@@ -55,6 +55,9 @@ void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
   info.status       = entry["status"].toString();
   info.inLibrary    = entry["inLibrary"].toBool();
 
+  const auto& source= entry["source"].toObject();
+  info.sourceName   = source["name"].toString();
+
   endResetModel();
 
   emit loaded();
@@ -154,6 +157,10 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
       {
         return entry.inLibrary;
       }
+    case RoleSourceName:
+      {
+        return entry.sourceName;
+      }
     //case Role
     default:
       return {};
@@ -181,6 +188,7 @@ QHash<int, QByteArray> MangaDetailsModel::roleNames() const {
     {RoleDescription, "description"},
     {RoleGenre, "genre"},
     {RoleInLibrary, "inLibrary"},
+    {RoleSourceName, "sourceName"},
     {RoleStatus, "status"}};
 
   return roles;

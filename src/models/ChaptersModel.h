@@ -11,12 +11,14 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY mangaNumberChanged)
+  Q_PROPERTY(qint32 lastReadChapter MEMBER _lastReadChapter NOTIFY lastReadChapterChanged)
 
   NetworkManager* _networkManager = nullptr;
   bool _cachedChapters = false;
 
 
   qint32 _mangaNumber;
+  qint32 _lastReadChapter = 0;
 
   void requestChapters(bool onlineFetch);
 protected:
@@ -83,11 +85,12 @@ public:
   }
 
   Q_INVOKABLE void chapterRead(qint32 chapter);
-  Q_INVOKABLE void downloadChapter(qint32 downloadOption);
+  Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
 
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();
+   void lastReadChapterChanged();
 
 public slots:
   void gotChapters(const QJsonDocument& reply);

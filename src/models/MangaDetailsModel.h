@@ -27,6 +27,7 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
     QString  genre;
     QString  status;
     bool     inLibrary;
+    QString  sourceName;
     // supportsLatest
     // isConfigurable
   };
@@ -57,6 +58,7 @@ public:
     RoleGenre,
     RoleStatus,
     RoleInLibrary,
+    RoleSourceName,
   };
 
   MangaDetailsModel(QObject* parent = nullptr);

@@ -63,8 +63,13 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     info.chapterCount = entry["chapterCount"].toInt();
     info.lastPageRead = entry["lastPageRead"].toInt();
     info.downloaded   = entry["downloaded"].toBool();
+
+    if (!info.read) {
+      _lastReadChapter = info.index;
+    }
     //info. author artist genre status
   }
+  emit lastReadChapterChanged();
 
   endResetModel();
 
@@ -204,11 +209,32 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
 void ChaptersModel::chapterRead(qint32 chapter)
 {
   auto chapterIndex = _chapters.size() - chapter;
-  _chapters[chapterIndex].read = true;
+
+  _chapters[chapterIndex].read = !_chapters[chapterIndex].read;
+  _networkManager->patch("read", _chapters[chapterIndex].read ? "true" : "false",
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+
+  auto findLastReadChapter = [&]() {
+    _lastReadChapter = 0;
+    for (const auto& chapter : _chapters) {
+      if (!chapter.read) {
+        _lastReadChapter = chapter.index;
+        qDebug() << "last read " << _lastReadChapter;
+      }
+    }
+  };
+  findLastReadChapter();
+  emit lastReadChapterChanged();
+
   emit dataChanged(index(chapterIndex, 0), index(chapterIndex, 0));
 }
 
-void ChaptersModel::downloadChapter(qint32 downloadOption)
+/******************************************************************************
+ *
+ * Method: chapterRead()
+ *
+ *****************************************************************************/
+void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
 {
   auto downloadEndpoint = QStringLiteral("download/%1/chapter/%2");
   auto getChapter = [&](const auto& check) {
@@ -233,6 +259,7 @@ void ChaptersModel::downloadChapter(qint32 downloadOption)
       }
     case DownloadCustom:
       {
+        _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapterIndex));
         break;
       }
   }

@@ -11,6 +11,7 @@ Item {
   id: base
   property alias mangaNumber: detailsModel.mangaNumber
   property var doWrap: false
+  property int chapterNumberPopup
 
   signal mangaChanged();
 
@@ -41,6 +42,7 @@ Item {
       anchors.fill: parent
       Button {
         Layout.fillWidth: true
+        Layout.fillHeight: true
         text: qsTr("Download All")
         onClicked: {
           chaptersModel.downloadChapter(ChaptersModel.DownloadAll)
@@ -49,6 +51,7 @@ Item {
       }
       Button {
         Layout.fillWidth: true
+        Layout.fillHeight: true
         text: qsTr("Download Unread")
         onClicked: {
           chaptersModel.downloadChapter(ChaptersModel.DownloadUnread)
@@ -57,7 +60,39 @@ Item {
       }
       Button {
         Layout.fillWidth: true
+        Layout.fillHeight: true
         text: qsTr("Download Custom")
+      }
+    }
+  }
+
+  Popup {
+    id: popupChapter
+    width: base.width / 1.5
+    height: 250
+    modal: true
+    focus: true
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+    anchors.centerIn: parent
+    ColumnLayout {
+      anchors.fill: parent
+      Button {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        text: qsTr("Download")
+        onClicked: {
+          chaptersModel.downloadChapter(chapterNumberPopup)
+          popupChapter.close()
+        }
+      }
+      Button {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        text: qsTr("Mark as read/unread")
+        onClicked: {
+          chaptersModel.chapterRead(chapterNumberPopup)
+          popupChapter.close()
+        }
       }
     }
   }
@@ -77,9 +112,9 @@ Item {
   Colorize {
     anchors.fill: backgroundImage
     source: backgroundImage
-    lightness: 0.75
+    lightness: 0.80
     saturation: 0.5
-    hue: 0.5
+    hue: 0.57
   }
 
   Column {
@@ -106,16 +141,29 @@ Item {
       ColumnLayout {
         Layout.fillWidth: true
         Text {
+          Layout.fillWidth: true
+          font.pixelSize: 20
+          fontSizeMode: Text.Fit
           text: details.title
         }
         Text {
+          Layout.fillWidth: true
+          font.pixelSize: 20
+          fontSizeMode: Text.Fit
           text: details.author
         }
         Text {
+          Layout.fillWidth: true
+          font.pixelSize: 20
+          fontSizeMode: Text.Fit
           text: details.artist
         }
         Text {
-          text: details.status
+          Layout.fillWidth: true
+          fontSizeMode: Text.Fit
+          font.pixelSize: 10
+          text: "%1 - %2".arg(details.status).arg(details.sourceName)
+          color: "#222222"
         }
       }
     }
@@ -158,7 +206,7 @@ Item {
       Button {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        text: details.inLibrary ? qsTr("In Library") : qsTr("Add to Library")
+        text: details.inLibrary ? qsTr("❤\nIn Library") : qsTr("♡\nAdd to Library")
         onClicked:  {
           mangaChanged()
           details.inLibrary ? detailsModel.removeFromLibrary() : detailsModel.addToLibrary()
@@ -196,7 +244,7 @@ Item {
     delegate: Rectangle {
       width: chapterView.width
       height: 60
-      color: "black"
+      color: "#333333"
       border {
         width: 1
         color: "white"
@@ -241,7 +289,44 @@ Item {
             chaptersModel.chapterRead(chapter)
           })
         }
+        onPressAndHold: {
+          chapterNumberPopup = chapterIndex
+          popupChapter.open()
+        }
       }
+    }
+  }
+
+  Rectangle {
+    visible: chaptersModel.lastReadChapter > 0
+    width: 100
+    height: 40
+    radius: 15
+    anchors {
+      right: parent.right
+      bottom: parent.bottom
+      margins: 8
+    }
+    color: "#0492c2"
+    Text {
+      text: qsTr("▶ Start")
+      color: "white"
+      anchors.centerIn: parent
+      font.pixelSize: 20
+      font.bold: true
+      fontSizeMode: Text.Fit
+    }
+    MouseArea {
+      anchors.fill: parent
+      onClicked: {
+        console.log(chaptersModel.lastReadChapter)
+          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+                                       { mangaNumber: detailsModel.mangaNumber,
+                                         chapter: chaptersModel.lastReadChapter })
+          viewer.chapterRead.connect((chapter) => {
+            chaptersModel.chapterRead(chapter)
+          })
+        }
     }
   }
 }

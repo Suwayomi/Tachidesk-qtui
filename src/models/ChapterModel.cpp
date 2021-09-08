@@ -228,11 +228,6 @@ void ChapterModel::updateChapter(qint32 page)
  *****************************************************************************/
 void ChapterModel::requestChapter(quint32 chapter)
 {
-  if (_chapterCount) {
-    _networkManager->patch("read", "true",
-        QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(_chapterNumber - 1));
-  }
-
   if (chapter > _chapterCount && _chapterCount != 0) {
     return;
   }
