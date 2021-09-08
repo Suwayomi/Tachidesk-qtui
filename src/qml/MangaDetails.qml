@@ -81,7 +81,7 @@ Item {
         Layout.fillHeight: true
         text: qsTr("Download")
         onClicked: {
-          chaptersModel.downloadChapter(chapterNumberPopup)
+          chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterNumberPopup)
           popupChapter.close()
         }
       }
