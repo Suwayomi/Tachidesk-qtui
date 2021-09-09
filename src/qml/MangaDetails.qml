@@ -27,6 +27,10 @@ Item {
     mangaNumber: detailsModel.mangaNumber
   }
 
+  function markRead(chapter) {
+    chaptersModel.chapterRead(chapter)
+  }
+
   property var details: detailsModel.get(0)
 
   Popup {
@@ -285,9 +289,7 @@ Item {
           var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                          chapter: chapterIndex })
-          viewer.chapterRead.connect((chapter) => {
-            chaptersModel.chapterRead(chapter)
-          })
+          viewer.chapterRead.connect(markRead)
         }
         onPressAndHold: {
           chapterNumberPopup = chapterIndex

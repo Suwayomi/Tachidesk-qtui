@@ -23,7 +23,8 @@ Rectangle {
     id: grid
     anchors.fill: parent
     model: libraryModel
-    cellWidth: 200
+    cellWidth: parent.width / 3
+    cellHeight: parent.height / 3
     clip: true
     delegate: Item {
       width: grid.cellWidth
@@ -35,15 +36,17 @@ Rectangle {
           top: parent.top
           left: parent.left
           right: parent.right
+          bottom: parent.bottom
           margins: 4
         }
         fillMode: Image.PreserveAspectFit
+        //sourceSize.height: 300
         source: thumbnailUrl
-        onStatusChanged: {
-          if (image.status == Image.Ready) {
-            setHeight(image.height)
-          }
-        }
+        //onStatusChanged: {
+        //  if (image.status == Image.Ready) {
+        //    setHeight(image.height)
+        //  }
+        //}
 
         OpacityMask {
           source: mask
