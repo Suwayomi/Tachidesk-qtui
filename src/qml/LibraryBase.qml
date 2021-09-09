@@ -7,12 +7,6 @@ import Tachidesk.Models 1.0
 Rectangle {
   id: libraryBase
 
-  function setHeight(height) {
-    if (height > grid.cellHeight) {
-      grid.cellHeight = height + 20
-    }
-  }
-
   function onMangaChanged() {
     libraryModel.refreshLibrary()
   }
