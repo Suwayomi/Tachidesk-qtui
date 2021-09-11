@@ -32,5 +32,6 @@ Item {
       right: parent.right
       bottom: parent.bottom
     }
+    onReachedEnd: libraryModel.next()
   }
 }

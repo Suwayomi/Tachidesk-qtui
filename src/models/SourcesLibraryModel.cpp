@@ -32,13 +32,7 @@ void SourcesLibraryModel::classBegin() { }
  *****************************************************************************/
 void SourcesLibraryModel::componentComplete()
 {
-  _networkManager->get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(_pageNumber));
-
-  connect(
-      _networkManager,
-      &NetworkManager::recievedReply,
-      this,
-      &SourcesLibraryModel::recievedReply);
+  next();
 }
 
 /******************************************************************************
@@ -50,10 +44,10 @@ void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
 {
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
-  beginResetModel();
-  _sources.clear();
-
   const auto& mangaList = reply["mangaList"].toArray();
+
+  beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
+
   for (const auto& entry_arr : mangaList) {
     const auto& entry   = entry_arr.toObject();
     auto& info          = _sources.emplace_back();
@@ -68,7 +62,7 @@ void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
     }
   }
 
-  endResetModel();
+  endInsertRows();
 }
 
 /******************************************************************************
@@ -162,6 +156,22 @@ QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
 void SourcesLibraryModel::search(const QString& searchTerm)
 {
   _networkManager->get(QStringLiteral("source/%1/search/%2/0").arg(_source).arg(searchTerm));
+
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &SourcesLibraryModel::recievedReply);
+}
+
+/******************************************************************************
+ *
+ * Method: next()
+ *
+ *****************************************************************************/
+void SourcesLibraryModel::next()
+{
+  _networkManager->get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(++_pageNumber));
 
   connect(
       _networkManager,

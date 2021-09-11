@@ -38,7 +38,7 @@ class SourcesLibraryModel : public QAbstractListModel, public QQmlParserStatus
   std::vector<SourceInfo> _sources;
 
   QString _source;
-  qint32 _pageNumber = 1;
+  qint32 _pageNumber = 0;
 
 protected:
 
@@ -82,6 +82,7 @@ public:
   void recievedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void search(const QString& searchTerm);
+  Q_INVOKABLE void next();
 signals:
   void sourceChanged();
   void networkManagerChanged();

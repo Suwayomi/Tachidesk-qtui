@@ -7,13 +7,13 @@ import Tachidesk.Models 1.0
 Rectangle {
   id: libraryBase
 
+  property int minimumWidth: 75
+  property int maximumWidth: 175
+  signal reachedEnd()
   function onMangaChanged() {
     libraryModel.refreshLibrary()
   }
 
-  color: "#333333"
-  property int minimumWidth: 75
-  property int maximumWidth: 175
   function getGridWidth() {
     var gridElements = 2
     var gridWidth = grid.width
@@ -27,6 +27,8 @@ Rectangle {
     return grid.cellWidth * 1.333
   }
 
+  color: "#333333"
+
   GridView {
     id: grid
     anchors.fill: parent
@@ -34,6 +36,17 @@ Rectangle {
     cellWidth: getGridWidth()
     cellHeight: getGridHeight()
     clip: true
+
+    property bool listviewLoaded: false
+    Component.onCompleted: {
+      listviewLoaded = true
+    }
+    onAtYEndChanged: {
+      if (!listviewLoaded) {
+        return
+      }
+      reachedEnd()
+    }
     delegate: Item {
       width: grid.cellWidth
       height: grid.cellHeight

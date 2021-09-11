@@ -219,7 +219,6 @@ void ChaptersModel::chapterRead(qint32 chapter)
     for (const auto& chapter : _chapters) {
       if (!chapter.read) {
         _lastReadChapter = chapter.index;
-        qDebug() << "last read " << _lastReadChapter;
       }
     }
   };
