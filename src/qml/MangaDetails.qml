@@ -321,14 +321,13 @@ Item {
     MouseArea {
       anchors.fill: parent
       onClicked: {
-        console.log(chaptersModel.lastReadChapter)
-          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
-                                       { mangaNumber: detailsModel.mangaNumber,
-                                         chapter: chaptersModel.lastReadChapter })
-          viewer.chapterRead.connect((chapter) => {
-            chaptersModel.chapterRead(chapter)
-          })
-        }
+        var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+                                     { mangaNumber: detailsModel.mangaNumber,
+                                       chapter: chaptersModel.lastReadChapter })
+        viewer.chapterRead.connect((chapter) => {
+          chaptersModel.chapterRead(chapter)
+        })
+      }
     }
   }
 }

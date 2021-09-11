@@ -12,13 +12,27 @@ Rectangle {
   }
 
   color: "#333333"
+  property int minimumWidth: 75
+  property int maximumWidth: 175
+  function getGridWidth() {
+    var gridElements = 2
+    var gridWidth = grid.width
+    while (gridWidth > maximumWidth) {
+      gridWidth = grid.width  * 1 / gridElements
+      gridElements++
+    }
+    return gridWidth > minimumWidth ? gridWidth : minimumWidth
+  }
+  function getGridHeight() {
+    return grid.cellWidth * 1.333
+  }
 
   GridView {
     id: grid
     anchors.fill: parent
     model: libraryModel
-    cellWidth: parent.width / 3
-    cellHeight: parent.height / 3
+    cellWidth: getGridWidth()
+    cellHeight: getGridHeight()
     clip: true
     delegate: Item {
       width: grid.cellWidth
@@ -27,20 +41,11 @@ Rectangle {
       Image {
         id: image
         anchors {
-          top: parent.top
-          left: parent.left
-          right: parent.right
-          bottom: parent.bottom
+          fill: parent
           margins: 4
         }
         fillMode: Image.PreserveAspectFit
-        //sourceSize.height: 300
         source: thumbnailUrl
-        //onStatusChanged: {
-        //  if (image.status == Image.Ready) {
-        //    setHeight(image.height)
-        //  }
-        //}
 
         OpacityMask {
           source: mask
