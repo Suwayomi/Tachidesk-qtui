@@ -21,6 +21,10 @@ find_package(Qt5QuickCompiler)
 
 add_subdirectory(libs/SortFilterProxyModel)
 
+if (ANDROID)
+    include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
+endif()
+
 function(include_directories_recurse dir)
 	include_directories(${dir})
 	file(GLOB subs "${dir}/*")
@@ -45,8 +49,8 @@ include_directories_recurse(src)
 set(lib_srcs ${src_files})
 
 if (ANDROID)
-  set(ANDROID_PACKAGE_SOURCE_DIR ${PACKAGE_SOURCE_DIR}/android CACHE INTERNAL "")
-  add_library(Tachidesk-qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml)
+  set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
+  add_library(Tachidesk-qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml android/res/values/styles.xml)
 else()
   add_executable(Tachidesk-qtui ${lib_srcs} src/qml/qml.qrc)
 endif()

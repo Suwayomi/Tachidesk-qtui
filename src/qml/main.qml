@@ -19,6 +19,11 @@ ApplicationWindow {
   //minimumWidth: 480
   visible: true
 
+  function changeVisiblity(changeTo) {
+      console.log("root visible: ", changeTo)
+    root.visibility = changeTo
+  }
+
   //Labs.Settings {
   //    id: windowSettings
   //    property var windowX

@@ -6,6 +6,11 @@ Item {
   property bool canClose: false
   property bool navigationVisible: true
 
+  function changeWindowVisibility(changeTo) {
+    console.log("change to", changeTo)
+    root.changeVisiblity(changeTo)
+  }
+
   function navigateHome() {
     if (stack.currentItem.url.toString() !== stack.initialItem.toString()) {
       stack.replace(null, stack.initialItem, {
@@ -45,26 +50,10 @@ Item {
     }
   }
 
-  //Connections {
-  //  target: stack.currentItem
+  Connections {
+    target: stack.currentItem
 
-  //  function onBackClicked() {
-  //    if (stack.depth === 1) {
-  //      navigateHome()
-  //    }
-  //    else {
-  //      stack.pop(StackView.Immediate)
-  //    }
-  //  }
-
-  //  function onHomeClicked() {
-  //    navigateHome()
-  //  }
-
-  //  function onChangeScreen(source, properties) {
-  //    navigatePage(source, properties)
-  //  }
-  //}
+  }
 
   StackView {
     id: stack

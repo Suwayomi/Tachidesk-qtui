@@ -1,5 +1,6 @@
 import QtQuick 2.8
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.2
 
 import Tachidesk.Models 1.0
 
@@ -8,6 +9,15 @@ Item {
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
   signal chapterRead(int chapter)
+
+  Component.onCompleted: {
+    if (Qt.platform.os === "android")
+      changeWindowVisibility(Window.FullScreen)
+  }
+  Component.onDestruction: {
+    if (Qt.platform.os === "android")
+      changeWindowVisibility(Window.Windowed)
+  }
 
   ChapterModel {
     id: chapterModel
@@ -20,7 +30,16 @@ Item {
     model: chapterModel
     cacheBuffer: 10000
     maximumFlickVelocity: 10000
-    delegate: WebtoonImage {}
+    delegate: WebtoonImage {
+      PinchArea {
+        width: Math.max(listView.contentWidth, listView.width)
+        height: Math.max(listView.contentHeight, listView.height)
+        enabled: true
+        pinch.target: parent
+        pinch.minimumScale: 0.5
+        pinch.maximumScale: 2
+      }
+    }
     // debug rectangle
     //delegate: Rectangle {
     //  width: base.width
