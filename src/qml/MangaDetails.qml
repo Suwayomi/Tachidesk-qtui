@@ -140,7 +140,7 @@ Item {
         id: image
         source: details.thumbnailUrl
         fillMode: Image.PreserveAspectFit
-        sourceSize.height: detailsColumn.height * 1/1.5
+        sourceSize.width: parent.width * .33
       }
       ColumnLayout {
         Layout.fillWidth: true
