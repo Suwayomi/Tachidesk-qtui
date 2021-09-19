@@ -10,11 +10,13 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
   Q_OBJECT
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-  Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY mangaNumberChanged)
+  Q_PROPERTY(qint32 mangaNumber     MEMBER _mangaNumber     NOTIFY mangaNumberChanged)
   Q_PROPERTY(qint32 lastReadChapter MEMBER _lastReadChapter NOTIFY lastReadChapterChanged)
+  Q_PROPERTY(bool   loading         MEMBER _loading         NOTIFY loadingChanged)
 
   NetworkManager* _networkManager = nullptr;
   bool _cachedChapters = false;
+  bool _loading = true;
 
 
   qint32 _mangaNumber;
@@ -91,6 +93,7 @@ signals:
    void networkManagerChanged();
    void mangaNumberChanged();
    void lastReadChapterChanged();
+   void loadingChanged();
 
 public slots:
   void gotChapters(const QJsonDocument& reply);

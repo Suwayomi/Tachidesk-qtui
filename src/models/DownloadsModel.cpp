@@ -218,11 +218,21 @@ QHash<int, QByteArray> DownloadsModel::roleNames() const {
   return roles;
 }
 
+/******************************************************************************
+ *
+ * Method: clear()
+ *
+ *****************************************************************************/
 void DownloadsModel::clear()
 {
   _networkManager->get("downloads/clear");
 }
 
+/******************************************************************************
+ *
+ * Method: cancel()
+ *
+ *****************************************************************************/
 void DownloadsModel::cancel(qint32 index)
 {
   _networkManager->deleteResource(

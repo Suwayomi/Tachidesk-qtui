@@ -229,6 +229,25 @@ Item {
         onClicked: popup.open()
       }
     }
+
+    RowLayout {
+      width: parent.width
+      height: busyIndicator.running ? 50 : 0
+      Text {
+        text: qsTr("loading new chapters...")
+        visible: busyIndicator.running
+        Layout.alignment: Qt.AlignRight
+        font.pixelSize: 20
+        Layout.fillWidth: true
+        Layout.leftMargin: 4
+      }
+      BusyIndicator {
+        id: busyIndicator
+        running: chaptersModel.loading
+        Layout.alignment: Qt.AlignLeft
+        Layout.rightMargin: 4
+      }
+    }
   }
 
   ListView {
