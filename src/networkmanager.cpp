@@ -10,7 +10,6 @@
 #include <QEventLoop>
 
 #include "networkmanager.h"
-#include "client_info.h"
 #include "settings.h"
 
 /********************************************************************
