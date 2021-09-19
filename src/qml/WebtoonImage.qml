@@ -1,10 +1,16 @@
 import QtQuick 2.8
+import QtQuick.Controls 2.15
 
 Rectangle {
   color: "black"
   width: base.width
   height: base.width * 2
   signal imageLoaded()
+
+  BusyIndicator {
+    running: image.status == Image.Loading
+    anchors.centerIn: parent
+  }
 
   Image {
     id: image
