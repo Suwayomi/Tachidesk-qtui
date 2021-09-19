@@ -59,6 +59,7 @@ Rectangle {
         Button {
           Layout.fillWidth: true
           text: qsTr("cancel")
+          onClicked: downloadsModel.cancel(index)
         }
       }
     }

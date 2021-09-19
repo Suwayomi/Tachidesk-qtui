@@ -222,3 +222,11 @@ void DownloadsModel::clear()
 {
   _networkManager->get("downloads/clear");
 }
+
+void DownloadsModel::cancel(qint32 index)
+{
+  _networkManager->deleteResource(
+      QStringLiteral("download/%1/chapter/%2")
+        .arg(_queue[index].mangaId)
+        .arg(_queue[index].chapterIndex));
+}

@@ -78,6 +78,7 @@ public:
   }
 
   Q_INVOKABLE void clear();
+  Q_INVOKABLE void cancel(qint32 index);
 signals:
   void statusChanged();
   void networkManagerChanged();
