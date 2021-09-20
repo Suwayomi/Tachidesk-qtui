@@ -7,6 +7,7 @@ I don't currently have a road map as i'm working on getting basic features imple
     - `git submodule init`
     - `git submodule update`
 2. Install the dependencies
+    - `gcc`
     - `cmake >= 3.14`
     - `qt5 >= 5.15.0` (must include development pacakges!)
     - `ninja` (optional)
