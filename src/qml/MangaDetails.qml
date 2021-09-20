@@ -124,6 +124,9 @@ Item {
   Column {
     id: detailsColumn
     spacing: 8
+    leftPadding: 4
+    rightPadding: 4
+    topPadding: 4
     width: parent.width
     height: {
       var heightLimit = parent.height * 3/8

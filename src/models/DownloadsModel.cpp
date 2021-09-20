@@ -52,6 +52,11 @@ void DownloadsModel::componentComplete()
   _webSocket.open(QUrl(resolved));
 }
 
+/******************************************************************************
+ *
+ * closed
+ *
+ *****************************************************************************/
 void DownloadsModel::closed()
 {
 }
@@ -67,6 +72,11 @@ void DownloadsModel::onConnected()
           this, &DownloadsModel::onTextMessageReceived);
 }
 
+/******************************************************************************
+ *
+ * onTextMessageReceived
+ *
+ *****************************************************************************/
 void DownloadsModel::onTextMessageReceived(const QString& message)
 {
   QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());

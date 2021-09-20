@@ -42,6 +42,11 @@ void ChaptersModel::classBegin()
 {
 }
 
+/******************************************************************************
+ *
+ * gotChapters
+ *
+ *****************************************************************************/
 void ChaptersModel::gotChapters(const QJsonDocument& reply)
 {
   if (reply.isEmpty()) {
@@ -53,7 +58,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
 
   _chapters.clear();
 
-  beginInsertRows({}, _chapters.size(), _chapters.size() + reply.array().count() - 1);
+  beginResetModel();
 
   for (const auto& entry_arr : reply.array()) {
     const auto& entry = entry_arr.toObject();
@@ -75,7 +80,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
   }
   emit lastReadChapterChanged();
 
-  endInsertRows();
+  endResetModel();
 
   if (!_cachedChapters) {
     _cachedChapters = true;
