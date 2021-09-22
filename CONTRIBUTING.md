@@ -22,3 +22,4 @@ I don't currently have a road map as i'm working on getting basic features imple
     - Release config
         1. `cmake -DCMAKE_BUILD_TYPE:STRING=Release -B./.build -G Ninja` leave off the `-G Ninja` part if you didn't install ninja
         2. `cmake --build .build --config Release --target all -- -j12` (or how ever many threads you want to build with)
+5. The built binary can be found inside `.build`
