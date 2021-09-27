@@ -13,6 +13,19 @@
 
 IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChaptersModel)
 
+void ChapterInfo::processChapter(const QJsonObject& entry)
+{
+  url          = entry["url"].toString();
+  name         = entry["name"].toString();
+  chapterNumber= entry["chapterNumber"].toInt();
+  read         = entry["read"].toBool();
+  index        = entry["index"].toInt();
+  pageCount    = entry["pageCount"].toInt();
+  chapterCount = entry["chapterCount"].toInt();
+  lastPageRead = entry["lastPageRead"].toInt();
+  downloaded   = entry["downloaded"].toBool();
+}
+
 /******************************************************************************
  *
  * ChaptersModel
@@ -63,16 +76,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
   for (const auto& entry_arr : reply.array()) {
     const auto& entry = entry_arr.toObject();
     auto& info        = _chapters.emplace_back();
-    info.url          = entry["url"].toString();
-    info.name         = entry["name"].toString();
-    info.chapterNumber= entry["chapterNumber"].toInt();
-    info.read         = entry["read"].toBool();
-    info.index        = entry["index"].toInt();
-    info.pageCount    = entry["pageCount"].toInt();
-    info.chapterCount = entry["chapterCount"].toInt();
-    info.lastPageRead = entry["lastPageRead"].toInt();
-    info.downloaded   = entry["downloaded"].toBool();
-
+    info.processChapter(entry);
     if (!info.read) {
       _lastReadChapter = info.index;
     }

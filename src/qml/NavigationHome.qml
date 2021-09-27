@@ -17,6 +17,12 @@ Item {
     Button {
       Layout.fillWidth: true
       Layout.fillHeight: true
+      text: qsTr("Updates")
+      onClicked: navigatePage(Qt.resolvedUrl("Updates.qml"), {replace: true})
+    }
+    Button {
+      Layout.fillWidth: true
+      Layout.fillHeight: true
       text: qsTr("Sources")
       onClicked: navigatePage(Qt.resolvedUrl("Sources.qml"), {replace: true})
     }

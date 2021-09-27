@@ -5,6 +5,20 @@
 
 #include "networkmanager.h"
 
+struct ChapterInfo {
+  QString  url;
+  QString  name;
+  qint32   chapterNumber;
+  bool     read;
+  bool     downloaded;
+  quint32  index;
+  quint32  pageCount;
+  quint32  chapterCount;
+  quint32  lastPageRead;
+
+  void processChapter(const QJsonObject& entry);
+};
+
 class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
@@ -32,17 +46,6 @@ protected:
   virtual QHash<int, QByteArray> roleNames() const override;
 
 public:
-  struct ChapterInfo {
-    QString  url;
-    QString  name;
-    qint32   chapterNumber;
-    bool     read;
-    bool     downloaded;
-    quint32  index;
-    quint32  pageCount;
-    quint32  chapterCount;
-    quint32  lastPageRead;
-  };
 private:
   std::vector<ChapterInfo> _chapters;
 

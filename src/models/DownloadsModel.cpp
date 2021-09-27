@@ -95,16 +95,7 @@ void DownloadsModel::onTextMessageReceived(const QString& message)
     info.progress     = entry["progress"].toDouble() * 100;
     info.tries        = entry["tries"].toInt();
 
-    const auto& chapter           = entry["chapter"].toObject();
-    info.chapterInfo.url          = chapter["url"].toString();
-    info.chapterInfo.name         = chapter["name"].toString();
-    info.chapterInfo.chapterNumber= chapter["chapterNumber"].toInt();
-    info.chapterInfo.read         = chapter["read"].toBool();
-    info.chapterInfo.index        = chapter["index"].toInt();
-    info.chapterInfo.pageCount    = chapter["pageCount"].toInt();
-    info.chapterInfo.chapterCount = chapter["chapterCount"].toInt();
-    info.chapterInfo.lastPageRead = chapter["lastPageRead"].toInt();
-    info.chapterInfo.downloaded   = chapter["downloaded"].toBool();
+    info.chapterInfo.processChapter(entry["chapter"].toObject());
   }
 
   endResetModel();

@@ -2,32 +2,37 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
-#include <QtWebSockets/QtWebSockets>
 
 #include "ChaptersModel.h"
 #include "networkmanager.h"
 
-class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
+#include <optional>
+
+class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-  Q_PROPERTY(QString status MEMBER _status NOTIFY statusChanged)
+  Q_PROPERTY(QString source MEMBER _source NOTIFY sourceChanged)
 
-  QString _status;
   NetworkManager* _networkManager = nullptr;
 
-  QWebSocket _webSocket;
+  struct SourceInfo {
+    qint32   id;
+    QString  sourceId;
+    QString  title;
+    QString  url;
+    QString  thumbnailUrl;
+    bool     isInitialized;
+    bool     inLibrary;
+    bool     freshData;
 
-  struct QueueInfo {
-    quint32  chapterIndex;
-    quint32  mangaId;
-    QString  state;
-    quint32  progress;
-    quint32  tries;
     ChapterInfo chapterInfo;
   };
-  std::vector<QueueInfo> _queue;
+  std::vector<SourceInfo> _sources;
+
+  QString _source;
+  qint32 _pageNumber = 0;
 
 protected:
 
@@ -40,7 +45,14 @@ protected:
 public:
 
   enum Role {
-    RoleUrl = Qt::UserRole + 1,
+    RoleThumbnailUrl = Qt::UserRole + 1,
+    RoleTitle,
+    RoleId,
+    RoleUrl,
+    RoleInitialized,
+    RoleInLibrary,
+    RoleFreshData,
+    RoleChapterUrl,
     RoleName,
     RoleChapterNumber,
     RoleRead,
@@ -49,16 +61,9 @@ public:
     RoleChapterCount,
     RoleLastPageRead,
     RoleDownloaded,
-
-    // info
-    // ChapterIndex
-    RoleMangaId,
-    RoleState,
-    RoleProgress,
-    RoleTries,
   };
 
-  DownloadsModel(QObject* parent = nullptr);
+  UpdatesModel(QObject* parent = nullptr);
 
   virtual int rowCount(
      const QModelIndex &parent = QModelIndex()) const override;
@@ -77,14 +82,10 @@ public:
     networkManagerChanged();
   }
 
-  Q_INVOKABLE void clear();
-  Q_INVOKABLE void cancel(qint32 index);
-signals:
-  void statusChanged();
-  void networkManagerChanged();
+  void recievedReply(const QJsonDocument& reply);
 
-public slots:
-  void onConnected();
-  void closed();
-  void onTextMessageReceived(const QString& message);
+  Q_INVOKABLE void next();
+signals:
+  void sourceChanged();
+  void networkManagerChanged();
 };
