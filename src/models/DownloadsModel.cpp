@@ -48,7 +48,6 @@ void DownloadsModel::componentComplete()
     .arg(ssl ? "wss" : "ws")
     .arg(resolved);
 
-  qDebug () << resolved;
   _webSocket.open(QUrl(resolved));
 }
 

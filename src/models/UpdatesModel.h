@@ -85,6 +85,7 @@ public:
   void recievedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void next();
+  Q_INVOKABLE void downloadChapter(int index);
 signals:
   void sourceChanged();
   void networkManagerChanged();

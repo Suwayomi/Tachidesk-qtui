@@ -49,14 +49,15 @@ void UpdatesModel::recievedReply(const QJsonDocument& reply)
 
   for (const auto& entry_arr : reply.array()) {
     const auto& entry   = entry_arr.toObject();
+    const auto& manga   = entry["manga"].toObject();
     auto& info          = _sources.emplace_back();
-    info.id             = entry["id"].toInt();
-    info.sourceId       = entry["sourceId"].toInt();
-    info.title          = entry["title"].toString();
-    info.thumbnailUrl   = entry["thumbnailUrl"].toString();
-    info.url            = entry["url"].toString();
-    info.isInitialized  = entry["isInitialized"].toBool();
-    info.inLibrary      = entry["inLibrary"].toBool();
+    info.id             = manga["id"].toInt();
+    info.sourceId       = manga["sourceId"].toInt();
+    info.title          = manga["title"].toString();
+    info.thumbnailUrl   = manga["thumbnailUrl"].toString();
+    info.url            = manga["url"].toString();
+    info.isInitialized  = manga["isInitialized"].toBool();
+    info.inLibrary      = manga["inLibrary"].toBool();
 
     info.chapterInfo.processChapter(entry["chapter"].toObject());
   }
@@ -73,7 +74,6 @@ int UpdatesModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) {
     return 0;
   }
-  qDebug() << "sources size: " << _sources.size();
 
   return _sources.size();
 }
@@ -210,4 +210,21 @@ void UpdatesModel::next()
       &NetworkManager::recievedReply,
       this,
       &UpdatesModel::recievedReply);
+}
+
+/******************************************************************************
+ *
+ * Method: downloadChapter()
+ *
+ *****************************************************************************/
+void UpdatesModel::downloadChapter(int index)
+{
+  auto& entry = _sources[index];
+  if (entry.chapterInfo.downloaded) {
+    return;
+  }
+  // make as downloaded so we don't download more than once
+  entry.chapterInfo.downloaded = true;
+
+  _networkManager->get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
 }
