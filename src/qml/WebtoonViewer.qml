@@ -23,6 +23,15 @@ Item {
     id: chapterModel
     nm: networkManager
   }
+  PinchArea {
+    width: Math.max(listView.contentWidth, listView.width)
+    height: Math.max(listView.contentHeight, listView.height)
+    enabled: true
+    pinch.target: listView
+    pinch.minimumScale: 0.5
+    pinch.maximumScale: 2
+    pinch.dragAxis: Pinch.XAndYAxis
+  }
 
   ListView {
     id: listView
@@ -31,14 +40,6 @@ Item {
     cacheBuffer: 10000
     maximumFlickVelocity: 10000
     delegate: WebtoonImage {
-      PinchArea {
-        width: Math.max(listView.contentWidth, listView.width)
-        height: Math.max(listView.contentHeight, listView.height)
-        enabled: true
-        pinch.target: parent
-        pinch.minimumScale: 0.5
-        pinch.maximumScale: 2
-      }
     }
     // debug rectangle
     //delegate: Rectangle {
