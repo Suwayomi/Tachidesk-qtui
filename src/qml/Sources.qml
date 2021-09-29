@@ -29,8 +29,15 @@ Rectangle {
 
   TextField {
     id: searchBox
-    placeholderText: qsTr("Language Filter")
+    placeholderText: qsTr("   Language Filter")
     onAccepted: sources.filterPattern = text
+    width: parent.width
+    height: 50
+    color: "white"
+    font.pointSize: 12
+    background: Rectangle {
+        color: "transparent"
+    }
   }
 
   ListView {

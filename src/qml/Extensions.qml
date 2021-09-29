@@ -44,8 +44,15 @@ Rectangle {
 
   TextField {
     id: searchBox
-    placeholderText: qsTr("Search")
+    placeholderText: qsTr("   Search")
     onAccepted: extensions.filterPattern = text
+    width: parent.width
+    height: 50
+    color: "white"
+    font.pointSize: 12
+    background: Rectangle {
+        color: "transparent"
+    }
   }
 
   ListView {
