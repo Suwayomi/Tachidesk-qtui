@@ -13,21 +13,25 @@ Item {
 
   TextField {
     id: search
+    padding: 8
     anchors {
       left: parent.left
       right: parent.right
       top: parent.top
-      margins: 4
     }
     height: 50
-    placeholderText: "search"
+    color: "white"
+    font.pointSize: 12
+    background: Rectangle {
+        color: "#333333"
+    }
+    placeholderText: "   search"
     onAccepted: libraryModel.search(search.text)
   }
 
   LibraryBase {
     anchors {
       top: search.bottom
-      topMargin: 4
       left: parent.left
       right: parent.right
       bottom: parent.bottom
