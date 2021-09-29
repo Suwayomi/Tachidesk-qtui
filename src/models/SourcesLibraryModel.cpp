@@ -46,7 +46,13 @@ void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
 
   const auto& mangaList = reply["mangaList"].toArray();
 
-  beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
+  if (resetModel) {
+    beginResetModel();
+    _sources.clear();
+  } else {
+    beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
+  }
+
 
   for (const auto& entry_arr : mangaList) {
     const auto& entry   = entry_arr.toObject();
@@ -62,7 +68,12 @@ void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
     }
   }
 
-  endInsertRows();
+  if (resetModel) {
+    resetModel = false;
+    endResetModel();
+  } else {
+    endInsertRows();
+  }
 }
 
 /******************************************************************************
@@ -155,7 +166,8 @@ QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
  *****************************************************************************/
 void SourcesLibraryModel::search(const QString& searchTerm)
 {
-  _networkManager->get(QStringLiteral("source/%1/search/%2/0").arg(_source).arg(searchTerm));
+  resetModel = true;
+  _networkManager->get(QStringLiteral("source/%1/search/%2/1").arg(_source).arg(searchTerm));
 
   connect(
       _networkManager,

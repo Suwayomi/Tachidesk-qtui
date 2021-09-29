@@ -40,6 +40,8 @@ class SourcesLibraryModel : public QAbstractListModel, public QQmlParserStatus
   QString _source;
   qint32 _pageNumber = 0;
 
+  bool resetModel = true;
+
 protected:
 
   void classBegin() override;
