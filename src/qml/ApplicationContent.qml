@@ -124,7 +124,7 @@ Item {
       right: parent.right
       bottom: parent.bottom
     }
-    height: 100
+    height: 50
     NavigationHome {
       anchors.fill: parent
     }

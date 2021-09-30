@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 
 Item {
   RowLayout {
+    spacing: 0
     anchors {
       fill: parent
       margins: 4
