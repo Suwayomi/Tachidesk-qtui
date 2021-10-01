@@ -15,5 +15,6 @@
         <file>Extensions.qml</file>
         <file>Settings.qml</file>
         <file>Downloads.qml</file>
+        <file>Updates.qml</file>
     </qresource>
 </RCC>
