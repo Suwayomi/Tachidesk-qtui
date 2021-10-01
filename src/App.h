@@ -29,6 +29,7 @@ public:
   App(const CommandLine& cmd, QObject * parent = 0);
   ~App();
 
+  Q_INVOKABLE void reload();
 signals:
   void sendMessage(const QString& msg);
 

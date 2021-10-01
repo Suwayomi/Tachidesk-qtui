@@ -8,15 +8,11 @@ import Qt.labs.settings 1.0 as Labs
 ApplicationWindow {
   id: root
 
-  property alias app: root
-
   // Application main font
   //font.family: Settings.font || appFont.name
 
   height: 800
   width: 400
-  //minimumHeight: 480
-  //minimumWidth: 480
   visible: true
 
   function changeVisiblity(changeTo) {
@@ -101,6 +97,32 @@ ApplicationWindow {
   ApplicationContent {
     id: ac
     anchors.fill: parent
+    focus: true
+
+    Keys.onPressed: {
+      switch (event.key) {
+        case Qt.Key_R:
+          if (event.modifiers & (Qt.ControlModifier | Qt.ShiftModifier)) {
+            ac.reload()
+          }
+          break
+        default:
+          break
+      }
+    }
+
+    Keys.onReleased: {
+      switch (event.key) {
+        case Qt.Key_Back:
+          if (event.modifiers & Qt.ControlModifier)
+          {
+            ac.back()
+          }
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   //FontLoader {

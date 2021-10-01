@@ -42,6 +42,11 @@ QUrl App::makeUrl(const QString& path) const
   }
 }
 
+void App::reload()
+{
+  _engine->clearComponentCache();
+}
+
 /****************************************************************************
  *
  * Method::initalize()
@@ -53,6 +58,7 @@ void App::initalize()
   const std::pair<const char*, QObject*> contextVars[] = {
     { "networkManager", _nm.get()},
     { "settings", _settings.get()},
+    { "app", this},
   };
   auto context = _engine->rootContext();
   for (auto& var : contextVars) {
