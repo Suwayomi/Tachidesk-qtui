@@ -57,7 +57,7 @@ Rectangle {
           fill: parent
           margins: 4
         }
-        fillMode: Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
         source: thumbnailUrl
 
         OpacityMask {
@@ -69,23 +69,24 @@ Rectangle {
           id: mask
           anchors.fill: image
           gradient: Gradient {
-              GradientStop { position: 0.6;  color: "transparent"}
-              GradientStop { position: 0.95; color: "black" }
+              GradientStop { position: 0.5;  color: "transparent"}
+              GradientStop { position: 0.99; color: "black" }
           }
         }
 
         Text {
           id: infoText
           anchors {
-            margins: 4
+            margins: 5
             bottom: image.bottom
             left: image.left
             right: image.right
           }
           color: "white"
-          font.bold: true
-          font.pixelSize: 16
+          font.pixelSize: parent.width/8
+          font.weight: Font.DemiBold
           wrapMode: Text.WordWrap
+          maximumLineCount: 3
           text: title
           style: Text.Outline
           styleColor: "black"
