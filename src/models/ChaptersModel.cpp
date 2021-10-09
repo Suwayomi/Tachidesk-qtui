@@ -24,6 +24,7 @@ void ChapterInfo::processChapter(const QJsonObject& entry)
   chapterCount = entry["chapterCount"].toInt();
   lastPageRead = entry["lastPageRead"].toInt();
   downloaded   = entry["downloaded"].toBool();
+  fetchedAt    = QDateTime::fromSecsSinceEpoch(entry["fetchedAt"].toInt());
 }
 
 /******************************************************************************

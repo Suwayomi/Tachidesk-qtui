@@ -38,14 +38,16 @@ void UpdatesModel::componentComplete()
 
 /******************************************************************************
  *
- * Method: recieveReply()
+ * Method: receiveReply()
  *
  *****************************************************************************/
-void UpdatesModel::recievedReply(const QJsonDocument& reply)
+void UpdatesModel::receivedReply(const QJsonDocument& reply)
 {
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
   beginInsertRows({}, _sources.size(), _sources.size() + reply.array().count() - 1);
+
+  _sources.reserve(reply.array().count());
 
   for (const auto& entry_arr : reply.array()) {
     const auto& entry   = entry_arr.toObject();
@@ -161,6 +163,11 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
       {
         return entry.chapterInfo.downloaded;
       }
+
+    case RoleFetchedAt:
+      {
+        return entry.chapterInfo.fetchedAt;
+      }
     //case Role
     default:
       return {};
@@ -191,6 +198,7 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
                                           {RoleDownloaded,    "downloaded"},
                                           {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},
+                                          {RoleFetchedAt,     "fetchedAt"},
   };
 
   return roles;
@@ -209,7 +217,7 @@ void UpdatesModel::next()
       _networkManager,
       &NetworkManager::recievedReply,
       this,
-      &UpdatesModel::recievedReply);
+      &UpdatesModel::receivedReply);
 }
 
 /******************************************************************************

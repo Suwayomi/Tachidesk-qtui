@@ -34,20 +34,41 @@ Rectangle {
         }
       }
 
-      RowLayout {
+      Row {
         anchors {
           fill: parent
           margins: 4
         }
-        Image {
-          Layout.fillWidth: true
-          sourceSize.height: item.height * .80
-          source: thumbnailUrl
-          fillMode: Image.PreserveAspectFit
+        spacing: 4
+        Item {
+          width: parent.height * .75
+          height: parent.height
+          Image {
+            source: thumbnailUrl
+            fillMode: Image.PreserveAspectCrop
+            anchors.fill: parent
+            anchors.margins: 2
+          }
+          MouseArea {
+            anchors.fill: parent
+            onClicked: {
+              var details = navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
+              details.mangaChanged.connect(onMangaChanged)
+            }
+          }
         }
 
         ColumnLayout {
-          Layout.fillWidth: true
+          width: parent.width * .70
+          height: parent.height
+          Text {
+            Layout.fillWidth: true
+            width: parent.width
+            text: "%1".arg(Qt.formatDate(fetchedAt, "MMM dd"))
+            font.pixelSize: 16
+            fontSizeMode: Text.Fit
+            color: "white"
+          }
           Text {
             Layout.fillWidth: true
             width: parent.width
@@ -55,7 +76,7 @@ Rectangle {
             font.bold: true
             font.pixelSize: 20
             fontSizeMode: Text.Fit
-            color: "white"
+            color: read ? "grey" : "white"
           }
           Text {
             Layout.fillWidth: true
@@ -66,22 +87,27 @@ Rectangle {
           }
         }
 
-        Rectangle {
-          Layout.minimumWidth: 30
-          Layout.minimumHeight: 30
-          radius: 15
-          color: "#0492c2"
-          Text {
-            text: downloaded ? "✅" : "⬇"
-            color: "white"
+        Item {
+          height: parent.height
+          width: 30
+          Rectangle {
+            radius: 15
+            color: "#0492c2"
+            width: 30
+            height: 30
             anchors.centerIn: parent
-            font.bold: true
-            font.pixelSize: 20
-            fontSizeMode: Text.Fit
-          }
-          MouseArea {
-            anchors.fill: parent
-            onClicked: updatesModel.downloadChapter(index)
+            Text {
+              text: downloaded ? "✅" : "⬇"
+              color: "white"
+              anchors.centerIn: parent
+              font.bold: true
+              font.pixelSize: 20
+              fontSizeMode: Text.Fit
+            }
+            MouseArea {
+              anchors.fill: parent
+              onClicked: updatesModel.downloadChapter(index)
+            }
           }
         }
       }

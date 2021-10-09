@@ -61,6 +61,7 @@ public:
     RoleChapterCount,
     RoleLastPageRead,
     RoleDownloaded,
+    RoleFetchedAt,
   };
 
   UpdatesModel(QObject* parent = nullptr);
@@ -82,7 +83,7 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void next();
   Q_INVOKABLE void downloadChapter(int index);

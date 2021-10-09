@@ -15,6 +15,7 @@ struct ChapterInfo {
   quint32  pageCount;
   quint32  chapterCount;
   quint32  lastPageRead;
+  QDateTime  fetchedAt;
 
   void processChapter(const QJsonObject& entry);
 };
