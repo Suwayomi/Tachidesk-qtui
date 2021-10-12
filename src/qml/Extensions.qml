@@ -42,23 +42,41 @@ Rectangle {
     }
   }
 
-  TextField {
-    id: searchBox
-    placeholderText: qsTr("   Search")
-    onAccepted: extensions.filterPattern = text
-    width: parent.width
-    height: 50
-    color: "white"
-    font.pointSize: 12
-    background: Rectangle {
-        color: "transparent"
-    }
+  RowLayout{
+      id: searchField
+      height: 50
+      width: parent.width
+      spacing: 0
+      Image {
+          id: searchIcon
+          Layout.alignment: Qt.AlignCenter
+          Layout.maximumWidth: 50
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          scale: 0.5
+          fillMode: Image.PreserveAspectFit
+          source: "./../../images/outline_search_white_24dp.png"
+      }
+      TextField {
+        id: searchBox
+        leftPadding: 0
+        color: "white"
+        font.pointSize: 12
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        background: Rectangle {
+            color: "transparent"
+        }
+        placeholderText: qsTr("Search")
+        onAccepted: extensions.filterPattern = text
+      }
   }
+
 
   ListView {
     id: layout
     anchors {
-      top: searchBox.bottom
+      top: searchField.bottom
       right: parent.right
       left: parent.left
       bottom: parent.bottom
