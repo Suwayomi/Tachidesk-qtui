@@ -8,6 +8,7 @@
 class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  Q_INTERFACES(QQmlParserStatus)
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(qint32 mangaNumber MEMBER _mangaNumber NOTIFY mangaNumberChanged)

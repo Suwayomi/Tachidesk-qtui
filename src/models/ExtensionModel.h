@@ -8,6 +8,7 @@
 class ExtensionModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  Q_INTERFACES(QQmlParserStatus)
 
   Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
 
