@@ -16,5 +16,7 @@
         <file>Settings.qml</file>
         <file>Downloads.qml</file>
         <file>Updates.qml</file>
+        <file>../../images/outline_filter_white_24dp.png</file>
+        <file>../../images/outline_search_white_24dp.png</file>
     </qresource>
 </RCC>

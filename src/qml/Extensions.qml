@@ -55,7 +55,7 @@ Rectangle {
           Layout.fillHeight: true
           scale: 0.5
           fillMode: Image.PreserveAspectFit
-          source: "./../../images/outline_search_white_24dp.png"
+          source: Qt.resolvedUrl("images/outline_search_white_24dp.png")
       }
       TextField {
         id: searchBox
