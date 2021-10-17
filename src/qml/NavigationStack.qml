@@ -9,6 +9,10 @@ Item {
     root.changeVisiblity(changeTo)
   }
 
+  function pop() {
+    stack.pop()
+  }
+
   function navigateHome() {
     if (stack.currentItem.url.toString() !== stack.initialItem.toString()) {
       stack.replace(null, stack.initialItem, {

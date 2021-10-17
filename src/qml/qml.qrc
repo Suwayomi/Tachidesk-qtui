@@ -18,5 +18,6 @@
         <file>Updates.qml</file>
         <file>../../images/outline_filter_white_24dp.png</file>
         <file>../../images/outline_search_white_24dp.png</file>
+        <file>RadialBarShape.qml</file>
     </qresource>
 </RCC>

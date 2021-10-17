@@ -113,11 +113,14 @@ ApplicationWindow {
 
     Keys.onReleased: {
       switch (event.key) {
-        case Qt.Key_Back:
+        case Qt.Key_Backspace:
           if (event.modifiers & Qt.ControlModifier)
           {
             ac.back()
           }
+          break;
+        case Qt.Key_Back:
+          ac.back()
           break;
         default:
           break;
