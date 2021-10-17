@@ -39,6 +39,12 @@ void DownloadsModel::classBegin()
  *****************************************************************************/
 void DownloadsModel::componentComplete()
 {
+  connect(
+      _networkManager,
+      &NetworkManager::recievedReply,
+      this,
+      &DownloadsModel::gotDetails);
+
   connect(&_webSocket, &QWebSocket::connected, this, &DownloadsModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &DownloadsModel::closed);
   auto resolved = _networkManager->resolvedPath().arg("/api/v1/downloads");
@@ -87,18 +93,37 @@ void DownloadsModel::onTextMessageReceived(const QString& message)
 
   for (const auto& entry_arr : doc["queue"].toArray()) {
     const auto& entry = entry_arr.toObject();
-    auto& info                    = _queue.emplace_back();
+    auto& info        = _queue.emplace_back();
     info.chapterIndex = entry["chapterIndex"].toInt();
     info.mangaId      = entry["mangaId"].toInt();
     info.state        = entry["state"].toString();
     info.progress     = entry["progress"].toDouble() * 100;
     info.tries        = entry["tries"].toInt();
 
+    if (!_mangaInfo.contains(info.mangaId)) {
+      _networkManager->get(QStringLiteral("manga/%1").arg(info.mangaId));
+      _mangaInfo[info.mangaId] = {};
+    }
+
     info.chapterInfo.processChapter(entry["chapter"].toObject());
   }
 
   endResetModel();
 
+}
+
+/******************************************************************************
+ *
+ * gotDetails
+ *
+ *****************************************************************************/
+void DownloadsModel::gotDetails(const QJsonDocument& reply)
+{
+  beginResetModel();
+  const auto& entry = reply.object();
+  auto& info        = _mangaInfo[entry["id"].toInt()];
+  info.processDetails(entry);
+  endResetModel();
 }
 
 /******************************************************************************
@@ -159,6 +184,10 @@ QVariant DownloadsModel::data(const QModelIndex &index, int role) const {
       {
         return entry.chapterInfo.chapterCount;
       }
+    case RoleFetchedAt:
+      {
+        return entry.chapterInfo.fetchedAt;
+      }
 
     case RoleLastPageRead:
       {
@@ -185,6 +214,17 @@ QVariant DownloadsModel::data(const QModelIndex &index, int role) const {
       {
         return entry.tries;
       }
+
+    case RoleTitle:
+      {
+        return _mangaInfo[entry.mangaId].title;
+      }
+
+    case RoleThumbnail:
+      {
+        return _networkManager->resolvedPath().arg(_mangaInfo[entry.mangaId].thumbnailUrl);
+      }
+
     //case Role
     default:
       return {};
@@ -208,11 +248,15 @@ QHash<int, QByteArray> DownloadsModel::roleNames() const {
                                           {RoleDownloaded,    "downloaded"},
                                           {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},
+                                          {RoleFetchedAt,     "fetchedAt"},
 
                                           {RoleMangaId,       "mangaId"},
                                           {RoleState,         "state"},
                                           {RoleProgress,      "progress"},
                                           {RoleTries,         "tries"},
+
+                                          {RoleTitle,         "title"},
+                                          {RoleThumbnail,     "thumbnailUrl"},
   };
 
   return roles;
@@ -226,6 +270,26 @@ QHash<int, QByteArray> DownloadsModel::roleNames() const {
 void DownloadsModel::clear()
 {
   _networkManager->get("downloads/clear");
+}
+
+/******************************************************************************
+ *
+ * Method: clear()
+ *
+ *****************************************************************************/
+void DownloadsModel::pause()
+{
+  _networkManager->get("downloads/stop");
+}
+
+/******************************************************************************
+ *
+ * Method: clear()
+ *
+ *****************************************************************************/
+void DownloadsModel::start()
+{
+  _networkManager->get("downloads/start");
 }
 
 /******************************************************************************

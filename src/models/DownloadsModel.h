@@ -6,6 +6,7 @@
 
 #include "ChaptersModel.h"
 #include "networkmanager.h"
+#include "MangaDetailsModel.h"
 
 class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
 {
@@ -30,6 +31,9 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
   };
   std::vector<QueueInfo> _queue;
 
+  typedef quint32 MangaId;
+  QMap<MangaId, MangaDetails> _mangaInfo;
+
 protected:
 
   void classBegin() override;
@@ -50,6 +54,7 @@ public:
     RoleChapterCount,
     RoleLastPageRead,
     RoleDownloaded,
+    RoleFetchedAt,
 
     // info
     // ChapterIndex
@@ -57,6 +62,10 @@ public:
     RoleState,
     RoleProgress,
     RoleTries,
+
+    // manga info
+    RoleThumbnail,
+    RoleTitle,
   };
 
   DownloadsModel(QObject* parent = nullptr);
@@ -79,6 +88,8 @@ public:
   }
 
   Q_INVOKABLE void clear();
+  Q_INVOKABLE void pause();
+  Q_INVOKABLE void start();
   Q_INVOKABLE void cancel(qint32 index);
 signals:
   void statusChanged();
@@ -88,4 +99,5 @@ public slots:
   void onConnected();
   void closed();
   void onTextMessageReceived(const QString& message);
+  void gotDetails(const QJsonDocument&);
 };

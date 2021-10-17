@@ -5,6 +5,26 @@
 
 #include "networkmanager.h"
 
+struct MangaDetails {
+  qint32   id;
+  QString  sourceId;
+  QString  url;
+  QString  title;
+  QString  thumbnailUrl;
+  bool     initalized = false;
+  QString  artist;
+  QString  author;
+  QString  description;
+  QString  genre;
+  QString  status;
+  bool     inLibrary;
+  QString  sourceName;
+  // supportsLatest
+  // isConfigurable
+
+  void processDetails(const QJsonObject& entry);
+};
+
 class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
@@ -15,24 +35,7 @@ class MangaDetailsModel : public QAbstractListModel, public QQmlParserStatus
 
   NetworkManager* _networkManager = nullptr;
 
-  struct EntryInfo {
-    qint32   id;
-    QString  sourceId;
-    QString  url;
-    QString  title;
-    QString  thumbnailUrl;
-    bool     initalized = false;
-    QString  artist;
-    QString  author;
-    QString  description;
-    QString  genre;
-    QString  status;
-    bool     inLibrary;
-    QString  sourceName;
-    // supportsLatest
-    // isConfigurable
-  };
-  std::vector<EntryInfo> _entries;
+  std::vector<MangaDetails> _entries;
 
   qint32 _mangaNumber;
 

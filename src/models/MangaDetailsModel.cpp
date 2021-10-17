@@ -13,6 +13,25 @@
 
 IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, MangaDetailsModel)
 
+void MangaDetails::processDetails(const QJsonObject& entry)
+{
+  id           = entry["id"].toInt();
+  sourceId     = entry["sourceId"].toString();
+  url          = entry["url"].toString();
+  title        = entry["title"].toString();
+  thumbnailUrl = entry["thumbnailUrl"].toString();
+  initalized   = entry["intialized"].toBool();
+  author       = entry["author"].toString();
+  artist       = entry["artist"].toString();
+  description  = entry["description"].toString();
+  genre        = entry["genre"].toString();
+  status       = entry["status"].toString();
+  inLibrary    = entry["inLibrary"].toBool();
+
+  const auto& source= entry["source"].toObject();
+  sourceName   = source["name"].toString();
+}
+
 /******************************************************************************
  *
  * MangaDetailsModel
@@ -42,21 +61,7 @@ void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
 
   const auto& entry = reply.object();
   auto& info        = _entries.emplace_back();
-  info.id           = entry["id"].toInt();
-  info.sourceId     = entry["sourceId"].toString();
-  info.url          = entry["url"].toString();
-  info.title        = entry["title"].toString();
-  info.thumbnailUrl = entry["thumbnailUrl"].toString();
-  info.initalized   = entry["intialized"].toBool();
-  info.author       = entry["author"].toString();
-  info.artist       = entry["artist"].toString();
-  info.description  = entry["description"].toString();
-  info.genre        = entry["genre"].toString();
-  info.status       = entry["status"].toString();
-  info.inLibrary    = entry["inLibrary"].toBool();
-
-  const auto& source= entry["source"].toObject();
-  info.sourceName   = source["name"].toString();
+  info.processDetails(entry);
 
   endResetModel();
 
