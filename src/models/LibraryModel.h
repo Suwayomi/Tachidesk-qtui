@@ -25,6 +25,7 @@ class LibraryModel : public QAbstractListModel, public QQmlParserStatus
     QString  description;
     QString  genre;
     QString  status;
+    quint32  unread;
   };
   std::vector<EntryInfo> _entries;
 
@@ -44,6 +45,7 @@ public:
     RoleTitle = Qt::UserRole + 1,
     RoleThumbnail,
     RoleId,
+    RoleUnread,
   };
 
 

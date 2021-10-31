@@ -54,6 +54,7 @@ void LibraryModel::classBegin()
       info.artist       = entry["artist"].toString();
       info.genre        = entry["genre"].toString();
       info.status       = entry["status"].toString();
+      info.unread       = entry["unreadCount"].toInt();
     }
 
     endResetModel();
@@ -113,6 +114,10 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
       {
         return entry.id;
       }
+    case RoleUnread:
+      {
+        return entry.unread;
+      }
 
     //case Role
     default:
@@ -130,6 +135,7 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> LibraryModel::roleNames() const {
   static QHash<int, QByteArray> roles = { {RoleTitle, "title"},
                                           {RoleThumbnail, "thumbnailUrl"},
+                                          {RoleUnread, "unread"},
                                           {RoleId, "mangaId"} };
 
   return roles;

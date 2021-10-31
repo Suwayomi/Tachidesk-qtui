@@ -93,6 +93,27 @@ Rectangle {
         }
 
       }
+      Rectangle {
+        visible: unread > 0
+        width: unreadText.width + 10
+        height: parent.height / 6
+        radius: 15
+        anchors {
+          right: parent.right
+          top: parent.top
+          margins: 8
+        }
+        color: "#0492c2"
+        Text {
+          id: unreadText
+          text: unread
+          color: "white"
+          anchors.centerIn: parent
+          font.pixelSize: 20
+          font.bold: true
+          fontSizeMode: Text.Fit
+        }
+      }
 
       MouseArea {
         anchors.fill: parent

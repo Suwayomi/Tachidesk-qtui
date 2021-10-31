@@ -24,6 +24,7 @@ Item {
     nm: networkManager
   }
   PinchArea {
+    id: pinchArea
     width: Math.max(listView.contentWidth, listView.width)
     height: Math.max(listView.contentHeight, listView.height)
     enabled: true
@@ -39,6 +40,7 @@ Item {
     model: chapterModel
     cacheBuffer: 10000
     maximumFlickVelocity: 10000
+    contentWidth:  pinchArea.width
     delegate: WebtoonImage {
     }
     // debug rectangle
