@@ -83,7 +83,7 @@ Rectangle {
             right: image.right
           }
           color: "white"
-          font.pixelSize: parent.width/8
+          font.pixelSize: 14
           font.weight: Font.DemiBold
           wrapMode: Text.WordWrap
           maximumLineCount: 3
@@ -96,7 +96,7 @@ Rectangle {
       Rectangle {
         visible: unread > 0
         width: unreadText.width + 10
-        height: parent.height / 6
+        height: parent.height / 7
         radius: 15
         anchors {
           right: parent.right
@@ -109,7 +109,7 @@ Rectangle {
           text: unread
           color: "white"
           anchors.centerIn: parent
-          font.pixelSize: 20
+          font.pixelSize: 14
           font.bold: true
           fontSizeMode: Text.Fit
         }
