@@ -293,7 +293,6 @@ void UpdatesModel::next()
  *****************************************************************************/
 void UpdatesModel::refresh()
 {
-  qDebug() << "refresh";
   QUrlQuery query;
   query.addQueryItem("category", 0);
   _networkManager->post("update/fetch", query);
