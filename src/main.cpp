@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 #endif
 
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
 
 #ifndef Q_OS_ANDROID
   QApplication app(argc, argv);
