@@ -5,49 +5,14 @@ import QtQuick.Layouts 1.0
 import Tachidesk.Models 1.0
 import SortFilterProxyModel 0.2
 
-Rectangle {
-
-  color: "#333333"
-
-  UpdatesModel {
-    id: updatesModel
-    nm: networkManager
-  }
-
-  ProgressBar {
-    id: progressbar
-    anchors {
-      top: parent.top
-      left: parent.left
-      right: parent.right
-      margins: 8
-    }
-    value: updatesModel.complete / updatesModel.total
-    visible: updatesModel.running
-  }
+Item {
 
   ListView {
     id: downloadView
     clip: true
-    anchors {
-      left: parent.left
-      right: parent.right
-      bottom: parent.bottom
-      top: progressbar.bottom
-    }
+    anchors.fill: parent
     spacing: 4
-    model: updatesModel
-
-    property bool listviewLoaded: false
-    Component.onCompleted: {
-      listviewLoaded = true
-    }
-    onAtYEndChanged: {
-      if (!listviewLoaded) {
-        return
-      }
-      updatesModel.next()
-    }
+    model: chapterInfoModel
     delegate: Item {
       id: item
       height: 100
@@ -115,37 +80,51 @@ Rectangle {
           }
         }
 
-        Item {
-          height: parent.height
-          width: 30
-          Rectangle {
-            radius: 15
-            color: "#0492c2"
-            width: 30
-            height: 30
-            anchors.centerIn: parent
-            Text {
-              text: downloaded ? "✅" : "⬇"
-              color: "white"
-              anchors.centerIn: parent
-              font.bold: true
-              font.pixelSize: 20
-              fontSizeMode: Text.Fit
-            }
-            MouseArea {
-              anchors.fill: parent
-              onClicked: updatesModel.downloadChapter(index)
-            }
+        Component {
+          id: buttonSource
+          RadialBarShape {
+            progressColor: "#e6436d"
+            Component.onCompleted: console.log("index?", index, downloadView.get(index))
+            value: downloadView.get(index).progress
+            spanAngle: 270
+            dialType: RadialBarShape.DialType.FullDial
+            backgroundColor: "#6272a4"
+            penStyle: Qt.FlatCap
+            dialColor: "transparent"
           }
         }
-      }
-    }
 
-    PullToRefreshHandler {
-      id: pulldown_handler
-      threshold: 20
-      onPulldownrelease: {
-        updatesModel.refresh()
+        Loader {
+          id: buttonLoader
+          height: parent.height
+          width: 30
+          sourceComponent: buttonSource
+          onLoaded: console.log("progress", buttonLoader.item.progress)
+        }
+
+        //Item {
+        //  height: parent.height
+        //  width: 30
+        //  Rectangle {
+        //    radius: 15
+        //    color: "#0492c2"
+        //    width: 30
+        //    height: 30
+        //    anchors.centerIn: parent
+        //    Text {
+        //      text: downloaded ? "✅" : "⬇"
+        //      color: "white"
+        //      anchors.centerIn: parent
+        //      font.bold: true
+        //      font.pixelSize: 20
+        //      fontSizeMode: Text.Fit
+        //    }
+        //    MouseArea {
+        //      anchors.fill: parent
+        //      onClicked: chapterInfoModel.downloadChapter(index)
+        //    }
+        //  }
+        //}
       }
     }
   }

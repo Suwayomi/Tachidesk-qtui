@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
+#include <qurlquery.h>
 
 #define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
 #define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
@@ -24,6 +25,53 @@ UpdatesModel::UpdatesModel(QObject* parent)
 {
 }
 
+/******************************************************************************
+ *
+ * closed
+ *
+ *****************************************************************************/
+void UpdatesModel::closed()
+{
+}
+
+/******************************************************************************
+ *
+ * onConnected
+ *
+ *****************************************************************************/
+void UpdatesModel::onConnected()
+{
+  connect(&_webSocket, &QWebSocket::textMessageReceived,
+          this, &UpdatesModel::onTextMessageReceived);
+}
+
+/******************************************************************************
+ *
+ * onTextMessageReceived
+ *
+ *****************************************************************************/
+void UpdatesModel::onTextMessageReceived(const QString& message)
+{
+  QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
+
+  //{"statusMap":{"COMPLETE" : 26,"FAILED" : 69,"RUNNING" : 1,"PENDING" : 123}, "running":true}
+  _running = doc["running"].toBool();
+
+  auto statusMap = doc["statusMap"].toObject();
+  _complete = statusMap["COMPLETE"].toInt();
+  _complete += statusMap["FAILED"].toInt();
+
+  _total = statusMap["FAILED"].toInt();
+  _total += statusMap["COMPLETE"].toInt();
+  _total += statusMap["RUNNING"].toInt();
+  _total += statusMap["PENDING"].toInt();
+
+  emit totalChanged();
+  emit completeChanged();
+  emit runningChanged();
+
+}
+
 void UpdatesModel::classBegin() { }
 
 /******************************************************************************
@@ -33,6 +81,17 @@ void UpdatesModel::classBegin() { }
  *****************************************************************************/
 void UpdatesModel::componentComplete()
 {
+  connect(&_webSocket, &QWebSocket::connected, this, &UpdatesModel::onConnected);
+  connect(&_webSocket, &QWebSocket::disconnected, this, &UpdatesModel::closed);
+  auto resolved = _networkManager->resolvedPath().arg("/api/v1/update");
+  bool ssl = resolved.startsWith("https");
+  resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
+  resolved = QStringLiteral("%1://%2")
+    .arg(ssl ? "wss" : "ws")
+    .arg(resolved);
+
+  _webSocket.open(QUrl(resolved));
+
   next();
 }
 
@@ -45,11 +104,14 @@ void UpdatesModel::receivedReply(const QJsonDocument& reply)
 {
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
-  beginInsertRows({}, _sources.size(), _sources.size() + reply.array().count() - 1);
+  _hasNext = reply["hasNextPage"].toBool();
+
+  auto pageArray = reply["page"].toArray();
+  beginInsertRows({}, _sources.size(), _sources.size() + pageArray.count() - 1);
 
   _sources.reserve(reply.array().count());
 
-  for (const auto& entry_arr : reply.array()) {
+  for (const auto& entry_arr : pageArray) {
     const auto& entry   = entry_arr.toObject();
     const auto& manga   = entry["manga"].toObject();
     auto& info          = _sources.emplace_back();
@@ -211,13 +273,30 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
  *****************************************************************************/
 void UpdatesModel::next()
 {
-  _networkManager->get(QStringLiteral("update/recentChapters"));
+  if (_pageNumber && !_hasNext) {
+    return;
+  }
+
+  _networkManager->get(QStringLiteral("update/recentChapters/%1").arg(_pageNumber++));
 
   connect(
       _networkManager,
       &NetworkManager::recievedReply,
       this,
       &UpdatesModel::receivedReply);
+}
+
+/******************************************************************************
+ *
+ * Method: refresh()
+ *
+ *****************************************************************************/
+void UpdatesModel::refresh()
+{
+  qDebug() << "refresh";
+  QUrlQuery query;
+  query.addQueryItem("category", 0);
+  _networkManager->post("update/fetch", query);
 }
 
 /******************************************************************************

@@ -84,7 +84,7 @@ Rectangle {
           }
           color: "white"
           font.pixelSize: 14
-          font.weight: Font.DemiBold
+          //font.weight: Font.DemiBold
           wrapMode: Text.WordWrap
           maximumLineCount: 3
           text: title

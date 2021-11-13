@@ -42,6 +42,8 @@ public:
   void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
   void getChapters(const QString& endpoint);
   void deleteResource(const QString& endpoint);
+  // TODO needs similar to patch for extra arguments
+  void post(const QString& endpoint, const QUrlQuery& query);
 
   auto resolvedPath() const {
     return QStringLiteral("%1%2").arg(_host);

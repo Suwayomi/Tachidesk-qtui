@@ -8,6 +8,7 @@
 #include <QNetworkConfigurationManager>
 #include <QNetworkInterface>
 #include <QEventLoop>
+#include <QUrlQuery>
 
 #include "networkmanager.h"
 #include "settings.h"
@@ -74,6 +75,18 @@ void NetworkManager::get(const QString& endpoint)
 void NetworkManager::getChapters(const QString& endpoint)
 {
   getEndpoint(endpoint, &NetworkManager::chaptersReply);
+}
+
+void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
+{
+  QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
+
+  QNetworkRequest request;
+  request.setUrl(url);
+
+  QByteArray dataParam;
+
+  man.post(request, dataParam.append(query.toString()));
 }
 
 /********************************************************************
