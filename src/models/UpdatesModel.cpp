@@ -116,7 +116,7 @@ void UpdatesModel::receivedReply(const QJsonDocument& reply)
     const auto& manga   = entry["manga"].toObject();
     auto& info          = _sources.emplace_back();
     info.id             = manga["id"].toInt();
-    info.sourceId       = manga["sourceId"].toInt();
+    info.sourceId       = manga["sourceId"].toString();
     info.title          = manga["title"].toString();
     info.thumbnailUrl   = manga["thumbnailUrl"].toString();
     info.url            = manga["url"].toString();

@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Item {
   property bool canClose: false
@@ -23,7 +23,9 @@ Item {
 
   function navigatePage(source, properties) {
     canClose = false
-    if (Qt.resolvedUrl(stack.currentItem.url) === Qt.resolvedUrl(source)) {
+    if (stack.currentItem && stack.currentItem.url
+      && Qt.resolvedUrl(stack.currentItem.url) === Qt.resolvedUrl(source))
+    {
       for (var i in properties) {
         if (i !== "replace") {
           stack.currentItem[i] = properties[i]
@@ -32,6 +34,10 @@ Item {
     }
 
     var item = stack.find(function(item, index) {
+      if (!item.url) {
+        return false
+      }
+      console.log("item url", item.url, source)
       return Qt.resolvedUrl(item.url) === Qt.resolvedUrl(source)
     })
 
@@ -65,13 +71,14 @@ Item {
       bottom: navigation.visible ? navigation.top : parent.bottom
       top: parent.top
     }
-    initialItem: Qt.resolvedUrl("Library.qml")
+
+    Component.onCompleted: stack.push(Qt.resolvedUrl("Library.qml"))
 
     pushEnter: Transition {
       PropertyAnimation {
         property: "opacity"
         from: 0
-        to:1
+        to: 1
         duration: 200
       }
     }

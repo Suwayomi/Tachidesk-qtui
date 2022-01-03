@@ -4,8 +4,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDesktopServices>
-#include <QNetworkConfiguration>
-#include <QNetworkConfigurationManager>
+//#include <QNetworkConfiguration>
+//#include <QNetworkConfigurationManager>
 #include <QNetworkInterface>
 #include <QEventLoop>
 #include <QUrlQuery>
@@ -86,7 +86,7 @@ void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
 
   QByteArray dataParam;
 
-  man.post(request, dataParam.append(query.toString()));
+  man.post(request, dataParam.append(query.toString().toStdString().c_str()));
 }
 
 /********************************************************************

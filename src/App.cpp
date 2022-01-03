@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QUrl>
-#include <QRegExp>
 #include <tuple>
 #include <QDir>
 #include <qstringbuilder.h>

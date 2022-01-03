@@ -145,8 +145,7 @@ Rectangle {
       id: pulldown_handler
       threshold: 50
       onPulldownrelease: {
-        console.log("refresh")
-        //updatesModel.refresh()
+        updatesModel.refresh()
       }
     }
   }

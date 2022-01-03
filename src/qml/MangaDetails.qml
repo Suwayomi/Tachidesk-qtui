@@ -1,9 +1,9 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtGraphicalEffects 1.12
-import QtQuick.Window 2.2
-import QtWebSockets 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import QtQuick.Window
+import QtWebSockets
 
 import Tachidesk.Models 1.0
 

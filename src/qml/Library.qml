@@ -1,9 +1,9 @@
-import QtQuick 2.8
-import QtQuick.Layouts 1.15
-import QtGraphicalEffects 1.0
+import QtQuick
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
-import Tachidesk.Models 1.0
-import SortFilterProxyModel 0.2
+import Tachidesk.Models
+import SortFilterProxyModel
 
 Item {
   id: libraryBase

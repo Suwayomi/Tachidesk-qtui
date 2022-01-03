@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(
-  Qt5
+  Qt6
   COMPONENTS Core
              Gui
              Quick
@@ -17,7 +17,6 @@ find_package(
              Widgets
              WebSockets
   REQUIRED)
-find_package(Qt5QuickCompiler)
 
 add_subdirectory(libs/SortFilterProxyModel)
 
@@ -56,11 +55,11 @@ else()
 endif()
 
 target_link_libraries(Tachidesk-qtui
-  Qt::Quick
-  Qt::Core
-  Qt::Widgets
-  Qt::Gui
-  Qt::WebSockets
+  Qt6::Quick
+  Qt6::Core
+  Qt6::Widgets
+  Qt6::Gui
+  Qt6::WebSockets
   SortFilterProxyModel)
 
 target_include_directories(Tachidesk-qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
