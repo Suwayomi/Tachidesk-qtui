@@ -84,7 +84,7 @@ void UpdatesModel::componentComplete()
   connect(&_webSocket, &QWebSocket::connected, this, &UpdatesModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &UpdatesModel::closed);
   auto resolved = _networkManager->resolvedPath().arg("/api/v1/update");
-  bool ssl = resolved.startsWith("https");
+  bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
   resolved = QStringLiteral("%1://%2")
     .arg(ssl ? "wss" : "ws")
