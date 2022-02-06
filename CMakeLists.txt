@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Tachidesk-qtui)
+project(qtui)
 
 include(cmake/ProjectSettings.cmake)
 
@@ -49,18 +49,29 @@ set(lib_srcs ${src_files})
 
 if (ANDROID)
   set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
-  add_library(Tachidesk-qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml android/res/values/styles.xml)
+  add_library(qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml android/res/values/styles.xml)
 else()
-  add_executable(Tachidesk-qtui ${lib_srcs} src/qml/qml.qrc)
+  qt_add_executable(qtui MACOSX_BUNDLE ${lib_srcs} src/qml/qml.qrc)
+
+  if (APPLE)
+     set_target_properties(qtui PROPERTIES
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.suwayomi.tachidesk-qtui"
+        MACOSX_BUNDLE_BUNDLE_VERSION 1
+        MACOSX_BUNDLE_SHORT_VERSION_STRING  1.0)
+ 
+     SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+     SET_PROPERTY(TARGET qtui PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist)
+  endif()
+
 endif()
 
-target_link_libraries(Tachidesk-qtui
-  Qt6::Quick
-  Qt6::Core
-  Qt6::Widgets
-  Qt6::Gui
-  Qt6::WebSockets
-  SortFilterProxyModel)
+target_link_libraries(qtui
+  PRIVATE
+    Qt6::Quick
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::Gui
+    Qt6::WebSockets
+    SortFilterProxyModel)
 
-target_include_directories(Tachidesk-qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-
+target_include_directories(qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
