@@ -102,6 +102,9 @@ void UpdatesModel::componentComplete()
  *****************************************************************************/
 void UpdatesModel::receivedReply(const QJsonDocument& reply)
 {
+  if (reply.isEmpty()) {
+    return;
+  }
   disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
 
   _hasNext = reply["hasNextPage"].toBool();

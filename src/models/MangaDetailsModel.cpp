@@ -24,7 +24,9 @@ void MangaDetails::processDetails(const QJsonObject& entry)
   author       = entry["author"].toString();
   artist       = entry["artist"].toString();
   description  = entry["description"].toString();
-  genre        = entry["genre"].toString();
+  for (const auto& ge : entry["genre"].toArray()) {
+    genre += ge.toString() + " ";
+  }
   status       = entry["status"].toString();
   inLibrary    = entry["inLibrary"].toBool();
 
