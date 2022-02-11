@@ -14,6 +14,10 @@ Rectangle {
     nm: networkManager
   }
 
+  function markRead(mangaId, chapter) {
+    updatesModel.chapterRead(mangaId, chapter)
+  }
+
   ProgressBar {
     id: progressbar
     anchors {
@@ -56,9 +60,10 @@ Rectangle {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                         { mangaNumber: mangaId,
                           chapter:     chapterIndex  })
+          details.chapterRead.connect(markRead)
         }
       }
 

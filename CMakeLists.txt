@@ -20,45 +20,56 @@ find_package(
 
 add_subdirectory(libs/SortFilterProxyModel)
 
+qt_add_executable(qtui MACOSX_BUNDLE ${lib_srcs})
+
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
 endif()
-
-function(include_directories_recurse dir)
-	include_directories(${dir})
-	file(GLOB subs "${dir}/*")
-	foreach(sub ${subs})
-		if (IS_DIRECTORY ${sub})
-			include_directories_recurse(${sub})
-		endif (IS_DIRECTORY ${sub})
-	endforeach(sub ${subs})
-endfunction(include_directories_recurse dir)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Locate all the source and header files for svs
 file(RELATIVE_PATH RELATIVE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB_RECURSE src_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.h")
+file(GLOB_RECURSE qml_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.qml")
+file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.png")
 
 list(APPEND src_files ${add_src_files})
 
-include_directories_recurse(src)
-
 set(lib_srcs ${src_files})
+
+qt_add_qml_module(qtui
+  URI Tachidesk.qtui
+  VERSION 1.0
+  SOURCES
+    ${src_files}
+    ${header_files}
+  QML_FILES
+    ${qml_files}
+  RESOURCES
+    ${icon_files}
+  IMPORTS
+    QtQml
+    QtQuick
+    QtQuick.Controls
+    QtQuick.Layouts
+    SortFilterProxyModel)
+
+target_include_directories(qtui PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/models>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/utils>)
 
 if (ANDROID)
   set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
   add_library(qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml android/res/values/styles.xml)
 else()
-  qt_add_executable(qtui MACOSX_BUNDLE ${lib_srcs} src/qml/qml.qrc)
 
   if (APPLE)
      set_target_properties(qtui PROPERTIES
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.suwayomi.tachidesk-qtui"
         MACOSX_BUNDLE_BUNDLE_VERSION 1
         MACOSX_BUNDLE_SHORT_VERSION_STRING  1.0)
- 
+
      SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
      SET_PROPERTY(TARGET qtui PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist)
   endif()
@@ -74,4 +85,3 @@ target_link_libraries(qtui
     Qt6::WebSockets
     SortFilterProxyModel)
 
-target_include_directories(qtui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

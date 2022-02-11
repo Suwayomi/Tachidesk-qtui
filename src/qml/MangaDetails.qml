@@ -27,7 +27,7 @@ Item {
     mangaNumber: detailsModel.mangaNumber
   }
 
-  function markRead(chapter) {
+  function markRead(mangaId, chapter) {
     chaptersModel.chapterRead(chapter)
   }
 

@@ -5,7 +5,7 @@
 #include <QWebSocket>
 
 #include "ChaptersModel.h"
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 #include <optional>
 
@@ -96,6 +96,7 @@ public:
   Q_INVOKABLE void next();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
+  Q_INVOKABLE void chapterRead(qint32 mangaId, qint32 chapter);
 signals:
   void networkManagerChanged();
   void runningChanged();

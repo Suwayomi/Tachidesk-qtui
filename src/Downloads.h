@@ -4,7 +4,7 @@
 #include <QQmlParserStatus>
 #include <QtWebSockets/QtWebSockets>
 
-#include "ChaptersModel.h"
+#include "models/ChaptersModel.h"
 #include "networkmanager.h"
 
 class Downloads : public QObject

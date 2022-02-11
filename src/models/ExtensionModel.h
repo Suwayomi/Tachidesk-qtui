@@ -3,7 +3,7 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 class ExtensionModel : public QAbstractListModel, public QQmlParserStatus
 {

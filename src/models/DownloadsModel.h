@@ -5,7 +5,7 @@
 #include <QtWebSockets/QtWebSockets>
 
 #include "ChaptersModel.h"
-#include "networkmanager.h"
+#include "../networkmanager.h"
 #include "MangaDetailsModel.h"
 
 class DownloadsModel : public QAbstractListModel, public QQmlParserStatus

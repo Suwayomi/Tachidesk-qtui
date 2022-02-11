@@ -37,7 +37,7 @@ QUrl App::makeUrl(const QString& path) const
     return QUrl::fromLocalFile(QDir(qmldir).absoluteFilePath(path));
   }
   else {
-    return QUrl(QStringLiteral("qrc:/") % path);
+    return QUrl(QStringLiteral("qrc:/Tachidesk/qtui/src/qml/") % path);
   }
 }
 

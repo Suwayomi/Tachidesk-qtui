@@ -3,7 +3,7 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 struct ChapterInfo {
   QString  url;

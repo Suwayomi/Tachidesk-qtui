@@ -317,3 +317,12 @@ void UpdatesModel::downloadChapter(int index)
 
   _networkManager->get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
 }
+
+void UpdatesModel::chapterRead(qint32 mangaId, qint32 chapter)
+{
+  for (auto& info : _sources) {
+    if (info.id == mangaId) {
+
+    }
+  }
+}
