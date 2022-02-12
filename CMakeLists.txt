@@ -20,7 +20,9 @@ find_package(
 
 add_subdirectory(libs/SortFilterProxyModel)
 
-qt_add_executable(qtui MACOSX_BUNDLE ${lib_srcs})
+qt_add_executable(qtui MACOSX_BUNDLE
+    android/AndroidManifest.xml
+    android/res/values/styles.xml)
 
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
@@ -31,11 +33,18 @@ file(RELATIVE_PATH RELATIVE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRE
 file(GLOB_RECURSE src_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.h")
 file(GLOB_RECURSE qml_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.qml")
-file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.png")
+file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.png" "android/res/*.png")
 
 list(APPEND src_files ${add_src_files})
 
-set(lib_srcs ${src_files})
+#set(ANDROID_EXTRA_LIBS /opt/android-libs/aarch64/lib/libjpeg.so CACHE INTERNAL "")
+#set_target_properties(qtui
+#    PROPERTIES
+#        QT_ANDROID_EXTRA_LIBS "${ANDROID_EXTRA_LIBS}"
+#        QT_ANDROID_VERSION_CODE "${CMAKE_PROJECT_VERSION_MAJOR}"
+#        QT_ANDROID_VERSION_NAME "${CMAKE_PROJECT_VERSION}"
+#        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/android"
+#)
 
 qt_add_qml_module(qtui
   URI Tachidesk.qtui
@@ -61,7 +70,7 @@ target_include_directories(qtui PUBLIC
 
 if (ANDROID)
   set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
-  add_library(qtui SHARED ${lib_srcs} src/qml/qml.qrc android/AndroidManifest.xml android/res/values/styles.xml)
+  #add_library(qtui SHARED ${lib_srcs} android/AndroidManifest.xml android/res/values/styles.xml)
 else()
 
   if (APPLE)
@@ -84,4 +93,3 @@ target_link_libraries(qtui
     Qt6::Gui
     Qt6::WebSockets
     SortFilterProxyModel)
-
