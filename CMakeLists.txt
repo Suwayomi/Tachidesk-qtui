@@ -20,9 +20,8 @@ find_package(
 
 add_subdirectory(libs/SortFilterProxyModel)
 
-qt_add_executable(qtui MACOSX_BUNDLE
-    android/AndroidManifest.xml
-    android/res/values/styles.xml)
+qt_add_executable(qtui MACOSX_BUNDLE MANUAL_FINALIZATION)
+    #android/res/values/styles.xml)
 
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
@@ -37,15 +36,6 @@ file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.pn
 
 list(APPEND src_files ${add_src_files})
 
-#set(ANDROID_EXTRA_LIBS /opt/android-libs/aarch64/lib/libjpeg.so CACHE INTERNAL "")
-#set_target_properties(qtui
-#    PROPERTIES
-#        QT_ANDROID_EXTRA_LIBS "${ANDROID_EXTRA_LIBS}"
-#        QT_ANDROID_VERSION_CODE "${CMAKE_PROJECT_VERSION_MAJOR}"
-#        QT_ANDROID_VERSION_NAME "${CMAKE_PROJECT_VERSION}"
-#        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/android"
-#)
-
 qt_add_qml_module(qtui
   URI Tachidesk.qtui
   VERSION 1.0
@@ -56,6 +46,8 @@ qt_add_qml_module(qtui
     ${qml_files}
   RESOURCES
     ${icon_files}
+    android/AndroidManifest.xml
+  NO_CACHEGEN
   IMPORTS
     QtQml
     QtQuick
@@ -69,7 +61,11 @@ target_include_directories(qtui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/utils>)
 
 if (ANDROID)
-  set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
+  set_property(TARGET qtui APPEND PROPERTY
+      QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
+  )
+  #set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
+
   #add_library(qtui SHARED ${lib_srcs} android/AndroidManifest.xml android/res/values/styles.xml)
 else()
 
@@ -93,3 +89,5 @@ target_link_libraries(qtui
     Qt6::Gui
     Qt6::WebSockets
     SortFilterProxyModel)
+
+qt_finalize_executable(qtui)

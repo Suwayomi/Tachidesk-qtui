@@ -21,6 +21,7 @@ if(MSVC)
       /external:anglebrackets
       /external:templates-
       /external:W0
+      /Zc:__cplusplus
     )
   endif()
 else()
