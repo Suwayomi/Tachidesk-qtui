@@ -21,10 +21,10 @@ find_package(
 add_subdirectory(libs/SortFilterProxyModel)
 
 qt_add_executable(qtui MACOSX_BUNDLE MANUAL_FINALIZATION)
-    #android/res/values/styles.xml)
 
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
+
 endif()
 
 # Locate all the source and header files for svs
@@ -47,7 +47,7 @@ qt_add_qml_module(qtui
   RESOURCES
     ${icon_files}
     android/AndroidManifest.xml
-  NO_CACHEGEN
+    android/res/values/styles.xml
   IMPORTS
     QtQml
     QtQuick
@@ -61,9 +61,12 @@ target_include_directories(qtui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/utils>)
 
 if (ANDROID)
-  set_property(TARGET qtui APPEND PROPERTY
-      QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
-  )
+  set_target_properties(qtui PROPERTIES
+    QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
+
+  set_property(TARGET qtui PROPERTY
+    QT_ANDROID_EXTRA_LIBS ${ANDROID_EXTRA_LIBS})
+
   #set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
 
   #add_library(qtui SHARED ${lib_srcs} android/AndroidManifest.xml android/res/values/styles.xml)
