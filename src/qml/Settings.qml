@@ -47,6 +47,47 @@ Rectangle {
     }
   }
 
+  Popup {
+    id: languagePopup
+    width: parent.width * .80
+    height: parent.height * .25
+    focus: true
+    modal: true
+    anchors.centerIn: parent
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#333333"
+      ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 4
+        spacing: 4
+        Text {
+          color: "white"
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          text: qsTr("Filter Sources by Language")
+          font.pixelSize: 18
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          fontSizeMode: Text.Fit
+        }
+        TextField {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.pixelSize: 18
+          color: "white"
+          text: settings.lang
+          inputMethodHints: Qt.ImhUrlCharactersOnly
+          onAccepted:  {
+            settings.lang = text
+            languagePopup.close()
+          }
+        }
+      }
+    }
+  }
+
   ColumnLayout {
     anchors {
       top: parent.top
@@ -54,7 +95,19 @@ Rectangle {
       right: parent.right
       margins: 4
     }
-    spacing: 2
+    spacing: 4
+
+    Text {
+      color: "white"
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      text: qsTr("Settings")
+      font.pixelSize: 24
+      font.bold: true
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+      fontSizeMode: Text.Fit
+    }
 
     RowLayout {
       Layout.fillWidth: true
@@ -111,12 +164,10 @@ Rectangle {
         font.pixelSize: 18
         placeholderText: settings.lang
         onAccepted: settings.lang = text
-      }
-      Button {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 100
-        text: "enter"
-        onClicked: settings.lang = langTextField.text
+        MouseArea {
+          anchors.fill: parent
+          onClicked: languagePopup.open()
+        }
       }
     }
 
