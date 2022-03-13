@@ -36,19 +36,19 @@ void SourcesModel::componentComplete()
 
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
-      &SourcesModel::recievedReply);
+      &SourcesModel::receivedReply);
 }
 
 /******************************************************************************
  *
- * Method: recieveReply()
+ * Method: receiveReply()
  *
  *****************************************************************************/
-void SourcesModel::recievedReply(const QJsonDocument& reply)
+void SourcesModel::receivedReply(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
 
   beginResetModel();
   _sources.clear();

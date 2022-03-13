@@ -62,7 +62,7 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
 
 signals:
    void networkManagerChanged();

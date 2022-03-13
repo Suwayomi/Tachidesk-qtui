@@ -39,9 +39,19 @@ void DownloadsModel::classBegin()
  *****************************************************************************/
 void DownloadsModel::componentComplete()
 {
+  setupWebsocket();
+}
+
+/******************************************************************************
+ *
+ * setupWebsocket
+ *
+ *****************************************************************************/
+void DownloadsModel::setupWebsocket()
+{
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
       &DownloadsModel::gotDetails);
 
@@ -110,6 +120,7 @@ void DownloadsModel::onTextMessageReceived(const QString& message)
 
   endResetModel();
 
+  emit downloadsUpdated(_queue);
 }
 
 /******************************************************************************

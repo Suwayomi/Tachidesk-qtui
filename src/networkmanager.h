@@ -21,13 +21,15 @@ class NetworkManager : public QObject
   std::shared_ptr<Settings> _settings;
 
 signals:
-  void recievedReply(const QJsonDocument& reply);
-  void recieveChapters(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
+  void receiveChapters(const QJsonDocument& reply);
+  void receiveUpdates(const QJsonDocument& reply);
   void abortChapterRequest();
 
 private slots:
   void endpointReply();
   void chaptersReply();
+  void updatesReply();
   void patchReply();
 
 public:
@@ -41,6 +43,7 @@ public:
   void get(const QString& endpoint);
   void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
   void getChapters(const QString& endpoint);
+  void getUpdates(const QString& endpoint);
   void deleteResource(const QString& endpoint);
   // TODO needs similar to patch for extra arguments
   void post(const QString& endpoint, const QUrlQuery& query);

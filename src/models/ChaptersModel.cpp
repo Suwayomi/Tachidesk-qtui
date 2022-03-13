@@ -113,7 +113,7 @@ void ChaptersModel::componentComplete()
 {
   connect(
       _networkManager,
-      &NetworkManager::recieveChapters,
+      &NetworkManager::receiveChapters,
       this,
       &ChaptersModel::gotChapters);
 

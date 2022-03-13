@@ -129,6 +129,7 @@ Rectangle {
             width: 30
             height: 30
             anchors.centerIn: parent
+            visible: downloadProgress < 0 || downloadProgress >= 100
             Text {
               text: downloaded ? "✅" : "⬇"
               color: "white"
@@ -141,6 +142,18 @@ Rectangle {
               anchors.fill: parent
               onClicked: updatesModel.downloadChapter(index)
             }
+          }
+          RadialBarShape {
+            height: parent.height
+            width: parent.width
+            visible: downloadProgress > 0 && downloadProgress < 100
+            progressColor: "#e6436d"
+            value: downloadProgress
+            spanAngle: 270
+            dialType: RadialBarShape.DialType.FullDial
+            backgroundColor: "#6272a4"
+            penStyle: Qt.FlatCap
+            dialColor: "transparent"
           }
         }
       }

@@ -55,7 +55,7 @@ void MangaDetailsModel::classBegin()
  *****************************************************************************/
 void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
 
   beginResetModel();
   _entries.clear();
@@ -79,7 +79,7 @@ void MangaDetailsModel::componentComplete()
 {
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
       &MangaDetailsModel::gotDetails);
 

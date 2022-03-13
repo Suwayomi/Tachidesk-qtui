@@ -9,6 +9,9 @@
 
 #include <optional>
 
+class DownloadsModel;
+class QueueInfo;
+
 class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
@@ -21,6 +24,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 
   NetworkManager* _networkManager = nullptr;
   QWebSocket _webSocket;
+  std::shared_ptr<DownloadsModel> downloads;
 
   struct SourceInfo {
     qint32   id;
@@ -33,6 +37,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
     bool     freshData;
 
     ChapterInfo chapterInfo;
+    std::shared_ptr<QueueInfo> queueInfo;
   };
   std::vector<SourceInfo> _sources;
 
@@ -70,6 +75,7 @@ public:
     RoleLastPageRead,
     RoleDownloaded,
     RoleFetchedAt,
+    RoleDownloadProgress,
   };
 
   UpdatesModel(QObject* parent = nullptr);
@@ -107,4 +113,5 @@ public slots:
   void onConnected();
   void closed();
   void onTextMessageReceived(const QString& message);
+  void onDownloadsUpdated(const std::vector<QueueInfo>& info);
 };

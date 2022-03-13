@@ -77,6 +77,16 @@ void NetworkManager::getChapters(const QString& endpoint)
   getEndpoint(endpoint, &NetworkManager::chaptersReply);
 }
 
+/********************************************************************
+ *
+ *  get()
+ *
+ ********************************************************************/
+void NetworkManager::getUpdates(const QString& endpoint)
+{
+  getEndpoint(endpoint, &NetworkManager::updatesReply);
+}
+
 void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
 {
   QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
@@ -170,9 +180,8 @@ void NetworkManager::deleteResource(const QString& endpoint)
  ********************************************************************/
 void NetworkManager::endpointReply()
 {
-  emit recievedReply(processReply());
+  emit receivedReply(processReply());
 }
-
 
 /********************************************************************
  *
@@ -181,7 +190,17 @@ void NetworkManager::endpointReply()
  ********************************************************************/
 void NetworkManager::chaptersReply()
 {
-  emit recieveChapters(processReply());
+  emit receiveChapters(processReply());
+}
+
+/********************************************************************
+ *
+ *  userReply()
+ *
+ ********************************************************************/
+void NetworkManager::updatesReply()
+{
+  emit receiveUpdates(processReply());
 }
 
 /********************************************************************

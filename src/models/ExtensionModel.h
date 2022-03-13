@@ -68,7 +68,7 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void update(const QString& pkgName, qint32 index);
   Q_INVOKABLE void install(const QString& pkgName, qint32 index);

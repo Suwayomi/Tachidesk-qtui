@@ -82,7 +82,7 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
 
   Q_INVOKABLE void search(const QString& searchTerm);
   Q_INVOKABLE void next();
