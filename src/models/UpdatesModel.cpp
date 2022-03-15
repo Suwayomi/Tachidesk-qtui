@@ -356,11 +356,23 @@ void UpdatesModel::downloadChapter(int index)
   _networkManager->get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
 }
 
+/******************************************************************************
+ *
+ * Method: chapterRead()
+ *
+ *****************************************************************************/
 void UpdatesModel::chapterRead(qint32 mangaId, qint32 chapter)
 {
+  int i = 0;
   for (auto& info : _sources) {
-    if (info.id == mangaId) {
-
+    if (info.id == mangaId &&
+        info.chapterInfo.chapterNumber == chapter)
+    {
+      info.chapterInfo.read = true;
+      _networkManager->patch("read", "true",
+        QStringLiteral("manga/%1/chapter/%2").arg(mangaId).arg(chapter));
+      emit dataChanged(createIndex(i, 0), createIndex(i, 0), { RoleRead });
     }
+    ++i;
   }
 }

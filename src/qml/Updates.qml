@@ -63,7 +63,7 @@ Rectangle {
           var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                         { mangaNumber: mangaId,
                           chapter:     chapterIndex  })
-          details.chapterRead.connect(markRead)
+          viewer.chapterRead.connect(markRead)
         }
       }
 
@@ -86,7 +86,7 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
               var details = navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
-              details.mangaChanged.connect(onMangaChanged)
+              //details.mangaChanged.connect(markRead)
             }
           }
         }

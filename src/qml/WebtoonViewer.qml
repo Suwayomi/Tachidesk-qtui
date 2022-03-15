@@ -68,7 +68,7 @@ Item {
         return
       }
       if (listView.atYEnd) {
-        chapterRead(chapterModel.mangaId, chapterModel.chapterNumber)
+        chapterRead(chapterModel.mangaNumber, chapterModel.chapterNumber)
         chapterModel.chapterNumber++
         chapterModel.requestChapter(chapterModel.chapterNumber)
       }
