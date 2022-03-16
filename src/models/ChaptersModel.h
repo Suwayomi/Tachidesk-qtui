@@ -16,9 +16,13 @@ struct ChapterInfo {
   quint32  chapterCount;
   quint32  lastPageRead;
   QDateTime  fetchedAt;
+  std::optional<qint32>  downloadProgress;
 
   void processChapter(const QJsonObject& entry);
 };
+
+class DownloadsModel;
+struct QueueInfo;
 
 class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 {
@@ -30,6 +34,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(bool   loading         MEMBER _loading         NOTIFY loadingChanged)
 
   NetworkManager* _networkManager = nullptr;
+  std::shared_ptr<DownloadsModel> _downloads;
   bool _cachedChapters = false;
   bool _loading = true;
 
@@ -68,6 +73,7 @@ public:
     RoleChapterCount,
     RoleLastPageRead,
     RoleDownloaded,
+    RoleDownloadProgress,
   };
 
   ChaptersModel(QObject* parent = nullptr);
@@ -101,4 +107,5 @@ signals:
 
 public slots:
   void gotChapters(const QJsonDocument& reply);
+  void onDownloadsUpdated(const std::vector<QueueInfo>& info);
 };

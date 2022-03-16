@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
+#include <QDesktopServices>
 
 #define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
 #define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
@@ -18,6 +19,7 @@ void MangaDetails::processDetails(const QJsonObject& entry)
   id           = entry["id"].toInt();
   sourceId     = entry["sourceId"].toString();
   url          = entry["url"].toString();
+  realUrl      = entry["realUrl"].toString();
   title        = entry["title"].toString();
   thumbnailUrl = entry["thumbnailUrl"].toString();
   initalized   = entry["intialized"].toBool();
@@ -128,6 +130,10 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
       {
         return entry.url;
       }
+    case RoleRealUrl:
+      {
+        return entry.realUrl;
+      }
     case RoleTitle:
       {
         return entry.title;
@@ -184,6 +190,7 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> MangaDetailsModel::roleNames() const {
   static QHash<int, QByteArray> roles = {
     {RoleUrl, "url"},
+    {RoleRealUrl, "realUrl"},
     {RoleId, "id"},
     {RoleSourceId, "sourceId"},
     {RoleUrl, "url"},
@@ -240,3 +247,12 @@ void MangaDetailsModel::removeFromLibrary()
   emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});
 }
 
+/******************************************************************************
+ *
+ * Method: openUrl()
+ *
+ *****************************************************************************/
+void MangaDetailsModel::openUrl()
+{
+  QDesktopServices::openUrl(QUrl(_entries[0].realUrl));
+}

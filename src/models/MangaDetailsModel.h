@@ -9,6 +9,7 @@ struct MangaDetails {
   qint32   id;
   QString  sourceId;
   QString  url;
+  QString  realUrl;
   QString  title;
   QString  thumbnailUrl;
   bool     initalized = false;
@@ -53,6 +54,7 @@ public:
     RoleId = Qt::UserRole + 1,
     RoleSourceId,
     RoleUrl,
+    RoleRealUrl,
     RoleTitle,
     RoleThumbnailUrl,
     RoleInitialized,
@@ -88,6 +90,7 @@ public:
 
   Q_INVOKABLE void addToLibrary();
   Q_INVOKABLE void removeFromLibrary();
+  Q_INVOKABLE void openUrl();
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();

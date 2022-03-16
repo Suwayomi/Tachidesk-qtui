@@ -1,4 +1,5 @@
 #include "ChaptersModel.h"
+#include "DownloadsModel.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -188,6 +189,11 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       {
         return entry.downloaded;
       }
+
+    case RoleDownloadProgress:
+      {
+        return entry.downloadProgress.value_or(-1);
+      }
     //case Role
     default:
       return {};
@@ -209,6 +215,7 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
                                           {RoleChapterIndex,  "chapterIndex"},
                                           {RolePageCount,     "pageCount"},
                                           {RoleDownloaded,    "downloaded"},
+                                          {RoleDownloadProgress, "progress"},
                                           {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},};
 
@@ -249,6 +256,13 @@ void ChaptersModel::chapterRead(qint32 chapter)
  *****************************************************************************/
 void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
 {
+  if (!_downloads) {
+    _downloads = std::make_shared<DownloadsModel>();
+    _downloads->setNetworkManager(_networkManager);
+    _downloads->setupWebsocket();
+    connect(_downloads.get(), &DownloadsModel::downloadsUpdated, this, &ChaptersModel::onDownloadsUpdated);
+  }
+
   auto downloadEndpoint = QStringLiteral("download/%1/chapter/%2");
   auto getChapter = [&](const auto& check) {
     for (const auto& chapter : _chapters) {
@@ -275,5 +289,28 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
         _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapterIndex));
         break;
       }
+  }
+}
+
+/******************************************************************************
+ *
+ * Method: onDownloadsUpdated()
+ *
+ *****************************************************************************/
+void ChaptersModel::onDownloadsUpdated(const std::vector<QueueInfo>& queueInfo)
+{
+  for (auto& info : queueInfo) {
+    int row = 0;
+    for (auto& chapter : _chapters) {
+      if (info.mangaId == _mangaNumber &&
+          info.chapterInfo.chapterNumber == chapter.chapterNumber)
+      {
+        chapter.downloadProgress = info.progress;
+        chapter.downloaded = info.progress >= 100;
+        emit dataChanged(createIndex(row, 0), createIndex(row, 0), { RoleDownloadProgress, RoleDownloaded });
+        break;
+      }
+      row++;
+    }
   }
 }

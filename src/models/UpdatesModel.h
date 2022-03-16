@@ -10,7 +10,7 @@
 #include <optional>
 
 class DownloadsModel;
-class QueueInfo;
+struct QueueInfo;
 
 class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 {
