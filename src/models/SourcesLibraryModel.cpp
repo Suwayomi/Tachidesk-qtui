@@ -37,12 +37,12 @@ void SourcesLibraryModel::componentComplete()
 
 /******************************************************************************
  *
- * Method: recieveReply()
+ * Method: receiveReply()
  *
  *****************************************************************************/
-void SourcesLibraryModel::recievedReply(const QJsonDocument& reply)
+void SourcesLibraryModel::receivedReply(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
 
   const auto& mangaList = reply["mangaList"].toArray();
 
@@ -171,9 +171,9 @@ void SourcesLibraryModel::search(const QString& searchTerm)
 
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
-      &SourcesLibraryModel::recievedReply);
+      &SourcesLibraryModel::receivedReply);
 }
 
 /******************************************************************************
@@ -187,7 +187,7 @@ void SourcesLibraryModel::next()
 
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
-      &SourcesLibraryModel::recievedReply);
+      &SourcesLibraryModel::receivedReply);
 }

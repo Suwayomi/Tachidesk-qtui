@@ -85,7 +85,7 @@ ApplicationWindow {
       return {android: true, ios: true, winphone: true}[Qt.platform.os] || false;
   }
 
-  onClosing: {
+  onClosing: (close) => {
     if (Qt.platform.os != "android" || ac.canClose) {
       close.accepted = true
       Qt.quit()
@@ -99,7 +99,7 @@ ApplicationWindow {
     anchors.fill: parent
     focus: true
 
-    Keys.onPressed: {
+    Keys.onPressed: (event) => {
       switch (event.key) {
         case Qt.Key_R:
           if (event.modifiers & (Qt.ControlModifier | Qt.ShiftModifier)) {
@@ -111,7 +111,7 @@ ApplicationWindow {
       }
     }
 
-    Keys.onReleased: {
+    Keys.onReleased: (event) => {
       switch (event.key) {
         case Qt.Key_Backspace:
           if (event.modifiers & Qt.ControlModifier)

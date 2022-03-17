@@ -39,16 +39,26 @@ void DownloadsModel::classBegin()
  *****************************************************************************/
 void DownloadsModel::componentComplete()
 {
+  setupWebsocket();
+}
+
+/******************************************************************************
+ *
+ * setupWebsocket
+ *
+ *****************************************************************************/
+void DownloadsModel::setupWebsocket()
+{
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
       &DownloadsModel::gotDetails);
 
   connect(&_webSocket, &QWebSocket::connected, this, &DownloadsModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &DownloadsModel::closed);
   auto resolved = _networkManager->resolvedPath().arg("/api/v1/downloads");
-  bool ssl = resolved.startsWith("https");
+  bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
   resolved = QStringLiteral("%1://%2")
     .arg(ssl ? "wss" : "ws")
@@ -110,6 +120,7 @@ void DownloadsModel::onTextMessageReceived(const QString& message)
 
   endResetModel();
 
+  emit downloadsUpdated(_queue);
 }
 
 /******************************************************************************

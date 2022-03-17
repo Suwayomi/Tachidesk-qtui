@@ -14,6 +14,10 @@ Rectangle {
     nm: networkManager
   }
 
+  function markRead(mangaId, chapter) {
+    updatesModel.chapterRead(mangaId, chapter)
+  }
+
   ProgressBar {
     id: progressbar
     anchors {
@@ -56,9 +60,10 @@ Rectangle {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                         { mangaNumber: mangaId,
                           chapter:     chapterIndex  })
+          viewer.chapterRead.connect(markRead)
         }
       }
 
@@ -81,7 +86,7 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
               var details = navigatePage(Qt.resolvedUrl("MangaDetails.qml"), { mangaNumber: mangaId })
-              details.mangaChanged.connect(onMangaChanged)
+              //details.mangaChanged.connect(markRead)
             }
           }
         }
@@ -124,6 +129,7 @@ Rectangle {
             width: 30
             height: 30
             anchors.centerIn: parent
+            visible: downloadProgress < 0 || downloadProgress >= 100
             Text {
               text: downloaded ? "✅" : "⬇"
               color: "white"
@@ -137,6 +143,18 @@ Rectangle {
               onClicked: updatesModel.downloadChapter(index)
             }
           }
+          RadialBarShape {
+            height: parent.height
+            width: parent.width
+            visible: downloadProgress > 0 && downloadProgress < 100
+            progressColor: "#e6436d"
+            value: downloadProgress
+            spanAngle: 270
+            dialType: RadialBarShape.DialType.FullDial
+            backgroundColor: "#6272a4"
+            penStyle: Qt.FlatCap
+            dialColor: "transparent"
+          }
         }
       }
     }
@@ -145,8 +163,7 @@ Rectangle {
       id: pulldown_handler
       threshold: 50
       onPulldownrelease: {
-        console.log("refresh")
-        //updatesModel.refresh()
+        updatesModel.refresh()
       }
     }
   }

@@ -5,8 +5,17 @@
 #include <QtWebSockets/QtWebSockets>
 
 #include "ChaptersModel.h"
-#include "networkmanager.h"
+#include "../networkmanager.h"
 #include "MangaDetailsModel.h"
+
+struct QueueInfo {
+  quint32  chapterIndex;
+  quint32  mangaId;
+  QString  state;
+  quint32  progress;
+  quint32  tries;
+  ChapterInfo chapterInfo;
+};
 
 class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
 {
@@ -20,15 +29,6 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
   NetworkManager* _networkManager = nullptr;
 
   QWebSocket _webSocket;
-
-  struct QueueInfo {
-    quint32  chapterIndex;
-    quint32  mangaId;
-    QString  state;
-    quint32  progress;
-    quint32  tries;
-    ChapterInfo chapterInfo;
-  };
   std::vector<QueueInfo> _queue;
 
   typedef quint32 MangaId;
@@ -87,6 +87,8 @@ public:
     networkManagerChanged();
   }
 
+  void setupWebsocket();
+
   Q_INVOKABLE void clear();
   Q_INVOKABLE void pause();
   Q_INVOKABLE void start();
@@ -94,6 +96,7 @@ public:
 signals:
   void statusChanged();
   void networkManagerChanged();
+  void downloadsUpdated(const std::vector<QueueInfo>& info);
 
 public slots:
   void onConnected();

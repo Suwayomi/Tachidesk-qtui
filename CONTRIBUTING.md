@@ -9,11 +9,11 @@ I don't currently have a road map as i'm working on getting basic features imple
 2. Install the dependencies
     - `gcc` and `g++`
     - `cmake >= 3.14`
-    - `qt5 >= 5.15.0` (must include development pacakges!)
-        - `qt5-base`
-        - `qt5-websockets`
-        - `qt5-quickcontrols`
-        - `qt5-quickcontrols2`
+    - `qt5 >= 6.2.0` (must include development pacakges!)
+        - `qt6-base`
+        - `qt6-websockets`
+        - `qt6-quickcontrols`
+        - `qt6-quickcontrols2`
     - `ninja` (optional)
 4. From the project root dir run:
     - Debug config

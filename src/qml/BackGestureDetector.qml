@@ -15,7 +15,7 @@ MouseArea {
   property bool tracing: false
   property bool allowedToWork: false
 
-  onPressed: {
+  onPressed: (mouse) => {
     if (allowedToWork) {
       xStart = mouse.x
       xPrev = mouse.x
@@ -28,7 +28,7 @@ MouseArea {
       mouse.accepted = false
   }
 
-  onPositionChanged: {
+  onPositionChanged: (mouse) => {
     if (!tracing) {
       mouse.accepted = false
       return
@@ -41,7 +41,7 @@ MouseArea {
     mouse.accepted = false
   }
 
-  onReleased: {
+  onReleased: (mouse) => {
     if (!tracing) {
       mouse.accepted = false
       return

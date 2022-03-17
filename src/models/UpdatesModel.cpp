@@ -1,5 +1,6 @@
 
 #include "UpdatesModel.h"
+#include "DownloadsModel.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -83,8 +84,14 @@ void UpdatesModel::componentComplete()
 {
   connect(&_webSocket, &QWebSocket::connected, this, &UpdatesModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &UpdatesModel::closed);
+  connect(
+      _networkManager,
+      &NetworkManager::receiveUpdates,
+      this,
+      &UpdatesModel::receivedReply);
+
   auto resolved = _networkManager->resolvedPath().arg("/api/v1/update");
-  bool ssl = resolved.startsWith("https");
+  bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
   resolved = QStringLiteral("%1://%2")
     .arg(ssl ? "wss" : "ws")
@@ -97,12 +104,44 @@ void UpdatesModel::componentComplete()
 
 /******************************************************************************
  *
+ * Method: onDownloadsUpdated()
+ *
+ *****************************************************************************/
+void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo>& queueInfo)
+{
+  for (auto& info : queueInfo) {
+    int row = 0;
+    for (auto& source : _sources) {
+      if (info.mangaId == source.id &&
+          info.chapterInfo.chapterNumber == source.chapterInfo.chapterNumber)
+      {
+        source.queueInfo = std::make_shared<QueueInfo>(info);
+        source.chapterInfo.downloaded = info.progress >= 100;
+        emit dataChanged(createIndex(row, 0), createIndex(row, 0), { RoleDownloadProgress, RoleDownloaded });
+        break;
+      }
+      row++;
+    }
+  }
+}
+
+/******************************************************************************
+ *
  * Method: receiveReply()
  *
  *****************************************************************************/
 void UpdatesModel::receivedReply(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  if (!downloads) {
+    downloads = std::make_shared<DownloadsModel>();
+    downloads->setNetworkManager(_networkManager);
+    downloads->setupWebsocket();
+    connect(downloads.get(), &DownloadsModel::downloadsUpdated, this, &UpdatesModel::onDownloadsUpdated);
+  }
+
+  if (reply.isEmpty()) {
+    return;
+  }
 
   _hasNext = reply["hasNextPage"].toBool();
 
@@ -116,7 +155,7 @@ void UpdatesModel::receivedReply(const QJsonDocument& reply)
     const auto& manga   = entry["manga"].toObject();
     auto& info          = _sources.emplace_back();
     info.id             = manga["id"].toInt();
-    info.sourceId       = manga["sourceId"].toInt();
+    info.sourceId       = manga["sourceId"].toString();
     info.title          = manga["title"].toString();
     info.thumbnailUrl   = manga["thumbnailUrl"].toString();
     info.url            = manga["url"].toString();
@@ -230,7 +269,14 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
       {
         return entry.chapterInfo.fetchedAt;
       }
-    //case Role
+
+    case RoleDownloadProgress:
+      {
+        if (!entry.queueInfo) {
+          return -1;
+        }
+        return entry.queueInfo->progress;
+      }
     default:
       return {};
   }
@@ -261,6 +307,7 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
                                           {RoleLastPageRead,  "lastPageRead"},
                                           {RoleChapterCount,  "chapterCount"},
                                           {RoleFetchedAt,     "fetchedAt"},
+                                          {RoleDownloadProgress,"downloadProgress"},
   };
 
   return roles;
@@ -277,13 +324,7 @@ void UpdatesModel::next()
     return;
   }
 
-  _networkManager->get(QStringLiteral("update/recentChapters/%1").arg(_pageNumber++));
-
-  connect(
-      _networkManager,
-      &NetworkManager::recievedReply,
-      this,
-      &UpdatesModel::receivedReply);
+  _networkManager->getUpdates(QStringLiteral("update/recentChapters/%1").arg(_pageNumber++));
 }
 
 /******************************************************************************
@@ -313,4 +354,25 @@ void UpdatesModel::downloadChapter(int index)
   entry.chapterInfo.downloaded = true;
 
   _networkManager->get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
+}
+
+/******************************************************************************
+ *
+ * Method: chapterRead()
+ *
+ *****************************************************************************/
+void UpdatesModel::chapterRead(qint32 mangaId, qint32 chapter)
+{
+  int i = 0;
+  for (auto& info : _sources) {
+    if (info.id == mangaId &&
+        info.chapterInfo.chapterNumber == chapter)
+    {
+      info.chapterInfo.read = true;
+      _networkManager->patch("read", "true",
+        QStringLiteral("manga/%1/chapter/%2").arg(mangaId).arg(chapter));
+      emit dataChanged(createIndex(i, 0), createIndex(i, 0), { RoleRead });
+    }
+    ++i;
+  }
 }

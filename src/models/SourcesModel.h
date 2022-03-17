@@ -3,7 +3,7 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 class SourcesModel : public QAbstractListModel, public QQmlParserStatus
 {
@@ -62,7 +62,7 @@ public:
     networkManagerChanged();
   }
 
-  void recievedReply(const QJsonDocument& reply);
+  void receivedReply(const QJsonDocument& reply);
 
 signals:
    void networkManagerChanged();

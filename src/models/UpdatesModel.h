@@ -5,9 +5,12 @@
 #include <QWebSocket>
 
 #include "ChaptersModel.h"
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 #include <optional>
+
+class DownloadsModel;
+struct QueueInfo;
 
 class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 {
@@ -21,6 +24,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 
   NetworkManager* _networkManager = nullptr;
   QWebSocket _webSocket;
+  std::shared_ptr<DownloadsModel> downloads;
 
   struct SourceInfo {
     qint32   id;
@@ -33,6 +37,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
     bool     freshData;
 
     ChapterInfo chapterInfo;
+    std::shared_ptr<QueueInfo> queueInfo;
   };
   std::vector<SourceInfo> _sources;
 
@@ -70,6 +75,7 @@ public:
     RoleLastPageRead,
     RoleDownloaded,
     RoleFetchedAt,
+    RoleDownloadProgress,
   };
 
   UpdatesModel(QObject* parent = nullptr);
@@ -96,6 +102,7 @@ public:
   Q_INVOKABLE void next();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
+  Q_INVOKABLE void chapterRead(qint32 mangaId, qint32 chapter);
 signals:
   void networkManagerChanged();
   void runningChanged();
@@ -106,4 +113,5 @@ public slots:
   void onConnected();
   void closed();
   void onTextMessageReceived(const QString& message);
+  void onDownloadsUpdated(const std::vector<QueueInfo>& info);
 };

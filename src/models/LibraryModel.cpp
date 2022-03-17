@@ -34,7 +34,7 @@ void LibraryModel::classBegin()
 
   /******************************************************************************
    *
-   * Method: recieveReply()
+   * Method: receiveReply()
    *
    *****************************************************************************/
   gotCategoryId = [&](const QJsonDocument& reply)

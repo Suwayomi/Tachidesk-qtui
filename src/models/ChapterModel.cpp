@@ -43,7 +43,7 @@ void ChapterModel::gotChapter(const QJsonDocument& reply)
     return;
   }
 
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
 
   auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
     vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
@@ -241,7 +241,7 @@ void ChapterModel::requestChapter(quint32 chapter)
 
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
       &ChapterModel::gotChapter);
 }

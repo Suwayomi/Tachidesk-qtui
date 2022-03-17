@@ -8,7 +8,7 @@ Item {
   id: base
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
-  signal chapterRead(int chapter)
+  signal chapterRead(int mangaId, int chapter)
 
   Component.onCompleted: {
     if (Qt.platform.os === "android")
@@ -68,7 +68,7 @@ Item {
         return
       }
       if (listView.atYEnd) {
-        chapterRead(chapterModel.chapterNumber)
+        chapterRead(chapterModel.mangaNumber, chapterModel.chapterNumber)
         chapterModel.chapterNumber++
         chapterModel.requestChapter(chapterModel.chapterNumber)
       }

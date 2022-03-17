@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
+#include <QDesktopServices>
 
 #define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
 #define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
@@ -18,13 +19,16 @@ void MangaDetails::processDetails(const QJsonObject& entry)
   id           = entry["id"].toInt();
   sourceId     = entry["sourceId"].toString();
   url          = entry["url"].toString();
+  realUrl      = entry["realUrl"].toString();
   title        = entry["title"].toString();
   thumbnailUrl = entry["thumbnailUrl"].toString();
   initalized   = entry["intialized"].toBool();
   author       = entry["author"].toString();
   artist       = entry["artist"].toString();
   description  = entry["description"].toString();
-  genre        = entry["genre"].toString();
+  for (const auto& ge : entry["genre"].toArray()) {
+    genre += ge.toString() + " ";
+  }
   status       = entry["status"].toString();
   inLibrary    = entry["inLibrary"].toBool();
 
@@ -53,7 +57,7 @@ void MangaDetailsModel::classBegin()
  *****************************************************************************/
 void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::recievedReply, this, nullptr);
+  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
 
   beginResetModel();
   _entries.clear();
@@ -77,7 +81,7 @@ void MangaDetailsModel::componentComplete()
 {
   connect(
       _networkManager,
-      &NetworkManager::recievedReply,
+      &NetworkManager::receivedReply,
       this,
       &MangaDetailsModel::gotDetails);
 
@@ -125,6 +129,10 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
     case RoleUrl:
       {
         return entry.url;
+      }
+    case RoleRealUrl:
+      {
+        return entry.realUrl;
       }
     case RoleTitle:
       {
@@ -182,6 +190,7 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> MangaDetailsModel::roleNames() const {
   static QHash<int, QByteArray> roles = {
     {RoleUrl, "url"},
+    {RoleRealUrl, "realUrl"},
     {RoleId, "id"},
     {RoleSourceId, "sourceId"},
     {RoleUrl, "url"},
@@ -238,3 +247,12 @@ void MangaDetailsModel::removeFromLibrary()
   emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});
 }
 
+/******************************************************************************
+ *
+ * Method: openUrl()
+ *
+ *****************************************************************************/
+void MangaDetailsModel::openUrl()
+{
+  QDesktopServices::openUrl(QUrl(_entries[0].realUrl));
+}

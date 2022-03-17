@@ -1,10 +1,92 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.0
-import QtQuick.Dialogs 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Rectangle {
   color: "#333333"
+
+  Popup {
+    id: hostnamePopup
+    width: parent.width * .80
+    height: parent.height * .25
+    focus: true
+    modal: true
+    anchors.centerIn: parent
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#333333"
+      ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 4
+        spacing: 4
+        Text {
+          color: "white"
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          text: qsTr("Server's Hostname")
+          font.pixelSize: 18
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          fontSizeMode: Text.Fit
+        }
+        TextField {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.pixelSize: 18
+          color: "white"
+          text: qsTr("%1").arg(settings.hostname)
+          inputMethodHints: Qt.ImhUrlCharactersOnly
+          onAccepted:  {
+            settings.hostname = text
+            hostnamePopup.close()
+          }
+        }
+      }
+    }
+  }
+
+  Popup {
+    id: languagePopup
+    width: parent.width * .80
+    height: parent.height * .25
+    focus: true
+    modal: true
+    anchors.centerIn: parent
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#333333"
+      ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 4
+        spacing: 4
+        Text {
+          color: "white"
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          text: qsTr("Filter Sources by Language")
+          font.pixelSize: 18
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          fontSizeMode: Text.Fit
+        }
+        TextField {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.pixelSize: 18
+          color: "white"
+          text: settings.lang
+          inputMethodHints: Qt.ImhUrlCharactersOnly
+          onAccepted:  {
+            settings.lang = text
+            languagePopup.close()
+          }
+        }
+      }
+    }
+  }
 
   ColumnLayout {
     anchors {
@@ -13,7 +95,19 @@ Rectangle {
       right: parent.right
       margins: 4
     }
-    spacing: 2
+    spacing: 4
+
+    Text {
+      color: "white"
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      text: qsTr("Settings")
+      font.pixelSize: 24
+      font.bold: true
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+      fontSizeMode: Text.Fit
+    }
 
     RowLayout {
       Layout.fillWidth: true
@@ -36,15 +130,13 @@ Rectangle {
         Layout.preferredWidth: parent.width * .75
         Layout.preferredHeight: 100
         font.pixelSize: 18
+        color: "white"
+        readOnly: true
         placeholderText: qsTr("%1").arg(settings.hostname)
-        inputMethodHints: Qt.ImhUrlCharactersOnly
-        onAccepted: settings.hostname = text
-      }
-      Button {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 100
-        text: "enter"
-        onClicked: settings.hostname = hostTextField.text
+        MouseArea {
+          anchors.fill: parent
+          onClicked: hostnamePopup.open()
+        }
       }
     }
 
@@ -72,12 +164,10 @@ Rectangle {
         font.pixelSize: 18
         placeholderText: settings.lang
         onAccepted: settings.lang = text
-      }
-      Button {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 100
-        text: "enter"
-        onClicked: settings.lang = langTextField.text
+        MouseArea {
+          anchors.fill: parent
+          onClicked: languagePopup.open()
+        }
       }
     }
 

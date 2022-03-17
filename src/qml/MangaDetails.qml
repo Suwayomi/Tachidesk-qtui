@@ -1,9 +1,9 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtGraphicalEffects 1.12
-import QtQuick.Window 2.2
-import QtWebSockets 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import QtQuick.Window
+import QtWebSockets
 
 import Tachidesk.Models 1.0
 
@@ -27,7 +27,7 @@ Item {
     mangaNumber: detailsModel.mangaNumber
   }
 
-  function markRead(chapter) {
+  function markRead(mangaId, chapter) {
     chaptersModel.chapterRead(chapter)
   }
 
@@ -61,11 +61,6 @@ Item {
           chaptersModel.downloadChapter(ChaptersModel.DownloadUnread)
           popup.close()
         }
-      }
-      Button {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        text: qsTr("Download Custom")
       }
     }
   }
@@ -224,6 +219,7 @@ Item {
         Layout.fillHeight: true
         Layout.fillWidth: true
         text: qsTr("View in Browser")
+        onClicked: detailsModel.openUrl()
       }
       Button {
         Layout.fillHeight: true
@@ -291,20 +287,6 @@ Item {
         font.pixelSize: 24
         fontSizeMode: Text.Fit
       }
-      Text {
-        id: downloadedText
-        anchors {
-          right: parent.right
-          top: parent.top
-          bottom: parent.bottom
-        }
-        color: "white"
-        text: downloaded ? "✅" : "⬇"
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        rightPadding: 12
-        font.pixelSize: 24
-      }
       MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -316,6 +298,48 @@ Item {
         onPressAndHold: {
           chapterNumberPopup = chapterIndex
           popupChapter.open()
+        }
+      }
+      Item {
+        id: downloadedText
+        anchors {
+          right: parent.right
+          top: parent.top
+          bottom: parent.bottom
+        }
+
+        width: parent.height * .75
+        Text {
+          id: downloadStatus
+          visible: progress < 0 || progress >= 100
+          anchors.fill: parent
+          color: "white"
+          text: downloaded ? "✅" : "⬇"
+          horizontalAlignment: Text.AlignRight
+          verticalAlignment: Text.AlignVCenter
+          rightPadding: 12
+          font.pixelSize: 24
+        }
+        RadialBarShape {
+          anchors {
+            centerIn: parent
+          }
+          height: parent.height * .90
+          width: parent.width * .90
+          visible: progress > 0 && progress < 100
+          progressColor: "#e6436d"
+          value: progress
+          spanAngle: 270
+          dialType: RadialBarShape.DialType.FullDial
+          backgroundColor: "#6272a4"
+          penStyle: Qt.FlatCap
+          dialColor: "transparent"
+        }
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+            chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterNumber)
+          }
         }
       }
     }

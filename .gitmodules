@@ -1,3 +1,4 @@
 [submodule "libs/SortFilterProxyModel"]
 	path = libs/SortFilterProxyModel
-	url = https://github.com/oKcerG/SortFilterProxyModel.git
+	url = https://github.com/CasparKielwein/SortFilterProxyModel.git
+  branch = feature/full_integration_to_qt6

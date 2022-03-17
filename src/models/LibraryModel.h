@@ -2,7 +2,7 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "networkmanager.h"
+#include "../networkmanager.h"
 
 class LibraryModel : public QAbstractListModel, public QQmlParserStatus
 {

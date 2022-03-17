@@ -40,7 +40,7 @@ Rectangle {
           Layout.fillHeight: true
           scale: 0.5
           fillMode: Image.PreserveAspectCrop
-          source: Qt.resolvedUrl("images/outline_filter_white_24dp.png")
+          source: "qrc:/Tachidesk/qtui/images/outline_filter_white_24dp.png"
       }
       TextField {
           id: searchBox
