@@ -27,7 +27,7 @@ Rectangle {
     return grid.cellWidth * 1.333
   }
 
-  color: "#333333"
+  color: "#212121"
 
   GridView {
     id: grid
@@ -82,7 +82,7 @@ Rectangle {
             left: image.left
             right: image.right
           }
-          color: "white"
+          color: "#F5F5F5"
           font.pixelSize: 14
           //font.weight: Font.DemiBold
           wrapMode: Text.WordWrap
@@ -107,7 +107,7 @@ Rectangle {
         Text {
           id: unreadText
           text: unread
-          color: "white"
+          color: "#F5F5F5"
           anchors.centerIn: parent
           font.pixelSize: 14
           font.bold: true

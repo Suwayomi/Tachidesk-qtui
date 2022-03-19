@@ -2,7 +2,7 @@ import QtQuick 2.8
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 2.1
-import QtQuick.Controls.Material 2.1
+import QtQuick.Controls.Material
 import Qt.labs.settings 1.0 as Labs
 
 ApplicationWindow {
@@ -56,7 +56,7 @@ ApplicationWindow {
   //}
 
   // Style settings
-  //Material.theme: Settings.lightTheme ? Material.Light : Material.Dark
+  Material.theme: settings.lightTheme ? Material.Light : Material.Dark
 
   title: "Tachidesk-qtui"
 

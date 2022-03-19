@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 Rectangle {
-  color: "#333333"
+  color: "#212121"
 
   Popup {
     id: hostnamePopup
@@ -16,13 +16,13 @@ Rectangle {
 
     Rectangle {
       anchors.fill: parent
-      color: "#333333"
+      color: "#212121"
       ColumnLayout {
         anchors.fill: parent
         anchors.margins: 4
         spacing: 4
         Text {
-          color: "white"
+          color: "#F5F5F5"
           Layout.fillWidth: true
           Layout.fillHeight: true
           text: qsTr("Server's Hostname")
@@ -35,7 +35,7 @@ Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
           font.pixelSize: 18
-          color: "white"
+          color: "#F5F5F5"
           text: qsTr("%1").arg(settings.hostname)
           inputMethodHints: Qt.ImhUrlCharactersOnly
           onAccepted:  {
@@ -57,13 +57,13 @@ Rectangle {
 
     Rectangle {
       anchors.fill: parent
-      color: "#333333"
+      color: "#212121"
       ColumnLayout {
         anchors.fill: parent
         anchors.margins: 4
         spacing: 4
         Text {
-          color: "white"
+          color: "#F5F5F5"
           Layout.fillWidth: true
           Layout.fillHeight: true
           text: qsTr("Filter Sources by Language")
@@ -76,7 +76,7 @@ Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
           font.pixelSize: 18
-          color: "white"
+          color: "#F5F5F5"
           text: settings.lang
           inputMethodHints: Qt.ImhUrlCharactersOnly
           onAccepted:  {
@@ -98,7 +98,7 @@ Rectangle {
     spacing: 4
 
     Text {
-      color: "white"
+      color: "#F5F5F5"
       Layout.fillWidth: true
       Layout.fillHeight: true
       text: qsTr("Settings")
@@ -114,7 +114,7 @@ Rectangle {
       Layout.preferredHeight: 100
       spacing: 4
       Text {
-        color: "white"
+        color: "#F5F5F5"
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
@@ -130,7 +130,7 @@ Rectangle {
         Layout.preferredWidth: parent.width * .75
         Layout.preferredHeight: 100
         font.pixelSize: 18
-        color: "white"
+        color: "#F5F5F5"
         readOnly: true
         placeholderText: qsTr("%1").arg(settings.hostname)
         MouseArea {
@@ -149,7 +149,7 @@ Rectangle {
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
         text: qsTr("language")
-        color: "white"
+        color: "#F5F5F5"
         font.pixelSize: 18
         fontSizeMode: Text.Fit
         horizontalAlignment: Text.AlignHCenter

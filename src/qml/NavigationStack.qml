@@ -127,7 +127,7 @@ Item {
   Rectangle {
     id: navigation
     visible: navigationVisible
-    color: "#333333"
+    color: "#212121"
     anchors {
       left: parent.left
       right: parent.right

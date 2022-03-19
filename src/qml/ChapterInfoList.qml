@@ -60,7 +60,7 @@ Item {
             text: "%1".arg(Qt.formatDate(fetchedAt, "MMM dd"))
             font.pixelSize: 16
             fontSizeMode: Text.Fit
-            color: "white"
+            color: "#F5F5F5"
           }
           Text {
             Layout.fillWidth: true
@@ -69,14 +69,14 @@ Item {
             font.bold: true
             font.pixelSize: 20
             fontSizeMode: Text.Fit
-            color: read ? "grey" : "white"
+            color: read ? "grey" : "#F5F5F5"
           }
           Text {
             Layout.fillWidth: true
             width: parent.width
             text: name
             fontSizeMode: Text.Fit
-            color: "white"
+            color: "#F5F5F5"
           }
         }
 
@@ -113,7 +113,7 @@ Item {
         //    anchors.centerIn: parent
         //    Text {
         //      text: downloaded ? "✅" : "⬇"
-        //      color: "white"
+        //      color: "#F5F5F5"
         //      anchors.centerIn: parent
         //      font.bold: true
         //      font.pixelSize: 20

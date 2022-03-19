@@ -46,6 +46,8 @@ qt_add_qml_module(qtui
     ${qml_files}
   RESOURCES
     ${icon_files}
+    libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf
+    libs/QmlBridgeForMaterialDesignIcons/Icon.js
     android/AndroidManifest.xml
     android/res/values/styles.xml
   IMPORTS

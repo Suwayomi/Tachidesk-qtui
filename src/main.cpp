@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QUrl>
+#include <QFontDatabase>
 
 #include "App.h"
 #include "commandline.h"
@@ -26,6 +27,10 @@ int main(int argc, char *argv[])
 #else
   QGuiApplication app(argc, argv);
 #endif
+
+  if (QFontDatabase::addApplicationFont(":/Tachidesk/qtui/libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf") < 0) {
+    assert(false);
+  }
 
   CommandLine commandline(&app);
   App _app(commandline);

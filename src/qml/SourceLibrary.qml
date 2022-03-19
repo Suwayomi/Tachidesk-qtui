@@ -20,7 +20,7 @@ Item {
       }
       width: parent.width
       height: 50
-      color: "#333333"
+      color: "#212121"
       RowLayout {
           anchors.fill: searchField
           spacing: 0
@@ -37,7 +37,7 @@ Item {
           TextField {
             id: search
             leftPadding: 0
-            color: "white"
+            color: "#F5F5F5"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.fillHeight: true

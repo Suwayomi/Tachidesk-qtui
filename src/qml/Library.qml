@@ -28,7 +28,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: "#444444"
+    color: "#424242"
   }
 
   Text {
@@ -38,7 +38,7 @@ Item {
       left: parent.left
       margins: 4
     }
-    color: "white"
+    color: "#F5F5F5"
     text: qsTr("Library")
     font.pixelSize: 24
     font.bold: true
@@ -61,7 +61,7 @@ Item {
     TextField {
       id: searchBox
       leftPadding: 0
-      color: "white"
+      color: "#F5F5F5"
       font.pointSize: 12
       horizontalAlignment: TextInput.AlignRight
       Layout.fillWidth: true

@@ -2,3 +2,6 @@
 	path = libs/SortFilterProxyModel
 	url = https://github.com/CasparKielwein/SortFilterProxyModel.git
   branch = feature/full_integration_to_qt6
+[submodule "libs/QmlBridgeForMaterialDesignIcons"]
+	path = libs/QmlBridgeForMaterialDesignIcons
+	url = git@github.com:mgn-norm/QmlBridgeForMaterialDesignIcons.git

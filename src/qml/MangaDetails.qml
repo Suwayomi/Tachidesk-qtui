@@ -266,10 +266,10 @@ Item {
     delegate: Rectangle {
       width: chapterView.width
       height: 60
-      color: "#333333"
+      color: "#212121"
       border {
         width: 1
-        color: "white"
+        color: "#F5F5F5"
       }
       Text {
         anchors {
@@ -280,7 +280,7 @@ Item {
           margins: 4
         }
         text: name
-        color: read ? "grey" : "white"
+        color: read ? "grey" : "#F5F5F5"
         horizontalAlignment: Text.AlignCenter
         verticalAlignment: Text.AlignVCenter
         leftPadding: 12
@@ -313,7 +313,7 @@ Item {
           id: downloadStatus
           visible: progress < 0 || progress >= 100
           anchors.fill: parent
-          color: "white"
+          color: "#F5F5F5"
           text: downloaded ? "✅" : "⬇"
           horizontalAlignment: Text.AlignRight
           verticalAlignment: Text.AlignVCenter
@@ -358,7 +358,7 @@ Item {
     color: "#0492c2"
     Text {
       text: qsTr("▶ Start")
-      color: "white"
+      color: "#F5F5F5"
       anchors.centerIn: parent
       font.pixelSize: 20
       font.bold: true

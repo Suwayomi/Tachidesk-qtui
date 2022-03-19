@@ -8,7 +8,7 @@ import CustomControls 1.0
 
 Rectangle {
 
-  color: "#333333"
+  color: "#212121"
 
   DownloadsModel {
     id: chapterInfoModel
@@ -96,7 +96,7 @@ Rectangle {
             text: "%1".arg(Qt.formatDate(fetchedAt, "MMM dd"))
             font.pixelSize: 16
             fontSizeMode: Text.Fit
-            color: "white"
+            color: "#F5F5F5"
           }
           Text {
             Layout.fillWidth: true
@@ -105,14 +105,14 @@ Rectangle {
             font.bold: true
             font.pixelSize: 20
             fontSizeMode: Text.Fit
-            color: read ? "grey" : "white"
+            color: read ? "grey" : "#F5F5F5"
           }
           Text {
             Layout.fillWidth: true
             width: parent.width
             text: name
             fontSizeMode: Text.Fit
-            color: "white"
+            color: "#F5F5F5"
           }
         }
 

@@ -7,7 +7,7 @@ import SortFilterProxyModel 0.2
 
 Rectangle {
 
-  color: "#333333"
+  color: "#212121"
 
   ExtensionModel {
     id: extensionModel
@@ -42,7 +42,7 @@ Rectangle {
     }
   }
 
-  RowLayout{
+  RowLayout {
       id: searchField
       height: 50
       width: parent.width
@@ -60,7 +60,7 @@ Rectangle {
       TextField {
         id: searchBox
         leftPadding: 0
-        color: "white"
+        color: "#F5F5F5"
         font.pointSize: 12
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -93,11 +93,11 @@ Rectangle {
         Layout.alignment: Qt.AlignLeft
         horizontalAlignment: Text.AlignLeft
         text: name
-        color: "white"
+        color: "#F5F5F5"
       }
       Text {
         text: lang
-        color: "white"
+        color: "#F5F5F5"
       }
       Button {
         Layout.alignment: Qt.AlignRight

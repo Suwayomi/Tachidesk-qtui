@@ -7,7 +7,7 @@ import SortFilterProxyModel 0.2
 
 Rectangle {
 
-  color: "#333333"
+  color: "#212121"
 
   SourcesModel {
     id: sourcesModel
@@ -46,7 +46,7 @@ Rectangle {
           id: searchBox
           leftPadding: 0
           visible: true
-          color: "white"
+          color: "#F5F5F5"
           font.pointSize: 12
           Layout.fillWidth: true
         Layout.fillHeight: true
@@ -77,11 +77,11 @@ Rectangle {
         Layout.alignment: Qt.AlignLeft
         horizontalAlignment: Text.AlignLeft
         text: name
-        color: "white"
+        color: "#F5F5F5"
       }
       Text {
         text: lang
-        color: "white"
+        color: "#F5F5F5"
       }
       Button {
         Layout.alignment: Qt.AlignRight
