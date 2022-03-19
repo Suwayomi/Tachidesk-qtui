@@ -4,6 +4,9 @@ Settings::Settings()
     : _settings("Tachidesk-qtui", "Suwayomi")
 {
   load();
+  connect(this, &Settings::hostnameChanged, this, &Settings::save);
+  connect(this, &Settings::langChanged, this, &Settings::save);
+  connect(this, &Settings::nsfwChanged, this, &Settings::save);
 }
 
 Settings::~Settings()
