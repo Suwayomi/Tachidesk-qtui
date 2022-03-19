@@ -7,6 +7,8 @@ import QtWebSockets
 
 import Tachidesk.Models 1.0
 
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
+
 Item {
   id: base
   property alias mangaNumber: detailsModel.mangaNumber
@@ -208,7 +210,7 @@ Item {
       Button {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        text: details.inLibrary ? qsTr("❤\nIn Library") : qsTr("♡\nAdd to Library")
+        text: details.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
         onClicked:  {
           mangaChanged()
           details.inLibrary ? detailsModel.removeFromLibrary() : detailsModel.addToLibrary()
@@ -314,7 +316,7 @@ Item {
           visible: progress < 0 || progress >= 100
           anchors.fill: parent
           color: "#F5F5F5"
-          text: downloaded ? "✅" : "⬇"
+          text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
           horizontalAlignment: Text.AlignRight
           verticalAlignment: Text.AlignVCenter
           rightPadding: 12

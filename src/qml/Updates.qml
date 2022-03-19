@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.0
 import Tachidesk.Models 1.0
 import SortFilterProxyModel 0.2
 
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
+
 Rectangle {
 
   color: "#212121"
@@ -131,7 +133,9 @@ Rectangle {
             anchors.centerIn: parent
             visible: downloadProgress < 0 || downloadProgress >= 100
             Text {
-              text: downloaded ? "✅" : "⬇"
+              text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
+              horizontalAlignment: Text.AlignCenter
+              verticalAlignment: Text.AlignVCenter
               color: "#F5F5F5"
               anchors.centerIn: parent
               font.bold: true

@@ -9,7 +9,7 @@ ApplicationWindow {
   id: root
 
   // Application main font
-  //font.family: Settings.font || appFont.name
+  font.family: "Roboto"//Settings.font || appFont.name
 
   height: 800
   width: 400
@@ -20,67 +20,12 @@ ApplicationWindow {
     root.visibility = changeTo
   }
 
-  //Labs.Settings {
-  //    id: windowSettings
-  //    property var windowX
-  //    property var windowY
-  //    property var windowWidth
-  //    property var windowHeight
-  //    property var windowVisibility
-  //    function update() {
-  //        Qt.callLater(function() {
-  //            if (visibility === Window.Windowed) {
-  //                windowX = x
-  //                windowY = y
-  //                windowWidth = width
-  //                windowHeight = height
-  //            }
-  //            windowVisibility = visibility
-  //        })
-  //    }
-  //    Component.onCompleted: {
-  //        if (isMobile()) return
-  //        if (visibility === Window.Windowed) {
-  //            x = windowX !== undefined ? windowX : x
-  //            y = windowY !== undefined ? windowY : y
-  //            width = windowWidth !== undefined ? windowWidth : width
-  //            height = windowHeight !== undefined ? windowHeight : height
-  //            visibility = windowVisibility === Window.Maximized ? windowVisibility : visibility
-  //        }
-  //        root.onXChanged.connect(update)
-  //        root.onYChanged.connect(update)
-  //        root.onWidthChanged.connect(update)
-  //        root.onHeightChanged.connect(update)
-  //        root.onVisibilityChanged.connect(update)
-  //    }
-  //}
-
   // Style settings
   Material.theme: settings.lightTheme ? Material.Light : Material.Dark
 
-  title: "Tachidesk-qtui"
-
-  //visibility: (!isMobile() && Settings.minimizeOnStartup) ? Window.Minimized : Window.AutomaticVisibility
-
-  property int restoredVisibility: Window.AutomaticVisibility
-  //onAppFullScreenChanged: {
-  //    if (visibility != Window.FullScreen) {
-  //        restoredVisibility = visibility
-  //    }
-  //    visibility = appFullScreen ? Window.FullScreen : restoredVisibility
-  //}
+  title: "Tachidesk Qtui"
 
   property variant rootWindow: root
-  property variant g_tooltip
-  property bool g_contextMenuVisible: false
-  //property bool appFullScreen: isMobile() ? (view.playerVisible && !isPortraitMode) : false
-  property bool isPortraitMode: Screen.primaryOrientation === Qt.PortraitOrientation
-                                || Screen.primaryOrientation === Qt.InvertedPortraitOrientation
-
-  //function fitToAspectRatio() {
-  //    height = Math.floor(view.width * 0.5625)
-  //}
-
   function isMobile() {
       return {android: true, ios: true, winphone: true}[Qt.platform.os] || false;
   }
@@ -128,16 +73,5 @@ ApplicationWindow {
     }
   }
 
-  //FontLoader {
-  //    source: "fonts/MaterialIcons-Regular.ttf"
-  //    name: "Material Icons"
-  //}
-
-  //FontLoader {
-  //    id: appFont
-
-  //    source: "fonts/NotoSans-Regular.ttf"
-  //    name: "Noto Sans"
-  //}
 }
 
