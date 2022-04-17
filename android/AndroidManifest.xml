@@ -9,11 +9,8 @@
 
     <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true"/>
 
-    <application android:name="org.qtproject.qt.android.bindings.QtApplication" android:allowNativeHeapPointerTagging="false" android:debuggable="true" android:extractNativeLibs="true" android:hardwareAccelerated="true" android:label="Tachidesk Qtui"
-      android:requestLegacyExternalStorage="true"
-      android:icon="@drawable/icon"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <activity android:name="org.qtproject.qt.android.bindings.QtActivity" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:label="Tachidesk-qtui" android:launchMode="singleTop" android:screenOrientation="unspecified" android:theme="@style/AppTheme">
+    <application android:name="org.qtproject.qt.android.bindings.QtApplication" android:allowNativeHeapPointerTagging="false" android:debuggable="true" android:extractNativeLibs="true" android:hardwareAccelerated="true" android:label="Tachidesk Qtui" android:requestLegacyExternalStorage="true" android:icon="@drawable/icon" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity android:name="org.qtproject.qt.android.bindings.QtActivity" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:label="Tachidesk-qtui" android:launchMode="singleTop" android:screenOrientation="unspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,7 +18,7 @@
             </intent-filter>
             <meta-data android:name="android.app.lib_name" android:value="qtui"/>
             <meta-data android:name="android.app.arguments" android:value=""/>
-            <meta-data android:name="android.app.extract_android_style" android:value="default"/>
+            <meta-data android:name="android.app.extract_android_style" android:value="minimal"/>
         </activity>
     </application>
 
