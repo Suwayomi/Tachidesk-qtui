@@ -97,6 +97,7 @@ public:
   }
 
   Q_INVOKABLE void chapterRead(qint32 chapter);
+  Q_INVOKABLE void previousChaptersRead(qint32 chapter, bool read);
   Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
 
 signals:
@@ -108,4 +109,5 @@ signals:
 public slots:
   void gotChapters(const QJsonDocument& reply);
   void onDownloadsUpdated(const std::vector<QueueInfo>& info);
+  void receivePatchReply();
 };

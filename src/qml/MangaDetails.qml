@@ -95,6 +95,24 @@ Item {
           popupChapter.close()
         }
       }
+      Button {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        text: qsTr("Mark previous as read")
+        onClicked: {
+          chaptersModel.previousChaptersRead(chapterNumberPopup, true)
+          popupChapter.close()
+        }
+      }
+      Button {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        text: qsTr("Mark previous as unread")
+        onClicked: {
+          chaptersModel.previousChaptersRead(chapterNumberPopup, false)
+          popupChapter.close()
+        }
+      }
     }
   }
 

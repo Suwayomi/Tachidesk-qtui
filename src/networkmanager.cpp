@@ -216,4 +216,6 @@ void NetworkManager::patchReply()
   }
 
   reply->deleteLater();
+
+  emit receivePatch();
 }

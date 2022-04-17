@@ -25,6 +25,7 @@ signals:
   void receiveChapters(const QJsonDocument& reply);
   void receiveUpdates(const QJsonDocument& reply);
   void abortChapterRequest();
+  void receivePatch();
 
 private slots:
   void endpointReply();
@@ -63,7 +64,7 @@ public:
         reply,
         &QNetworkReply::finished,
         this,
-        &NetworkManager::endpointReply);
+        &NetworkManager::patchReply);
 
   }
 

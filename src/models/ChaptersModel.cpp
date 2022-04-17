@@ -71,9 +71,13 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
   _loading = !_chapters.size();
   emit loadingChanged();
 
-  _chapters.clear();
 
-  beginResetModel();
+  bool reset = reply.array().size() != _chapters.size();
+  if (reset) {
+    beginResetModel();
+  }
+
+  _chapters.clear();
 
   for (const auto& entry_arr : reply.array()) {
     const auto& entry = entry_arr.toObject();
@@ -86,12 +90,27 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
   }
   emit lastReadChapterChanged();
 
-  endResetModel();
+  if (reset) {
+    endResetModel();
+  }
+  else {
+    emit dataChanged( createIndex(0, 0), createIndex(_chapters.size(), 0));
+  }
 
   if (!_cachedChapters) {
     _cachedChapters = true;
     requestChapters(true);
   }
+}
+
+/******************************************************************************
+ *
+ * receivePatchReply
+ *
+ *****************************************************************************/
+void ChaptersModel::receivePatchReply()
+{
+  requestChapters(false);
 }
 
 /******************************************************************************
@@ -117,6 +136,12 @@ void ChaptersModel::componentComplete()
       &NetworkManager::receiveChapters,
       this,
       &ChaptersModel::gotChapters);
+
+  connect(
+      _networkManager,
+      &NetworkManager::receivePatch,
+      this,
+      &ChaptersModel::receivePatchReply);
 
   requestChapters(_cachedChapters);
 }
@@ -247,6 +272,17 @@ void ChaptersModel::chapterRead(qint32 chapter)
   emit lastReadChapterChanged();
 
   emit dataChanged(index(chapterIndex, 0), index(chapterIndex, 0));
+}
+
+/******************************************************************************
+ *
+ * Method: chapterRead()
+ *
+ *****************************************************************************/
+void ChaptersModel::previousChaptersRead(qint32 chapter, bool read)
+{
+  _networkManager->patch("markPrevRead", read ? "true" : "false",
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
 }
 
 /******************************************************************************
