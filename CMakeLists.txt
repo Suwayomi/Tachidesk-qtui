@@ -96,3 +96,5 @@ target_link_libraries(qtui
     SortFilterProxyModel)
 
 qt_finalize_executable(qtui)
+
+install (TARGETS qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
