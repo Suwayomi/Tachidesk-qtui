@@ -66,6 +66,7 @@ void ChapterModel::gotChapter(const QJsonDocument& reply)
   info.index        = entry["index"].toInt();
   info.pageCount    = entry["pageCount"].toInt();
   _pageCount = info.pageCount;
+  chapterLoaded(entry["lastPageRead"].toInt());
   emit pageCountChanged();
 
   info.chapterCount = entry["chapterCount"].toInt();
@@ -79,6 +80,7 @@ void ChapterModel::gotChapter(const QJsonDocument& reply)
   insert_sorted(_chapters, info);
 
   endInsertRows();
+
 }
 
 /******************************************************************************

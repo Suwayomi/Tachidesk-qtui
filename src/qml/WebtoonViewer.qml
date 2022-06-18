@@ -8,6 +8,7 @@ Item {
   id: base
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
+  property int lastReadPage: 0
   signal chapterRead(int mangaId, int chapter)
 
   Component.onCompleted: {
@@ -23,6 +24,25 @@ Item {
     id: chapterModel
     nm: networkManager
   }
+
+  Connections {
+    target: chapterModel
+    // doesn't work?
+    function onChapterLoaded(lastRead) {
+      if (lastRead) {
+        lastReadPage = lastRead
+        listView.positionViewAtIndex(lastRead, ListView.Beginning)
+      }
+    }
+  }
+
+  function imageLoaded() {
+    if (lastReadPage) {
+      listView.positionViewAtIndex(lastReadPage, ListView.Beginning)
+      lastReadPage = 0
+    }
+  }
+
   PinchArea {
     id: pinchArea
     width: Math.max(listView.contentWidth, listView.width)
@@ -43,6 +63,7 @@ Item {
     contentWidth:  pinchArea.width
     synchronousDrag: true
     delegate: WebtoonImage {
+      onImageLoaded: base.imageLoaded()
     }
     // debug rectangle
     //delegate: Rectangle {

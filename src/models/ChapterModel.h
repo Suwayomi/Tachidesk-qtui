@@ -86,6 +86,7 @@ signals:
    void pageCountChanged();
    void pageIndexChanged();
    void chapterNumberChanged();
+   void chapterLoaded(int lastRead);
 
 public slots:
   void gotChapter(const QJsonDocument& reply);
