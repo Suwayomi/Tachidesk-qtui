@@ -1,8 +1,8 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
 
-import Tachidesk.Models 1.0
+import Tachidesk.Models
 
 Item {
   id: base
@@ -41,6 +41,7 @@ Item {
     cacheBuffer: 10000
     maximumFlickVelocity: 10000
     contentWidth:  pinchArea.width
+    synchronousDrag: true
     delegate: WebtoonImage {
     }
     // debug rectangle
@@ -62,6 +63,7 @@ Item {
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       chapterModel.updateChapter(indexIs)
+      currentIndex = indexIs
     }
     onAtYEndChanged: {
       if (!listviewLoaded) {
@@ -73,5 +75,24 @@ Item {
         chapterModel.requestChapter(chapterModel.chapterNumber)
       }
     }
+
+    Text {
+      id: infoText
+      anchors {
+        margins: 5
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+      }
+      color: "#F5F5F5"
+      font.pixelSize: 14
+      wrapMode: Text.WordWrap
+      maximumLineCount: 3
+      text: ("%1 / %2").arg(chapterModel.pageIndex).arg(chapterModel.pageCount)
+      style: Text.Outline
+      styleColor: "black"
+      horizontalAlignment: Text.AlignHCenter
+    }
   }
+
 }

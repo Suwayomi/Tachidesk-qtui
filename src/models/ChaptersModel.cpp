@@ -14,19 +14,6 @@
 
 IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChaptersModel)
 
-void ChapterInfo::processChapter(const QJsonObject& entry)
-{
-  url          = entry["url"].toString();
-  name         = entry["name"].toString();
-  chapterNumber= entry["chapterNumber"].toInt();
-  read         = entry["read"].toBool();
-  index        = entry["index"].toInt();
-  pageCount    = entry["pageCount"].toInt();
-  chapterCount = entry["chapterCount"].toInt();
-  lastPageRead = entry["lastPageRead"].toInt();
-  downloaded   = entry["downloaded"].toBool();
-  fetchedAt    = QDateTime::fromSecsSinceEpoch(entry["fetchedAt"].toInt());
-}
 
 /******************************************************************************
  *

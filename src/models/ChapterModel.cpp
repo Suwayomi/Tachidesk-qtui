@@ -65,6 +65,9 @@ void ChapterModel::gotChapter(const QJsonDocument& reply)
   info.read         = entry["read"].toBool();
   info.index        = entry["index"].toInt();
   info.pageCount    = entry["pageCount"].toInt();
+  _pageCount = info.pageCount;
+  emit pageCountChanged();
+
   info.chapterCount = entry["chapterCount"].toInt();
 
   _chapterCount = info.chapterCount;
@@ -216,6 +219,10 @@ void ChapterModel::updateChapter(qint32 page)
   if (!entry) {
     return;
   }
+  _pageCount = entry->pageCount;
+  _pageIndex = page - chapterNumber + 1;
+  pageCountChanged();
+  pageIndexChanged();
 
   _networkManager->patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));

@@ -4,25 +4,9 @@
 #include <QQmlParserStatus>
 
 #include "../networkmanager.h"
-
-struct ChapterInfo {
-  QString  url;
-  QString  name;
-  qint32   chapterNumber;
-  bool     read;
-  bool     downloaded;
-  quint32  index;
-  quint32  pageCount;
-  quint32  chapterCount;
-  quint32  lastPageRead;
-  QDateTime  fetchedAt;
-  std::optional<qint32>  downloadProgress;
-
-  void processChapter(const QJsonObject& entry);
-};
+#include "common_structs.h"
 
 class DownloadsModel;
-struct QueueInfo;
 
 class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 {

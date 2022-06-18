@@ -7,15 +7,7 @@
 #include "ChaptersModel.h"
 #include "../networkmanager.h"
 #include "MangaDetailsModel.h"
-
-struct QueueInfo {
-  quint32  chapterIndex;
-  quint32  mangaId;
-  QString  state;
-  quint32  progress;
-  quint32  tries;
-  ChapterInfo chapterInfo;
-};
+#include "common_structs.h"
 
 class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
 {
