@@ -9,6 +9,7 @@ Item {
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
   property int lastReadPage: 0
+  property bool positioned: false
   signal chapterRead(int mangaId, int chapter)
 
   Component.onCompleted: {
@@ -37,9 +38,9 @@ Item {
   }
 
   function imageLoaded() {
-    if (lastReadPage) {
+    if (lastReadPage && !positioned) {
       listView.positionViewAtIndex(lastReadPage, ListView.Beginning)
-      lastReadPage = 0
+      positioned = true
     }
   }
 
