@@ -221,6 +221,8 @@ void ChapterModel::updateChapter(qint32 page)
   if (!entry) {
     return;
   }
+  _chapterNumber = chapterNumber;
+  chapterNumberChanged();
   _pageCount = entry->pageCount;
   _pageIndex = page - chapterNumber + 1;
   pageCountChanged();

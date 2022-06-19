@@ -4,6 +4,8 @@ import QtQuick.Window
 
 import Tachidesk.Models
 
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
+
 Item {
   id: base
   property alias mangaNumber: chapterModel.mangaNumber
@@ -28,9 +30,8 @@ Item {
 
   Connections {
     target: chapterModel
-    // doesn't work?
     function onChapterLoaded(lastRead) {
-      if (lastRead) {
+      if (lastRead && !positioned) {
         lastReadPage = lastRead
         listView.positionViewAtIndex(lastRead, ListView.Beginning)
       }
@@ -63,6 +64,7 @@ Item {
     maximumFlickVelocity: 10000
     contentWidth:  pinchArea.width
     synchronousDrag: true
+    snapMode: ListView.NoSnap
     delegate: WebtoonImage {
       onImageLoaded: base.imageLoaded()
     }
@@ -77,11 +79,17 @@ Item {
     //    text: name +  chapterUrl
     //  }
     //}
+
+
     property bool listviewLoaded: false
     // TODO position at last page read
     Component.onCompleted: {
       listviewLoaded = true
     }
+    onMovementStarted: {
+      headerBar.height = 0
+    }
+
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       chapterModel.updateChapter(indexIs)
@@ -115,6 +123,78 @@ Item {
       styleColor: "black"
       horizontalAlignment: Text.AlignHCenter
     }
+
+    MouseArea {
+      anchors.centerIn: parent
+      height: parent.height / 2
+      width: parent.width / 2
+      onClicked: !headerBar.height ? headerBar.height = 55 : headerBar.height = 0
+    }
   }
 
+  ToolBar {
+    id: headerBar
+    //Material.foreground: rootWindow.Material.foreground
+    background: Rectangle {
+      anchors.fill: parent
+      color: "#424242"
+      opacity: 0.8
+    }
+
+    Text {
+      anchors {
+        left: parent.left
+        top: parent.top
+        bottom: parent.bottom
+      }
+      font.family: "Material Design Icons"
+      font.pixelSize: 20
+      verticalAlignment: Text.AlignVCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#F5F5F5"
+      text: MdiFont.Icon.arrowLeft
+    }
+
+    MouseArea {
+      anchors {
+        left: parent.left
+        top: parent.top
+        bottom: parent.bottom
+      }
+      width: 50
+      onClicked: pop()
+    }
+
+    Text {
+      id: chapterText
+      anchors {
+        margins: 5
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        top: parent.top
+      }
+      color: "#F5F5F5"
+      font.pixelSize: 14
+      wrapMode: Text.WordWrap
+      maximumLineCount: 3
+      text: "Chapter %1".arg(chapterModel.chapterNumber)
+      style: Text.Outline
+      styleColor: "black"
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+    }
+    height: 55
+    visible: height > 0
+    anchors {
+      top: parent.top
+      right: parent.right
+      left: parent.left
+    }
+    Behavior on height {
+      NumberAnimation {
+          easing.type: Easing.OutCubic
+      }
+    }
+  }
 }
