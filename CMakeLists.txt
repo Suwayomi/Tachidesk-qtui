@@ -97,4 +97,6 @@ target_link_libraries(qtui
 
 qt_finalize_executable(qtui)
 
-install (TARGETS qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
+if (NOT ANDROID)
+  install (TARGETS qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
+endif()
