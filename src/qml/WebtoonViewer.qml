@@ -64,7 +64,6 @@ Item {
     maximumFlickVelocity: 10000
     contentWidth:  pinchArea.width
     synchronousDrag: true
-    snapMode: ListView.NoSnap
     delegate: WebtoonImage {
       onImageLoaded: base.imageLoaded()
     }
