@@ -34,6 +34,7 @@ Item {
       if (lastRead && !positioned) {
         lastReadPage = lastRead
         listView.positionViewAtIndex(lastRead, ListView.Beginning)
+        console.log("jumping to:", lastRead)
       }
     }
   }
@@ -41,6 +42,7 @@ Item {
   function imageLoaded() {
     if (lastReadPage && !positioned) {
       listView.positionViewAtIndex(lastReadPage, ListView.Beginning)
+      console.log("jumping to:", lastReadPage)
       positioned = true
     }
   }
@@ -81,7 +83,6 @@ Item {
 
 
     property bool listviewLoaded: false
-    // TODO position at last page read
     Component.onCompleted: {
       listviewLoaded = true
     }
@@ -92,7 +93,6 @@ Item {
     onMovementEnded: {
       var indexIs = indexAt(contentX,contentY + base.height - 10)
       chapterModel.updateChapter(indexIs)
-      currentIndex = indexIs
     }
     onAtYEndChanged: {
       if (!listviewLoaded) {
