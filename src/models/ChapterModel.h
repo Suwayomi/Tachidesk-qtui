@@ -14,6 +14,7 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(NetworkManager* nm   READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(qint32 mangaNumber   MEMBER _mangaNumber    NOTIFY mangaNumberChanged)
   Q_PROPERTY(qint32 chapterNumber MEMBER _chapterNumber  NOTIFY chapterNumberChanged)
+  Q_PROPERTY(QString chapterName  MEMBER _chapterName    NOTIFY chapterNameChanged)
   Q_PROPERTY(qint32 pageCount     MEMBER _pageCount      NOTIFY pageCountChanged)
   Q_PROPERTY(qint32 pageIndex     MEMBER _pageIndex      NOTIFY pageIndexChanged)
 
@@ -33,6 +34,7 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
   qint32 _chapterNumber;
+  QString _chapterName;
   quint32 _chapterCount;
   qint32 _pageCount = 0;
   qint32 _pageIndex = 0;
@@ -86,6 +88,7 @@ signals:
    void pageCountChanged();
    void pageIndexChanged();
    void chapterNumberChanged();
+   void chapterNameChanged();
    void chapterLoaded(int lastRead);
 
 public slots:

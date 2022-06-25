@@ -12,8 +12,9 @@ import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 Item {
   id: base
   property alias mangaNumber: detailsModel.mangaNumber
-  property var doWrap: false
+  property bool doWrap: false
   property int chapterNumberPopup
+  property bool chapterReadPopup: false
 
   signal mangaChanged();
 
@@ -30,7 +31,7 @@ Item {
   }
 
   function markRead(mangaId, chapter) {
-    chaptersModel.chapterRead(chapter)
+    chaptersModel.chapterRead(chapter, true)
   }
 
   property var details: detailsModel.get(0)
@@ -91,7 +92,7 @@ Item {
         Layout.fillHeight: true
         text: qsTr("Mark as read/unread")
         onClicked: {
-          chaptersModel.chapterRead(chapterNumberPopup)
+          chaptersModel.chapterRead(chapterNumberPopup, !chapterReadPopup)
           popupChapter.close()
         }
       }
@@ -317,6 +318,8 @@ Item {
         }
         onPressAndHold: {
           chapterNumberPopup = chapterIndex
+          console.log("chapter was : ", read)
+          chapterReadPopup = read
           popupChapter.open()
         }
       }
@@ -391,7 +394,7 @@ Item {
                                      { mangaNumber: detailsModel.mangaNumber,
                                        chapter: chaptersModel.lastReadChapter })
         viewer.chapterRead.connect((chapter) => {
-          chaptersModel.chapterRead(chapter)
+          chaptersModel.chapterRead(chapter, true)
         })
       }
     }

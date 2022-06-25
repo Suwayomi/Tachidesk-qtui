@@ -81,9 +81,8 @@ void ChapterModel::gotChapter(const QJsonDocument& reply)
 
   endInsertRows();
 
-  if (!pageStart) {
-    updateChapter(0);
-  }
+  _chapterName = info.name;
+  emit chapterNameChanged();
 }
 
 /******************************************************************************
@@ -224,7 +223,7 @@ void ChapterModel::updateChapter(qint32 page)
   if (!entry) {
     return;
   }
-  _chapterNumber = entry->chapterNumber;
+  _chapterName = entry->name;
   chapterNumberChanged();
   _pageCount = entry->pageCount;
   _pageIndex = page - chapterNumber + 1;

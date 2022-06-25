@@ -165,7 +165,6 @@ Rectangle {
 
     PullToRefreshHandler {
       id: pulldown_handler
-      threshold: 50
       onPulldownrelease: {
         updatesModel.refresh()
       }

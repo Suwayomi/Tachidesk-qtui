@@ -80,7 +80,7 @@ public:
     networkManagerChanged();
   }
 
-  Q_INVOKABLE void chapterRead(qint32 chapter);
+  Q_INVOKABLE void chapterRead(quint64 chapter, bool read);
   Q_INVOKABLE void previousChaptersRead(qint32 chapter, bool read);
   Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
 

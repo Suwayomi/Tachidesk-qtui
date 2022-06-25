@@ -17,7 +17,15 @@ ApplicationWindow {
 
   function changeVisiblity(changeTo) {
       console.log("root visible: ", changeTo)
-    root.visibility = changeTo
+    //root.visibility = changeTo
+    if (changeTo == Window.FullScreen) {
+        console.log("\n\n\n fullscreenQ!!!")
+        root.showFullScreen()
+    }
+    else {
+        console.log("\n\n\n normal!!!")
+        root.showNormal()
+    }
   }
 
   // Style settings

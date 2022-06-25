@@ -177,7 +177,7 @@ Item {
       font.pixelSize: 14
       wrapMode: Text.WordWrap
       maximumLineCount: 3
-      text: "Chapter %1".arg(chapterModel.chapterNumber)
+      text: "%1".arg(chapterModel.chapterName)
       style: Text.Outline
       styleColor: "black"
       horizontalAlignment: Text.AlignHCenter
