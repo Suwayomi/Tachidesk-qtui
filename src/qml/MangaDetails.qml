@@ -229,6 +229,7 @@ Item {
       Button {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        font.family: "Material Design Icons"
         text: details.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
         onClicked:  {
           mangaChanged()
@@ -336,6 +337,7 @@ Item {
           id: downloadStatus
           visible: progress < 0 || progress >= 100
           anchors.fill: parent
+          font.family: "Material Design Icons"
           color: "#F5F5F5"
           text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
           horizontalAlignment: Text.AlignRight

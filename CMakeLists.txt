@@ -20,11 +20,15 @@ find_package(
 
 add_subdirectory(libs/SortFilterProxyModel)
 
-qt_add_executable(qtui MACOSX_BUNDLE MANUAL_FINALIZATION)
+set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+# And the following tells CMake where to find and install the file itself.
+set(app_icon_macos "${CMAKE_CURRENT_SOURCE_DIR}/images/AppIcon.icns")
+set_source_files_properties(${app_icon_macos} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+qt_add_executable(qtui MACOSX_BUNDLE ${app_icon_macos} MANUAL_FINALIZATION)
 
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
-
 endif()
 
 # Locate all the source and header files for svs
@@ -80,7 +84,7 @@ else()
         MACOSX_BUNDLE_BUNDLE_VERSION 1
         MACOSX_BUNDLE_SHORT_VERSION_STRING  1.0)
 
-     SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+     SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION ios)
      SET_PROPERTY(TARGET qtui PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist)
   endif()
 
@@ -97,6 +101,6 @@ target_link_libraries(qtui
 
 qt_finalize_executable(qtui)
 
-if (NOT ANDROID)
+if (NOT ANDROID AND NOT APPLE)
   install (TARGETS qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
 endif()

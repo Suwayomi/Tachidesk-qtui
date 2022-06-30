@@ -22,5 +22,7 @@
 		<string>LaunchImage</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
 	</dict>
 </plist>

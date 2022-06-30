@@ -136,6 +136,7 @@ Rectangle {
               text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
               horizontalAlignment: Text.AlignCenter
               verticalAlignment: Text.AlignVCenter
+              font.family: "Material Design Icons"
               color: "#F5F5F5"
               anchors.centerIn: parent
               font.bold: true
