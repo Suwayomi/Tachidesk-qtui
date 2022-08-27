@@ -10,9 +10,13 @@ Item {
   }
 
   function back() {
-    stack.item.depth <= 1 ? stack.item.canClose = true : stack.item.canClose = false
+    stack.item.depth() <= 1 ? stack.item.canClose = true : stack.item.canClose = false
     stack.item.pop()
-    stack.item.depth > 1 ? stack.item.navigationVisible = false : stack.item.navigationVisible = true
+    stack.item.depth() > 1 ? stack.item.navigationVisible = false : stack.item.navigationVisible = true
+  }
+
+  function canExit() {
+    return stack.item.canClose
   }
 
   Loader {

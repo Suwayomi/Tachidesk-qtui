@@ -13,6 +13,10 @@ Item {
     stack.pop()
   }
 
+  function depth() {
+    return stack.depth
+  }
+
   function navigateHome() {
     if (stack.currentItem.url.toString() !== stack.initialItem.toString()) {
       stack.replace(null, stack.initialItem, {
@@ -22,7 +26,6 @@ Item {
   }
 
   function navigatePage(source, properties) {
-    canClose = false
     if (stack.currentItem && stack.currentItem.url
       && Qt.resolvedUrl(stack.currentItem.url) === Qt.resolvedUrl(source))
     {

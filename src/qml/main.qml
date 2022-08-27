@@ -39,12 +39,12 @@ ApplicationWindow {
   }
 
   onClosing: (close) => {
-    if (Qt.platform.os != "android" || ac.canClose) {
+    if (Qt.platform.os != "android" || ac.canExit()) {
       close.accepted = true
       Qt.quit()
-    } else {
-      close.accepted = false
+      return
     }
+    close.accepted = false
   }
 
   ApplicationContent {
