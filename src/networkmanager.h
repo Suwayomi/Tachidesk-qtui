@@ -15,6 +15,8 @@ class NetworkManager : public QObject
   Q_OBJECT
 
   QString   _host;
+  QString   _username;
+  QString   _password;
 
   QNetworkAccessManager man;
 

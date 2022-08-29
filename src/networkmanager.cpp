@@ -7,6 +7,7 @@
 //#include <QNetworkConfiguration>
 //#include <QNetworkConfigurationManager>
 #include <QNetworkInterface>
+#include <QAuthenticator>
 #include <QEventLoop>
 #include <QUrlQuery>
 
@@ -33,6 +34,27 @@ NetworkManager::NetworkManager(
         _host = _settings->hostname();
       });
 
+  connect(
+     _settings.get(),
+     &Settings::usernameChanged,
+     [&]() {
+       _username = _settings->username();
+    });
+
+  connect(
+     _settings.get(),
+     &Settings::passwordChanged,
+     [&]() {
+       _password = _settings->password();
+    });
+
+  connect(&man, &QNetworkAccessManager::authenticationRequired,
+    [&](QNetworkReply *,
+        QAuthenticator *aAuthenticator)
+  {
+    aAuthenticator->setUser(_username);
+    aAuthenticator->setPassword(_password);
+  });
 }
 
 /********************************************************************
@@ -87,6 +109,11 @@ void NetworkManager::getUpdates(const QString& endpoint)
   getEndpoint(endpoint, &NetworkManager::updatesReply);
 }
 
+/********************************************************************
+ *
+ *  post()
+ *
+ ********************************************************************/
 void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
 {
   QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
@@ -96,6 +123,7 @@ void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
 
   QByteArray dataParam;
 
+  //request.setRawHeader("Authorization", "Basic " + QByteArray(QString("%1:%2").arg(_username).arg(_password)).toBase64());
   man.post(request, dataParam.append(query.toString().toStdString().c_str()));
 }
 
