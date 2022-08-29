@@ -7,8 +7,10 @@
 //#include <QNetworkConfiguration>
 //#include <QNetworkConfigurationManager>
 #include <QNetworkInterface>
+#include <QAuthenticator>
 #include <QEventLoop>
 #include <QUrlQuery>
+#include <QStandardPaths>
 
 #include "networkmanager.h"
 #include "settings.h"
@@ -23,9 +25,18 @@ NetworkManager::NetworkManager(
   const QString& host,
   QObject* parent)
     : QObject(parent)
+    , QQmlNetworkAccessManagerFactory()
     , _host(host)
     , _settings(settings)
 {
+  man = new QNetworkAccessManager(this);
+  _cache = new QNetworkDiskCache(this);
+  _cache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/network-cache");
+  man->setCache(_cache);
+
+  _username = _settings->username();
+  _password = _settings->password();
+
   connect(
       _settings.get(),
       &Settings::hostnameChanged,
@@ -33,6 +44,34 @@ NetworkManager::NetworkManager(
         _host = _settings->hostname();
       });
 
+  connect(
+     _settings.get(),
+     &Settings::usernameChanged,
+     [&]() {
+       _username = _settings->username();
+    });
+
+  connect(
+     _settings.get(),
+     &Settings::passwordChanged,
+     [&]() {
+       _password = _settings->password();
+    });
+
+  connect(man, &QNetworkAccessManager::authenticationRequired,
+    [&](QNetworkReply *,
+        QAuthenticator *aAuthenticator)
+  {
+    qDebug() << "using username and password: " << _username << _password;
+    aAuthenticator->setUser(_username);
+    aAuthenticator->setPassword(_password);
+  });
+
+}
+
+QNetworkAccessManager* NetworkManager::create(QObject* parent)
+{
+  return man;
 }
 
 /********************************************************************
@@ -87,16 +126,23 @@ void NetworkManager::getUpdates(const QString& endpoint)
   getEndpoint(endpoint, &NetworkManager::updatesReply);
 }
 
+/********************************************************************
+ *
+ *  post()
+ *
+ ********************************************************************/
 void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
 {
   QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
 
   QNetworkRequest request;
   request.setUrl(url);
+  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
 
   QByteArray dataParam;
 
-  man.post(request, dataParam.append(query.toString().toStdString().c_str()));
+  //request.setRawHeader("Authorization", "Basic " + QByteArray(QString("%1:%2").arg(_username).arg(_password)).toBase64());
+  man->post(request, dataParam.append(query.toString().toStdString().c_str()));
 }
 
 /********************************************************************
@@ -130,8 +176,9 @@ void NetworkManager::get(
 {
   QNetworkRequest request;
   request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
 
-  QNetworkReply *reply = man.get(request);
+  QNetworkReply *reply = man->get(request);
 
   connect(
       reply,
@@ -163,8 +210,9 @@ void NetworkManager::deleteResource(const QString& endpoint)
 {
   QNetworkRequest request;
   request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
 
-  QNetworkReply *reply = man.deleteResource(request);
+  QNetworkReply *reply = man->deleteResource(request);
 
   connect(
       reply,

@@ -64,8 +64,11 @@ void App::initalize()
     context->setContextProperty(var.first, QVariant::fromValue(var.second));
   }
 
+  _engine->setNetworkAccessManagerFactory(_nm.get());
+
   _engine->addImportPath(QStringLiteral("qrc:/"));
   _engine->load(makeUrl(QStringLiteral("main.qml")));
+
 }
 
 void App::disconnect() {

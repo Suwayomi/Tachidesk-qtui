@@ -48,6 +48,73 @@ Rectangle {
   }
 
   Popup {
+    id: authPopup
+    width: parent.width * .80
+    height: parent.height * .50
+    focus: true
+    modal: true
+    anchors.centerIn: parent
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#212121"
+      ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 4
+        spacing: 4
+        Text {
+          color: "#F5F5F5"
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          text: qsTr("Username")
+          font.pixelSize: 18
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          fontSizeMode: Text.Fit
+        }
+        TextField {
+          id: usernameText
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.pixelSize: 18
+          color: "#F5F5F5"
+          text: qsTr("%1").arg(settings.username)
+        }
+        Text {
+          color: "#F5F5F5"
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          text: qsTr("Password")
+          font.pixelSize: 18
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          fontSizeMode: Text.Fit
+        }
+        TextField {
+          id: passwordText
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.pixelSize: 18
+          color: "#F5F5F5"
+          text: qsTr("%1").arg(settings.password)
+          passwordMaskDelay: 2
+          echoMode: TextInput.PasswordEchoOnEdit
+        }
+        Button {
+          Layout.fillWidth: true
+          Layout.preferredHeight: 100
+          text: qsTr("Enter")
+          onClicked: {
+             settings.username = usernameText.text
+             settings.password = passwordText.text
+             authPopup.close()
+          }
+        }
+      }
+    }
+  }
+
+  Popup {
     id: languagePopup
     width: parent.width * .80
     height: parent.height * .25
@@ -145,6 +212,38 @@ Rectangle {
       Layout.preferredHeight: 100
       spacing: 4
       Text {
+        color: "#F5F5F5"
+        Layout.fillWidth: true
+        Layout.preferredHeight: 100
+        Layout.preferredWidth: parent.width * .20
+        text: qsTr("Authorization")
+        font.pixelSize: 18
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        fontSizeMode: Text.Fit
+      }
+      TextField {
+        id: usernameField
+        Layout.fillWidth: true
+        Layout.preferredWidth: parent.width * .75
+        Layout.preferredHeight: 100
+        font.pixelSize: 18
+        color: "#F5F5F5"
+        readOnly: true
+        placeholderText: qsTr("%1").arg(settings.username)
+        MouseArea {
+          anchors.fill: parent
+          onClicked: authPopup.open()
+        }
+      }
+    }
+
+
+    RowLayout {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 100
+      spacing: 4
+      Text {
         Layout.fillWidth: true
         Layout.preferredHeight: 100
         Layout.preferredWidth: parent.width * .20
@@ -170,6 +269,7 @@ Rectangle {
         }
       }
     }
+
 
     Button {
       Layout.fillWidth: true
