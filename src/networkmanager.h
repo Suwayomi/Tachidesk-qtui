@@ -2,6 +2,8 @@
 
 #include <QSslSocket>
 #include <QNetworkAccessManager>
+#include <QQmlNetworkAccessManagerFactory>
+#include <QNetworkDiskCache>
 #include <QTimer>
 #include <QHttpMultiPart>
 #include <QNetworkReply>
@@ -10,7 +12,7 @@
 
 class Settings;
 
-class NetworkManager : public QObject
+class NetworkManager : public QObject, public QQmlNetworkAccessManagerFactory
 {
   Q_OBJECT
 
@@ -18,7 +20,8 @@ class NetworkManager : public QObject
   QString   _username;
   QString   _password;
 
-  QNetworkAccessManager man;
+  QNetworkDiskCache* _cache;
+  QNetworkAccessManager* man;
 
   std::shared_ptr<Settings> _settings;
 
@@ -43,6 +46,8 @@ public:
 
   ~NetworkManager() = default;
 
+  QNetworkAccessManager* create(QObject* parent) override;
+
   void get(const QString& endpoint);
   void get(const QString& endpoint, const std::function<void(const QJsonDocument&)>& func);
   void getChapters(const QString& endpoint);
@@ -58,8 +63,9 @@ public:
   void patch(QHttpMultiPart* patchData, const QString& endpoint) {
     QNetworkRequest request;
     request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
 
-    auto reply = man.sendCustomRequest(request, "PATCH", patchData);
+    auto reply = man->sendCustomRequest(request, "PATCH", patchData);
     patchData->setParent(reply);
 
     connect(
@@ -97,8 +103,9 @@ private:
   {
     QNetworkRequest request;
     request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
 
-    QNetworkReply *reply = man.get(request);
+    QNetworkReply *reply = man->get(request);
 
     connect(
         reply,
