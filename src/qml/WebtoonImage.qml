@@ -17,6 +17,7 @@ Rectangle {
     fillMode: Image.PreserveAspectFit
     source: chapterUrl
     width: parent.width
+    cache: false
     // this is only needed for resizing windows
     onWidthChanged: if (paintedHeight != 0) parent.height = paintedHeight
     onStatusChanged: {

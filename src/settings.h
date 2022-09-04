@@ -24,6 +24,12 @@ class Settings : public QObject {
   void load();
 
 public:
+  enum Viewer {
+    WEBTOON,
+    MANGA,
+  };
+  Q_ENUM(Viewer)
+
   Settings();
   ~Settings();
 

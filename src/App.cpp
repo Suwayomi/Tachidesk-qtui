@@ -14,9 +14,10 @@ App::App(const CommandLine& cmd, QObject * parent)
           _settings,
           cmd.isSet(CommandLine::hostname)
             ? cmd.value(CommandLine::hostname)
-            : _settings->hostname()))
+            : _settings->hostname(),
+          this))
   , _commandLine(cmd)
-  , _engine(new QQmlApplicationEngine())
+  , _engine(new QQmlApplicationEngine(this))
 {
   initalize();
 }
@@ -53,11 +54,13 @@ void App::reload()
  ***************************************************************************/
 void App::initalize()
 {
+  _nm->create(this);
+
   // Global context variables to inject into QML
   const std::pair<const char*, QObject*> contextVars[] = {
     { "networkManager", _nm.get()},
     { "settings", _settings.get()},
-    { "app", this},
+    { "app", this },
   };
   auto context = _engine->rootContext();
   for (auto& var : contextVars) {
@@ -65,10 +68,8 @@ void App::initalize()
   }
 
   _engine->setNetworkAccessManagerFactory(_nm.get());
-
   _engine->addImportPath(QStringLiteral("qrc:/"));
   _engine->load(makeUrl(QStringLiteral("main.qml")));
-
 }
 
 void App::disconnect() {
