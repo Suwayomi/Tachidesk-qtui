@@ -17,6 +17,11 @@ Item {
   Component.onCompleted: {
     if (Qt.platform.os === "android")
       changeWindowVisibility(Window.FullScreen)
+
+    console.log("settings viewer: ", settings.viewer, Settings.WEBTOON)
+    settings.viewer == 0 ?
+      listView.sourceComponent = webtoonViewer :
+      listView.sourceComponent = mangaViewer
   }
   Component.onDestruction: {
     if (Qt.platform.os === "android")
@@ -34,7 +39,7 @@ Item {
       if (lastRead && !positioned) {
         lastReadPage = lastRead
         console.log("jumping to:", lastRead)
-        listView.setCurrentIndex(lastRead)
+        //listView.setCurrentIndex(lastRead)
       }
     }
   }
@@ -57,12 +62,47 @@ Item {
     pinch.dragAxis: Pinch.XAndYAxis
   }
 
+
+  Component {
+    id: mangaViewer
+    MangaViewer {
+      anchors.fill:parent
+      model: chapterModel
+      Component.onCompleted: console.log("we loaded loaded")
+    }
+  }
+
+  Component {
+    id: webtoonViewer
+    WebtoonViewer {
+      anchors.fill:parent
+      model: chapterModel
+      Component.onCompleted: console.log("we loaded loaded")
+    }
+  }
+
+  states: [
+    State {
+      name: "MangaReader"
+      when: settings.viewer == 1//Settings.MANGA
+      PropertyChanges {
+        target: listView
+        sourceComponent: mangaViewer
+      }
+    },
+    State {
+      name: "WebtoonReader"
+      when: settings.viewer == 0//Settings.WEBTOON
+      PropertyChanges {
+        target: listView
+        sourceComponent: webtoonViewer
+      }
+    }
+  ]
+
   Loader {
     id: listView
     anchors.fill: parent
-    sourceComponent: MangaViewer {
-      model: chapterModel
-    }
   }
 
   Text {
@@ -81,6 +121,10 @@ Item {
     style: Text.Outline
     styleColor: "black"
     horizontalAlignment: Text.AlignHCenter
+  }
+
+  ViewerPopup {
+    id: settingsPopup
   }
 
   ToolBar {
@@ -147,5 +191,31 @@ Item {
           easing.type: Easing.OutCubic
       }
     }
+
+    Text {
+      anchors {
+        right: parent.right
+        top: parent.top
+        bottom: parent.bottom
+      }
+      font.family: "Material Design Icons"
+      font.pixelSize: 20
+      verticalAlignment: Text.AlignVCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#F5F5F5"
+      text: MdiFont.Icon.dotsHorizontal
+    }
+
+    MouseArea {
+      anchors {
+        right: parent.right
+        top: parent.top
+        bottom: parent.bottom
+      }
+      width: 50
+      onClicked: settingsPopup.open()
+    }
+
   }
+
 }
