@@ -102,7 +102,7 @@ Rectangle {
         }
         Button {
           Layout.fillWidth: true
-          Layout.preferredHeight: 100
+          Layout.preferredHeight: 75
           text: qsTr("Enter")
           onClicked: {
              settings.username = usernameText.text
@@ -155,6 +155,10 @@ Rectangle {
     }
   }
 
+  ViewerPopup {
+    id: viewerPopup
+  }
+
   ColumnLayout {
     anchors {
       top: parent.top
@@ -178,12 +182,12 @@ Rectangle {
 
     RowLayout {
       Layout.fillWidth: true
-      Layout.preferredHeight: 100
+      Layout.preferredHeight: 75
       spacing: 4
       Text {
         color: "#F5F5F5"
         Layout.fillWidth: true
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         Layout.preferredWidth: parent.width * .20
         text: qsTr("Server's\nHostname")
         font.pixelSize: 18
@@ -195,7 +199,7 @@ Rectangle {
         id: hostTextField
         Layout.fillWidth: true
         Layout.preferredWidth: parent.width * .75
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         font.pixelSize: 18
         color: "#F5F5F5"
         readOnly: true
@@ -209,12 +213,12 @@ Rectangle {
 
     RowLayout {
       Layout.fillWidth: true
-      Layout.preferredHeight: 100
+      Layout.preferredHeight: 75
       spacing: 4
       Text {
         color: "#F5F5F5"
         Layout.fillWidth: true
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         Layout.preferredWidth: parent.width * .20
         text: qsTr("Authorization")
         font.pixelSize: 18
@@ -226,7 +230,7 @@ Rectangle {
         id: usernameField
         Layout.fillWidth: true
         Layout.preferredWidth: parent.width * .75
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         font.pixelSize: 18
         color: "#F5F5F5"
         readOnly: true
@@ -241,11 +245,11 @@ Rectangle {
 
     RowLayout {
       Layout.fillWidth: true
-      Layout.preferredHeight: 100
+      Layout.preferredHeight: 75
       spacing: 4
       Text {
         Layout.fillWidth: true
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         Layout.preferredWidth: parent.width * .20
         text: qsTr("language")
         color: "#F5F5F5"
@@ -258,7 +262,7 @@ Rectangle {
       TextField {
         id: langTextField
         Layout.fillWidth: true
-        Layout.preferredHeight: 100
+        Layout.preferredHeight: 75
         Layout.preferredWidth: parent.width * .75
         font.pixelSize: 18
         placeholderText: settings.lang
@@ -270,12 +274,18 @@ Rectangle {
       }
     }
 
+    Button {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 75
+      text: settings.nsfw ? "NSFW enabled" : "NSFW disabled"
+      onClicked: settings.nsfw = !settings.nsfw
+    }
 
     Button {
       Layout.fillWidth: true
-      Layout.preferredHeight: 100
-      text: settings.nsfw ? "NSFW enabled" : "NSFW disabled"
-      onClicked: settings.nsfw = !settings.nsfw
+      Layout.preferredHeight: 75
+      text: qsTr("Reader Mode")
+      onClicked: viewerPopup.open()
     }
 
     //FileDialog {

@@ -29,9 +29,14 @@ NetworkManager::NetworkManager(
     , _host(host)
     , _settings(settings)
 {
-  man = new QNetworkAccessManager(this);
-  _cache = new QNetworkDiskCache(this);
+}
+
+QNetworkAccessManager* NetworkManager::create(QObject* parent)
+{
+  man = new QNetworkAccessManager(parent);
+  _cache = new QNetworkDiskCache(parent);
   _cache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/network-cache");
+  _cache->setMaximumCacheSize(419430400);
   man->setCache(_cache);
 
   _username = _settings->username();
@@ -62,15 +67,10 @@ NetworkManager::NetworkManager(
     [&](QNetworkReply *,
         QAuthenticator *aAuthenticator)
   {
-    qDebug() << "using username and password: " << _username << _password;
     aAuthenticator->setUser(_username);
     aAuthenticator->setPassword(_password);
   });
 
-}
-
-QNetworkAccessManager* NetworkManager::create(QObject* parent)
-{
   return man;
 }
 
