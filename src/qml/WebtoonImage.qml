@@ -5,6 +5,7 @@ Rectangle {
   color: "black"
   width: base.width
   height: base.width * 2
+  property alias imageHeight: image.height
   signal imageLoaded()
 
   BusyIndicator {

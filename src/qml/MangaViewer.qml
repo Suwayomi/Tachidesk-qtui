@@ -24,7 +24,8 @@ Item {
         sourceComponent: Item {
           anchors.fill: parent
           WebtoonImage {
-            anchors.centerIn: parent
+            anchors.fill: parent
+            imageHeight: parent.height
             //onImageLoaded: base.imageLoaded()
           }
           MouseArea {
