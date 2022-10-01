@@ -1,9 +1,6 @@
-import QtQuick 2.8
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.0
-import QtQuick.Controls 2.1
+import QtQuick
+import QtQuick.Window
 import QtQuick.Controls.Material
-import Qt.labs.settings 1.0 as Labs
 
 ApplicationWindow {
   id: root
@@ -15,28 +12,24 @@ ApplicationWindow {
   width: 400
   visible: true
 
-  function changeVisiblity(changeTo) {
-      console.log("root visible: ", changeTo)
-    //root.visibility = changeTo
-    if (changeTo == Window.FullScreen) {
-        console.log("\n\n\n fullscreenQ!!!")
-        root.showFullScreen()
+  /*
+   * @param {number} changeTo - change from full screen to windowed and visa versa
+  */
+  function changeVisiblity(changeTo : int) {
+    if (changeTo === Window.FullScreen) {
+      root.showFullScreen()
     }
     else {
-        console.log("\n\n\n normal!!!")
-        root.showNormal()
+      root.showNormal()
     }
   }
 
   // Style settings
-  Material.theme: settings.lightTheme ? Material.Light : Material.Dark
+  Material.theme: Material.Dark //settings.lightTheme ? Material.Light : Material.Dark
 
   title: "Tachidesk Qtui"
 
   property variant rootWindow: root
-  function isMobile() {
-      return {android: true, ios: true, winphone: true}[Qt.platform.os] || false;
-  }
 
   onClosing: (close) => {
     if (Qt.platform.os != "android" || ac.canExit()) {

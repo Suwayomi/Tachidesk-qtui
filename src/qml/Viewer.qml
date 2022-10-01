@@ -18,7 +18,6 @@ Item {
     if (Qt.platform.os === "android")
       changeWindowVisibility(Window.FullScreen)
 
-    console.log("settings viewer: ", settings.viewer, Settings.WEBTOON)
     settings.viewer == 0 ?
       listView.sourceComponent = webtoonViewer :
       listView.sourceComponent = mangaViewer
@@ -68,7 +67,6 @@ Item {
     MangaViewer {
       anchors.fill:parent
       model: chapterModel
-      Component.onCompleted: console.log("we loaded loaded")
     }
   }
 
@@ -77,7 +75,6 @@ Item {
     WebtoonViewer {
       anchors.fill:parent
       model: chapterModel
-      Component.onCompleted: console.log("we loaded loaded")
     }
   }
 

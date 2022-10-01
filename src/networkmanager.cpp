@@ -1,18 +1,17 @@
-#include <QNetworkRequest>
-#include <QJsonParseError>
+#include "networkmanager.h"
+
+#include <QAuthenticator>
+#include <QDesktopServices>
+#include <QEventLoop>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
-#include <QDesktopServices>
-//#include <QNetworkConfiguration>
-//#include <QNetworkConfigurationManager>
+#include <QJsonParseError>
 #include <QNetworkInterface>
-#include <QAuthenticator>
-#include <QEventLoop>
-#include <QUrlQuery>
+#include <QNetworkRequest>
 #include <QStandardPaths>
+#include <QUrlQuery>
 
-#include "networkmanager.h"
 #include "settings.h"
 
 /********************************************************************
@@ -21,55 +20,51 @@
  *
  ********************************************************************/
 NetworkManager::NetworkManager(
-  std::shared_ptr<Settings>& settings,
-  const QString& host,
-  QObject* parent)
-    : QObject(parent)
-    , QQmlNetworkAccessManagerFactory()
-    , _host(host)
-    , _settings(settings)
+  std::shared_ptr<Settings> &settings, const QString &host, QObject *parent)
+: QObject(parent)
+, QQmlNetworkAccessManagerFactory()
+, _host(host)
+, _settings(settings)
 {
 }
 
-QNetworkAccessManager* NetworkManager::create(QObject* parent)
+/********************************************************************
+ *
+ *  NetworkManager::create()
+ *
+ ********************************************************************/
+QNetworkAccessManager *NetworkManager::create(QObject *parent)
 {
-  man = new QNetworkAccessManager(parent);
+  man    = new QNetworkAccessManager(parent);
   _cache = new QNetworkDiskCache(parent);
-  _cache->setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/network-cache");
+  _cache->setCacheDirectory(
+    QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
+    "/network-cache");
   _cache->setMaximumCacheSize(419430400);
   man->setCache(_cache);
 
   _username = _settings->username();
   _password = _settings->password();
 
-  connect(
-      _settings.get(),
-      &Settings::hostnameChanged,
-      [&]() {
-        _host = _settings->hostname();
-      });
-
-  connect(
-     _settings.get(),
-     &Settings::usernameChanged,
-     [&]() {
-       _username = _settings->username();
-    });
-
-  connect(
-     _settings.get(),
-     &Settings::passwordChanged,
-     [&]() {
-       _password = _settings->password();
-    });
-
-  connect(man, &QNetworkAccessManager::authenticationRequired,
-    [&](QNetworkReply *,
-        QAuthenticator *aAuthenticator)
-  {
-    aAuthenticator->setUser(_username);
-    aAuthenticator->setPassword(_password);
+  connect(_settings.get(), &Settings::hostnameChanged, [&]() {
+    _host = _settings->hostname();
   });
+
+  connect(_settings.get(), &Settings::usernameChanged, [&]() {
+    _username = _settings->username();
+  });
+
+  connect(_settings.get(), &Settings::passwordChanged, [&]() {
+    _password = _settings->password();
+  });
+
+  connect(
+    man,
+    &QNetworkAccessManager::authenticationRequired,
+    [&](QNetworkReply *, QAuthenticator *aAuthenticator) {
+      aAuthenticator->setUser(_username);
+      aAuthenticator->setPassword(_password);
+    });
 
   return man;
 }
@@ -79,12 +74,10 @@ QNetworkAccessManager* NetworkManager::create(QObject* parent)
  * handleNetworkError
  *
  ********************************************************************/
-bool handleNetworkError(QNetworkReply* reply)
+bool handleNetworkError(QNetworkReply *reply)
 {
-  if (reply->error() != QNetworkReply::NoError)
-  {
-    if (reply->error() >= 1 && reply->error() <= 199)
-    {
+  if (reply->error() != QNetworkReply::NoError) {
+    if (reply->error() >= 1 && reply->error() <= 199) {
       // no connection
     }
 
@@ -101,7 +94,7 @@ bool handleNetworkError(QNetworkReply* reply)
  *  get()
  *
  ********************************************************************/
-void NetworkManager::get(const QString& endpoint)
+void NetworkManager::get(const QString &endpoint)
 {
   getEndpoint(endpoint, &NetworkManager::endpointReply);
 }
@@ -111,7 +104,7 @@ void NetworkManager::get(const QString& endpoint)
  *  get()
  *
  ********************************************************************/
-void NetworkManager::getChapters(const QString& endpoint)
+void NetworkManager::getChapters(const QString &endpoint)
 {
   getEndpoint(endpoint, &NetworkManager::chaptersReply);
 }
@@ -121,7 +114,7 @@ void NetworkManager::getChapters(const QString& endpoint)
  *  get()
  *
  ********************************************************************/
-void NetworkManager::getUpdates(const QString& endpoint)
+void NetworkManager::getUpdates(const QString &endpoint)
 {
   getEndpoint(endpoint, &NetworkManager::updatesReply);
 }
@@ -131,17 +124,19 @@ void NetworkManager::getUpdates(const QString& endpoint)
  *  post()
  *
  ********************************************************************/
-void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
+void NetworkManager::post(const QString &endpoint, const QUrlQuery &query)
 {
   QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
 
   QNetworkRequest request;
   request.setUrl(url);
-  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
+  request.setAttribute(
+    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QByteArray dataParam;
 
-  //request.setRawHeader("Authorization", "Basic " + QByteArray(QString("%1:%2").arg(_username).arg(_password)).toBase64());
+  // request.setRawHeader("Authorization", "Basic " +
+  // QByteArray(QString("%1:%2").arg(_username).arg(_password)).toBase64());
   man->post(request, dataParam.append(query.toString().toStdString().c_str()));
 }
 
@@ -152,14 +147,14 @@ void NetworkManager::post(const QString& endpoint, const QUrlQuery& query)
  ********************************************************************/
 QJsonDocument NetworkManager::processReply()
 {
-  QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
   if (!handleNetworkError(reply)) {
-      return QJsonDocument();
+    return QJsonDocument();
   }
   QByteArray data = reply->readAll();
 
   QJsonParseError error;
-  QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+  QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
   reply->deleteLater();
   return doc;
@@ -171,34 +166,31 @@ QJsonDocument NetworkManager::processReply()
  *
  ********************************************************************/
 void NetworkManager::get(
-    const QString& endpoint,
-    const std::function<void(const QJsonDocument&)>& func)
+  const QString &endpoint,
+  const std::function<void(const QJsonDocument &)> &func)
 {
   QNetworkRequest request;
   request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
-  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
+  request.setAttribute(
+    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QNetworkReply *reply = man->get(request);
 
-  connect(
-      reply,
-      &QNetworkReply::finished,
-      this,
-      [&]() {
-        QNetworkReply* r = qobject_cast<QNetworkReply *>(sender());
-        if (!handleNetworkError(r)) {
-            return;
-        }
-        QByteArray data = r->readAll();
+  connect(reply, &QNetworkReply::finished, this, [&]() {
+    QNetworkReply *r = qobject_cast<QNetworkReply *>(sender());
+    if (!handleNetworkError(r)) {
+      return;
+    }
+    QByteArray data = r->readAll();
 
-        QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(data,&error);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
-        if (func) {
-          func(doc);
-        }
-        r->deleteLater();
-      });
+    if (func) {
+      func(doc);
+    }
+    r->deleteLater();
+  });
 }
 
 /********************************************************************
@@ -206,19 +198,17 @@ void NetworkManager::get(
  *  get()
  *
  ********************************************************************/
-void NetworkManager::deleteResource(const QString& endpoint)
+void NetworkManager::deleteResource(const QString &endpoint)
 {
   QNetworkRequest request;
   request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
-  request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
+  request.setAttribute(
+    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QNetworkReply *reply = man->deleteResource(request);
 
   connect(
-      reply,
-      &QNetworkReply::finished,
-      this,
-      &NetworkManager::endpointReply);
+    reply, &QNetworkReply::finished, this, &NetworkManager::endpointReply);
 }
 
 /********************************************************************
@@ -226,30 +216,21 @@ void NetworkManager::deleteResource(const QString& endpoint)
  *  userReply()
  *
  ********************************************************************/
-void NetworkManager::endpointReply()
-{
-  emit receivedReply(processReply());
-}
+void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
 
 /********************************************************************
  *
  *  userReply()
  *
  ********************************************************************/
-void NetworkManager::chaptersReply()
-{
-  emit receiveChapters(processReply());
-}
+void NetworkManager::chaptersReply() { emit receiveChapters(processReply()); }
 
 /********************************************************************
  *
  *  userReply()
  *
  ********************************************************************/
-void NetworkManager::updatesReply()
-{
-  emit receiveUpdates(processReply());
-}
+void NetworkManager::updatesReply() { emit receiveUpdates(processReply()); }
 
 /********************************************************************
  *
@@ -258,9 +239,9 @@ void NetworkManager::updatesReply()
  ********************************************************************/
 void NetworkManager::patchReply()
 {
-  QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
   if (!handleNetworkError(reply)) {
-      return;
+    return;
   }
 
   reply->deleteLater();

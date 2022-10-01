@@ -38,6 +38,40 @@ Item {
             }
             propagateComposedEvents: true
           }
+          MouseArea {
+            anchors {
+              right: parent.right
+              top: parent.top
+              bottom: parent.bottom
+            }
+            width: base.width / 4
+            onClicked: (mouse) => {
+              if (headerBar.height) {
+                headerBar.height = 0
+              }
+              listView.currentIndex += 1
+              mouse.accepted = false
+            }
+            propagateComposedEvents: true
+          }
+          MouseArea {
+            anchors {
+              left: parent.left
+              top: parent.top
+              bottom: parent.bottom
+            }
+            width: base.width / 4
+            onClicked: (mouse) => {
+              if (headerBar.height) {
+                headerBar.height = 0
+              }
+              if (listView.currentIndex > 0) {
+                listView.currentIndex -= 1
+              }
+              mouse.accepted = false
+            }
+            propagateComposedEvents: true
+          }
         }
       }
     }

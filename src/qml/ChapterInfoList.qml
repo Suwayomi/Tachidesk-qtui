@@ -1,5 +1,4 @@
 import QtQuick 2.8
-import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
 
 import Tachidesk.Models 1.0

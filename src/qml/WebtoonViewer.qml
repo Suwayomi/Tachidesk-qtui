@@ -4,8 +4,6 @@ import QtQuick.Window
 
 import Tachidesk.Models
 
-import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
-
 Item {
   id: base
   property alias model: listView.model
@@ -43,7 +41,7 @@ Item {
     }
 
     onMovementEnded: {
-      var indexIs = indexAt(contentX,contentY + base.height - 10)
+      const indexIs = indexAt(contentX,contentY + base.height - 10)
       chapterModel.updateChapter(indexIs)
     }
     onAtYEndChanged: {
@@ -64,6 +62,45 @@ Item {
       onClicked: {
         !headerBar.height ? headerBar.height = 55 : headerBar.height = 0
       }
+    }
+
+    MouseArea {
+      anchors {
+        right: parent.right
+        top: parent.top
+        bottom: parent.bottom
+      }
+      width: base.width / 4
+      onClicked: (mouse) => {
+        if (headerBar.height) {
+          headerBar.height = 0
+        }
+        const moveHeight = listView.height - 50
+        if (listView.contentY + moveHeight < listView.contentHeight) {
+          listView.contentY += moveHeight
+        }
+        mouse.accepted = false
+      }
+      propagateComposedEvents: true
+    }
+    MouseArea {
+      anchors {
+        left: parent.left
+        top: parent.top
+        bottom: parent.bottom
+      }
+      width: base.width / 4
+      onClicked: (mouse) => {
+        if (headerBar.height) {
+          headerBar.height = 0
+        }
+        const moveHeight = listView.height - 50
+        if (listView.contentY - moveHeight > 0) {
+          listView.contentY -= moveHeight
+        }
+        mouse.accepted = false
+      }
+      propagateComposedEvents: true
     }
   }
 
