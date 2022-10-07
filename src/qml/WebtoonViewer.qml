@@ -75,10 +75,13 @@ Item {
         if (headerBar.height) {
           headerBar.height = 0
         }
+
         const moveHeight = listView.height - 50
-        if (listView.contentY + moveHeight < listView.contentHeight) {
-          listView.contentY += moveHeight
-        }
+        listView.contentY += moveHeight
+
+        const indexIs = indexAt(contentX, contentY + base.height - 10)
+        chapterModel.updateChapter(indexIs)
+
         mouse.accepted = false
       }
       propagateComposedEvents: true
@@ -97,6 +100,9 @@ Item {
         const moveHeight = listView.height - 50
         if (listView.contentY - moveHeight > 0) {
           listView.contentY -= moveHeight
+        }
+        else {
+          listView.contentY = 0
         }
         mouse.accepted = false
       }
