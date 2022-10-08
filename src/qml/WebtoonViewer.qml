@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Window
 
 import Tachidesk.Models
@@ -79,10 +78,11 @@ Item {
         const moveHeight = listView.height - 50
         listView.contentY += moveHeight
 
-        const indexIs = indexAt(contentX, contentY + base.height - 10)
+        const indexIs = listView.indexAt(listView.contentX, listView.contentY + base.height - 10)
         chapterModel.updateChapter(indexIs)
 
         mouse.accepted = false
+
       }
       propagateComposedEvents: true
     }
