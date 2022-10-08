@@ -274,24 +274,26 @@ Rectangle {
       }
     }
 
-    Button {
+    SettingsSwitch {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
-      text: settings.nsfw ? "NSFW enabled" : "NSFW disabled"
-      onClicked: settings.nsfw = !settings.nsfw
+      switchText: qsTr("NSFW extensions")
+      switchSetting: settings.nsfw
+      onSwitchClicked: settings.nsfw = !settings.nsfw
+    }
+
+    SettingsSwitch {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 75
+      switchText: qsTr("Auto update chapters when opening manga")
+      switchSetting: settings.autoUpdate
+      onSwitchClicked: settings.autoUpdate = !settings.autoUpdate
     }
 
     Button {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
-      text: settings.autoUpdate ? qsTr("update chapters manually") : qsTr("update chapters automatically")
-      onClicked: settings.autoUpdate = !settings.autoUpdate
-    }
-
-    Button {
-      Layout.fillWidth: true
-      Layout.preferredHeight: 75
-      text: qsTr("Reader Mode")
+      text: qsTr("Default Reader Mode")
       onClicked: viewerPopup.open()
     }
 
