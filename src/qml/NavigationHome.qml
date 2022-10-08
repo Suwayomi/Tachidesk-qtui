@@ -29,16 +29,9 @@ Rectangle {
     IconButton {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      text: qsTr("Sources")
+      text: qsTr("Browse")
       image: MdiFont.Icon.compassOutline
-      onClicked: navigatePage(Qt.resolvedUrl("Sources.qml"), {replace: true})
-    }
-    IconButton {
-      Layout.fillWidth: true
-      Layout.fillHeight: true
-      text: qsTr("Extensions")
-      image: MdiFont.Icon.storeOutline
-      onClicked: navigatePage(Qt.resolvedUrl("Extensions.qml"), {replace: true})
+      onClicked: navigatePage(Qt.resolvedUrl("SourceExtensionsBase.qml"), {replace: true})
     }
     IconButton {
       Layout.fillWidth: true
