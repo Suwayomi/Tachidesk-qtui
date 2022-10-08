@@ -28,6 +28,7 @@ Item {
     id: chaptersModel
     nm: networkManager
     mangaNumber: detailsModel.mangaNumber
+    autoUpdate: settings.autoUpdate
   }
 
   function markRead(mangaId, chapter) {
@@ -253,10 +254,10 @@ Item {
 
     RowLayout {
       width: parent.width
-      height: busyIndicator.running ? 50 : 0
+      height: chaptersModel.loading ? 50 : 0
       Text {
         text: qsTr("loading new chapters...")
-        visible: busyIndicator.running
+        visible: chaptersModel.loading
         Layout.alignment: Qt.AlignRight
         font.pixelSize: 20
         Layout.fillWidth: true
@@ -366,6 +367,13 @@ Item {
             chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterNumber)
           }
         }
+      }
+    }
+
+    PullToRefreshHandler {
+      id: pulldown_handler
+      onPulldownrelease: {
+        chaptersModel.requestChapters(true)
       }
     }
   }

@@ -57,10 +57,6 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     return;
   }
 
-  _loading = !_chapters.size();
-  emit loadingChanged();
-
-
   bool reset = reply.array().size() != _chapters.size();
   if (reset) {
     beginResetModel();
@@ -86,9 +82,13 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     emit dataChanged( createIndex(0, 0), createIndex(_chapters.size(), 0));
   }
 
-  if (!_cachedChapters) {
+  if (!_cachedChapters && _autoUpdate) {
     _cachedChapters = true;
     requestChapters(true);
+  }
+  else {
+    _loading = false;
+    emit loadingChanged();
   }
 }
 
@@ -109,6 +109,9 @@ void ChaptersModel::receivePatchReply()
  *****************************************************************************/
 void ChaptersModel::requestChapters(bool onlineFetch)
 {
+  _loading = true;
+  emit loadingChanged();
+
   _networkManager->getChapters(QStringLiteral("manga/%1/chapters/?onlineFetch=%2")
       .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"));
 }

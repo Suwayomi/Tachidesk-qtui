@@ -7,7 +7,7 @@ import Tachidesk.Models
 import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
 Item {
-  id: base
+  id: viewerBase
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
   property int lastReadPage: 0

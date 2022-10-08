@@ -284,6 +284,13 @@ Rectangle {
     Button {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
+      text: settings.autoUpdate ? qsTr("update chapters manually") : qsTr("update chapters automatically")
+      onClicked: settings.autoUpdate = !settings.autoUpdate
+    }
+
+    Button {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 75
       text: qsTr("Reader Mode")
       onClicked: viewerPopup.open()
     }

@@ -11,6 +11,7 @@ Settings::Settings()
   connect(this, &Settings::usernameChanged, this, &Settings::save);
   connect(this, &Settings::passwordChanged, this, &Settings::save);
   connect(this, &Settings::viewerChanged, this, &Settings::save);
+  connect(this, &Settings::autoUpdateChanged, this, &Settings::save);
 }
 
 Settings::~Settings()
@@ -27,6 +28,7 @@ void Settings::save()
   _settings.setValue("username", _username);
   _settings.setValue("password", _password);
   _settings.setValue("viewer", _viewer);
+  _settings.setValue("autoUpdate", _autoUpdate);
 }
 
 void Settings::load()
@@ -36,6 +38,7 @@ void Settings::load()
   _nsfw       = _settings.value("nsfw", false).toBool();
   _lightTheme = _settings.value("lightTheme", false).toBool();
   _viewer     = (Viewer)_settings.value("viewer", Viewer::WEBTOON).toInt();
+  _autoUpdate = _settings.value("autoUpdate", false).toBool();
   if (_settings.contains("username")) {
     _username = _settings.value("username").toString();
   }

@@ -16,17 +16,17 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(qint32 mangaNumber     MEMBER _mangaNumber     NOTIFY mangaNumberChanged)
   Q_PROPERTY(qint32 lastReadChapter MEMBER _lastReadChapter NOTIFY lastReadChapterChanged)
   Q_PROPERTY(bool   loading         MEMBER _loading         NOTIFY loadingChanged)
+  Q_PROPERTY(bool   autoUpdate      MEMBER _autoUpdate      NOTIFY autoUpdateChanged)
 
   NetworkManager* _networkManager = nullptr;
   std::shared_ptr<DownloadsModel> _downloads;
   bool _cachedChapters = false;
   bool _loading = true;
-
+  bool _autoUpdate = false;
 
   qint32 _mangaNumber;
   qint32 _lastReadChapter = 0;
 
-  void requestChapters(bool onlineFetch);
 protected:
 
   void classBegin() override;
@@ -35,7 +35,6 @@ protected:
 
   virtual QHash<int, QByteArray> roleNames() const override;
 
-public:
 private:
   std::vector<ChapterInfo> _chapters;
 
@@ -83,12 +82,14 @@ public:
   Q_INVOKABLE void chapterRead(quint64 chapter, bool read);
   Q_INVOKABLE void previousChaptersRead(qint32 chapter, bool read);
   Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
+  Q_INVOKABLE void requestChapters(bool onlineFetch);
 
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();
    void lastReadChapterChanged();
    void loadingChanged();
+   void autoUpdateChanged();
 
 public slots:
   void gotChapters(const QJsonDocument& reply);

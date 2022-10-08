@@ -46,6 +46,11 @@ MangaDetailsModel::MangaDetailsModel(QObject* parent)
 {
 }
 
+/******************************************************************************
+ *
+ * classBegin()
+ *
+ *****************************************************************************/
 void MangaDetailsModel::classBegin()
 {
 }

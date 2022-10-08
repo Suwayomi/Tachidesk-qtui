@@ -17,6 +17,7 @@ private:
   Q_PROPERTY(QString lang MEMBER _lang NOTIFY langChanged)
   Q_PROPERTY(bool nsfw MEMBER _nsfw NOTIFY nsfwChanged)
   Q_PROPERTY(bool lightTheme MEMBER _lightTheme NOTIFY lightThemeChanged)
+  Q_PROPERTY(bool autoUpdate MEMBER _autoUpdate NOTIFY autoUpdateChanged)
   Q_PROPERTY(QString username MEMBER _username NOTIFY usernameChanged)
   Q_PROPERTY(QString password MEMBER _password NOTIFY passwordChanged)
   Q_PROPERTY(Viewer viewer MEMBER _viewer NOTIFY viewerChanged)
@@ -28,6 +29,7 @@ private:
   QString _username;
   QString _password;
   Viewer _viewer = Viewer::WEBTOON;
+  bool _autoUpdate = false;
 
   QSettings _settings;
 
@@ -39,20 +41,24 @@ public:
   Settings();
   ~Settings();
 
-  auto& hostname() {
+  auto& hostname() const {
     return _hostname;
   }
 
-  auto& username() {
+  auto& username() const {
     return _username;
   }
 
-  auto& password() {
+  auto& password() const {
     return _password;
   }
 
-  auto& nsfw() {
+  auto& nsfw() const {
     return _nsfw;
+  }
+
+  auto& autoUpdate() const {
+    return _autoUpdate;
   }
 
 signals:
@@ -63,4 +69,5 @@ signals:
   void usernameChanged();
   void passwordChanged();
   void viewerChanged();
+  void autoUpdateChanged();
 };
