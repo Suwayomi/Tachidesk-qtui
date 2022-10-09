@@ -43,13 +43,6 @@ Item {
     }
   }
 
-  function imageLoaded() {
-    if (lastReadPage && !positioned) {
-      listView.setCurrentIndex(lastReadPage)
-      positioned = true
-    }
-  }
-
   PinchArea {
     id: pinchArea
     width: Math.max(listView.contentWidth, listView.width)
@@ -65,16 +58,22 @@ Item {
   Component {
     id: mangaViewer
     MangaViewer {
+      id: mangaViewer
       anchors.fill:parent
       model: chapterModel
+      Component.onCompleted: mangaViewer.chapterRead.connect(viewerBase.chapterRead)
     }
   }
 
   Component {
     id: webtoonViewer
     WebtoonViewer {
+      id: webtoonViewer
       anchors.fill:parent
       model: chapterModel
+      Component.onCompleted: {
+        webtoonViewer.chapterRead.connect(viewerBase.chapterRead)
+      }
     }
   }
 

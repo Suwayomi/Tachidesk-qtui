@@ -82,6 +82,7 @@ public:
 
   Q_INVOKABLE void updateChapter(qint32 page);
   Q_INVOKABLE void requestChapter(quint32 chapter);
+  Q_INVOKABLE QVariantMap get(int row) const;
 signals:
    void networkManagerChanged();
    void mangaNumberChanged();

@@ -203,13 +203,31 @@ QHash<int, QByteArray> ChapterModel::roleNames() const {
                                           {RoleName,          "name"},
                                           {RoleChapterNumber, "chapterNumber"},
                                           {RoleRead,          "read"},
-                                          {RoleIndex,         "index"},
+                                          {RoleIndex,         "chapterIndex"},
                                           {RolePageCount,     "pageCount"},
                                           {RoleChapterUrl,    "chapterUrl"},
                                           {RoleChapterCount,  "chapterCount"},};
 
   return roles;
 }
+
+/******************************************************************************
+ *
+ * Method: get()
+ *
+ *****************************************************************************/
+QVariantMap ChapterModel::get(int row) const
+{
+  QVariantMap map;
+  QModelIndex modelIndex = index(row, 0);
+  QHash<int, QByteArray> roles = roleNames();
+
+  for (auto it = roles.begin(); it != roles.end(); ++it) {
+    map.insert(it.value(), data(modelIndex, it.key()));
+  }
+  return map;
+}
+
 
 /******************************************************************************
  *
@@ -258,3 +276,5 @@ void ChapterModel::requestChapter(quint32 chapter)
       this,
       &ChapterModel::gotChapter);
 }
+
+

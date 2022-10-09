@@ -7,6 +7,13 @@ Item {
   id: base
   property alias model: listView.model
   signal chapterRead(int mangaId, int chapter)
+  function imageLoaded() {
+    if (lastReadPage && !positioned) {
+      listView.currentIndex = lastReadPage
+      positioned = true
+    }
+  }
+
 
   ListView {
     id: listView
@@ -30,7 +37,6 @@ Item {
     //  }
     //}
 
-
     property bool listviewLoaded: false
     Component.onCompleted: {
       listviewLoaded = true
@@ -48,9 +54,10 @@ Item {
         return
       }
       if (listView.atYEnd) {
-        chapterRead(chapterModel.mangaNumber, chapterModel.chapterNumber)
-        chapterModel.chapterNumber++
-        chapterModel.requestChapter(chapterModel.chapterNumber)
+        const chapterIndex = model.get(currentIndex).chapterIndex
+        console.log("chapter index, manga number: ", chapterIndex, chapterModel.mangaNumber)
+        chapterRead(chapterModel.mangaNumber, chapterIndex)
+        chapterModel.requestChapter(chapterIndex + 1)
       }
     }
 

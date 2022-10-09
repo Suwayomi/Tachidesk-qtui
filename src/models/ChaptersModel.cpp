@@ -57,7 +57,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     return;
   }
 
-  bool reset = reply.array().size() != _chapters.size();
+  bool reset = static_cast<quint32>(reply.array().size()) != _chapters.size();
   if (reset) {
     beginResetModel();
   }
@@ -71,7 +71,6 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     if (!info.read) {
       _lastReadChapter = info.index;
     }
-    //info. author artist genre status
   }
   emit lastReadChapterChanged();
 
@@ -79,7 +78,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
     endResetModel();
   }
   else {
-    emit dataChanged( createIndex(0, 0), createIndex(_chapters.size(), 0));
+    emit dataChanged(createIndex(0, 0), createIndex(_chapters.size(), 0));
   }
 
   if (!_cachedChapters && _autoUpdate) {
@@ -99,7 +98,7 @@ void ChaptersModel::gotChapters(const QJsonDocument& reply)
  *****************************************************************************/
 void ChaptersModel::receivePatchReply()
 {
-  requestChapters(false);
+  //requestChapters(false);
 }
 
 /******************************************************************************
@@ -249,8 +248,20 @@ void ChaptersModel::chapterRead(quint64 chapter, bool read)
   if (chapter > _chapters.size()) {
     return;
   }
+
+  auto c = std::lower_bound(_chapters.rbegin(), _chapters.rend(), chapter, [](const auto& c, quint64 value) {
+        return c.index < value;
+      });
+  c->read = read;
+  qDebug() << "read chapter: " << c->chapterNumber << " read? " << read;
+  assert(chapter == c->index);
+
   _networkManager->patch("read", read ? "true" : "false",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(c->chapterNumber));
+
+  auto index = (_chapters.rend() - c - 1);
+  qDebug() << "index: " << index << " chapter numbeR: " << _chapters[index].chapterNumber;
+  emit dataChanged(createIndex(index, 0), createIndex(index, 0), { RoleRead });
 
   emit lastReadChapterChanged();
 }
