@@ -41,6 +41,10 @@ Item {
           verticalAlignment: Text.AlignVCenter
           color: "#F5F5F5"
         }
+        MouseArea {
+          anchors.fill: parent
+          onClicked: view.currentIndex = index
+        }
       }
     }
   }
