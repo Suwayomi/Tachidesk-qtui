@@ -121,6 +121,25 @@ void NetworkManager::getUpdates(const QString &endpoint)
 
 /********************************************************************
  *
+ *  get()
+ *
+ ********************************************************************/
+void NetworkManager::getSources(const QString &endpoint)
+{
+  getEndpoint(endpoint, &NetworkManager::sourcesReply);
+}
+/********************************************************************
+ *
+ *  get()
+ *
+ ********************************************************************/
+void NetworkManager::getExtensions(const QString &endpoint)
+{
+  getEndpoint(endpoint, &NetworkManager::extensionsReply);
+}
+
+/********************************************************************
+ *
  *  post()
  *
  ********************************************************************/
@@ -231,6 +250,20 @@ void NetworkManager::chaptersReply() { emit receiveChapters(processReply()); }
  *
  ********************************************************************/
 void NetworkManager::updatesReply() { emit receiveUpdates(processReply()); }
+
+/********************************************************************
+ *
+ *  userReply()
+ *
+ ********************************************************************/
+void NetworkManager::sourcesReply() { emit receiveSources(processReply()); }
+
+/********************************************************************
+ *
+ *  userReply()
+ *
+ ********************************************************************/
+void NetworkManager::extensionsReply() { emit receiveExtensions(processReply()); }
 
 /********************************************************************
  *

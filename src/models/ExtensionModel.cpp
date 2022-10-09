@@ -32,11 +32,11 @@ void ExtensionModel::classBegin() { }
  *****************************************************************************/
 void ExtensionModel::componentComplete()
 {
-  _networkManager->get("extension/list");
+  _networkManager->getExtensions("extension/list");
 
   connect(
       _networkManager,
-      &NetworkManager::receivedReply,
+      &NetworkManager::receiveExtensions,
       this,
       &ExtensionModel::receivedReply);
 }
@@ -48,8 +48,6 @@ void ExtensionModel::componentComplete()
  *****************************************************************************/
 void ExtensionModel::receivedReply(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
-
   beginResetModel();
   _extensions.clear();
 

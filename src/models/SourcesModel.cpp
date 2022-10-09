@@ -32,11 +32,11 @@ void SourcesModel::classBegin() { }
  *****************************************************************************/
 void SourcesModel::componentComplete()
 {
-  _networkManager->get("source/list");
+  _networkManager->getSources("source/list");
 
   connect(
       _networkManager,
-      &NetworkManager::receivedReply,
+      &NetworkManager::receiveSources,
       this,
       &SourcesModel::receivedReply);
 }
@@ -48,8 +48,6 @@ void SourcesModel::componentComplete()
  *****************************************************************************/
 void SourcesModel::receivedReply(const QJsonDocument& reply)
 {
-  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
-
   beginResetModel();
   _sources.clear();
 

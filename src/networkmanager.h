@@ -28,6 +28,8 @@ signals:
   void receivedReply(const QJsonDocument &reply);
   void receiveChapters(const QJsonDocument &reply);
   void receiveUpdates(const QJsonDocument &reply);
+  void receiveSources(const QJsonDocument &reply);
+  void receiveExtensions(const QJsonDocument &reply);
   void abortChapterRequest();
   void receivePatch();
 
@@ -35,6 +37,8 @@ private slots:
   void endpointReply();
   void chaptersReply();
   void updatesReply();
+  void sourcesReply();
+  void extensionsReply();
   void patchReply();
 
 public:
@@ -53,6 +57,8 @@ public:
     const std::function<void(const QJsonDocument &)> &func);
   void getChapters(const QString &endpoint);
   void getUpdates(const QString &endpoint);
+  void getSources(const QString &endpoint);
+  void getExtensions(const QString &endpoint);
   void deleteResource(const QString &endpoint);
   // TODO needs similar to patch for extra arguments
   void post(const QString &endpoint, const QUrlQuery &query);
