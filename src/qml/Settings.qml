@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
+
 Rectangle {
   color: "#212121"
 
@@ -180,98 +182,41 @@ Rectangle {
       fontSizeMode: Text.Fit
     }
 
-    RowLayout {
+    SettingsImageInfo {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
-      spacing: 4
-      Text {
-        color: "#F5F5F5"
-        Layout.fillWidth: true
-        Layout.preferredHeight: 75
-        Layout.preferredWidth: parent.width * .20
-        text: qsTr("Server's\nHostname")
-        font.pixelSize: 18
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        fontSizeMode: Text.Fit
-      }
-      TextField {
-        id: hostTextField
-        Layout.fillWidth: true
-        Layout.preferredWidth: parent.width * .75
-        Layout.preferredHeight: 75
-        font.pixelSize: 18
-        color: "#F5F5F5"
-        readOnly: true
-        placeholderText: qsTr("%1").arg(settings.hostname)
-        MouseArea {
-          anchors.fill: parent
-          onClicked: hostnamePopup.open()
-        }
-      }
+      header: "Server's Hostname"
+      value: settings.hostname
+      image: MdiFont.Icon.web
+      onClicked: hostnamePopup.open()
     }
 
-    RowLayout {
+    SettingsImageInfo {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
-      spacing: 4
-      Text {
-        color: "#F5F5F5"
-        Layout.fillWidth: true
-        Layout.preferredHeight: 75
-        Layout.preferredWidth: parent.width * .20
-        text: qsTr("Authorization")
-        font.pixelSize: 18
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        fontSizeMode: Text.Fit
-      }
-      TextField {
-        id: usernameField
-        Layout.fillWidth: true
-        Layout.preferredWidth: parent.width * .75
-        Layout.preferredHeight: 75
-        font.pixelSize: 18
-        color: "#F5F5F5"
-        readOnly: true
-        placeholderText: qsTr("%1").arg(settings.username)
-        MouseArea {
-          anchors.fill: parent
-          onClicked: authPopup.open()
-        }
-      }
+      header: "Authorization"
+      value: settings.username
+      image: MdiFont.Icon.security
+      onClicked: authPopup.open()
     }
 
-
-    RowLayout {
+    SettingsImageInfo {
       Layout.fillWidth: true
       Layout.preferredHeight: 75
-      spacing: 4
-      Text {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 75
-        Layout.preferredWidth: parent.width * .20
-        text: qsTr("language")
-        color: "#F5F5F5"
-        font.pixelSize: 18
-        fontSizeMode: Text.Fit
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-      }
+      header: "Language"
+      value: settings.lang
+      image: MdiFont.Icon.translate
+      onClicked: languagePopup.open()
+    }
 
-      TextField {
-        id: langTextField
-        Layout.fillWidth: true
-        Layout.preferredHeight: 75
-        Layout.preferredWidth: parent.width * .75
-        font.pixelSize: 18
-        placeholderText: settings.lang
-        onAccepted: settings.lang = text
-        MouseArea {
-          anchors.fill: parent
-          onClicked: languagePopup.open()
-        }
-      }
+    SettingsImageInfo {
+      Layout.fillWidth: true
+      Layout.preferredHeight: 75
+      header: qsTr("Default Reader Mode")
+      property var viewerModes: [ "WebToon", "Manga" ]
+      value: viewerModes[settings.viewer]
+      image: MdiFont.Icon.bookOpen
+      onClicked: viewerPopup.open()
     }
 
     SettingsSwitch {
@@ -288,13 +233,6 @@ Rectangle {
       switchText: qsTr("Auto update chapters when opening manga")
       switchSetting: settings.autoUpdate
       onSwitchClicked: settings.autoUpdate = !settings.autoUpdate
-    }
-
-    Button {
-      Layout.fillWidth: true
-      Layout.preferredHeight: 75
-      text: qsTr("Default Reader Mode")
-      onClicked: viewerPopup.open()
     }
 
     //FileDialog {

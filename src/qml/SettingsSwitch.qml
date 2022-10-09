@@ -17,7 +17,6 @@ Item {
       Layout.preferredWidth: parent.width * .20
       text: switchText
       font.pixelSize: 18
-      horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
       fontSizeMode: Text.Fit
     }
