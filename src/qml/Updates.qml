@@ -62,7 +62,7 @@ Rectangle {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+          var viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                         { mangaNumber: mangaId,
                           chapter:     chapterIndex  })
           viewer.chapterRead.connect(markRead)
