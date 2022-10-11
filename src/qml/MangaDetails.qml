@@ -364,7 +364,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-            chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterNumber)
+            chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterIndex)
           }
         }
       }

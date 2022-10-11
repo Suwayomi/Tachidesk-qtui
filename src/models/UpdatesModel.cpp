@@ -84,6 +84,10 @@ void UpdatesModel::componentComplete()
 {
   connect(&_webSocket, &QWebSocket::connected, this, &UpdatesModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &UpdatesModel::closed);
+  connect(&_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+  [=](QAbstractSocket::SocketError error){
+    qDebug() << "error: " << error << _webSocket.errorString();
+  });
   connect(
       _networkManager,
       &NetworkManager::receiveUpdates,
@@ -97,7 +101,11 @@ void UpdatesModel::componentComplete()
     .arg(ssl ? "wss" : "ws")
     .arg(resolved);
 
-  _webSocket.open(QUrl(resolved));
+  QNetworkRequest request;
+  request.setUrl(resolved);
+  request.setRawHeader("Authorization", QString("Basic %1").arg(QByteArray(QString("%1:%2").arg(_networkManager->username()).arg(_networkManager->password()).toUtf8()).toBase64()).toUtf8());
+
+  _webSocket.open(request);
 
   next();
 }

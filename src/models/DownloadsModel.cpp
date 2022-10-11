@@ -57,6 +57,10 @@ void DownloadsModel::setupWebsocket()
 
   connect(&_webSocket, &QWebSocket::connected, this, &DownloadsModel::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &DownloadsModel::closed);
+  connect(&_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+  [=](QAbstractSocket::SocketError error){
+    qDebug() << "error: " << error << _webSocket.errorString();
+  });
   auto resolved = _networkManager->resolvedPath().arg("/api/v1/downloads");
   bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
@@ -64,7 +68,11 @@ void DownloadsModel::setupWebsocket()
     .arg(ssl ? "wss" : "ws")
     .arg(resolved);
 
-  _webSocket.open(QUrl(resolved));
+  QNetworkRequest request;
+  request.setUrl(resolved);
+  request.setRawHeader("Authorization", QString("Basic %1").arg(QByteArray(QString("%1:%2").arg(_networkManager->username()).arg(_networkManager->password()).toUtf8()).toBase64()).toUtf8());
+
+  _webSocket.open(request);
 }
 
 /******************************************************************************

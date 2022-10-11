@@ -51,6 +51,14 @@ public:
 
   QNetworkAccessManager *create(QObject *parent) override;
 
+  const auto& username() const {
+    return _username;
+  }
+
+  const auto& password() const {
+    return _password;
+  }
+
   void get(const QString &endpoint);
   void get(
     const QString &endpoint,
