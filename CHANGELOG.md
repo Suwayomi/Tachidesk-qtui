@@ -4,9 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [v2022.6.26](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.6.26) - 2022-10-07
+## [v2022.10.10](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.10.10) - 2022-10-11
 
-<small>[Compare with v2022.6.25](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.6.25...v2022.6.26)</small>
+<small>[Compare with v2022.10.7](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.10.7...v2022.10.10)</small>
+
+### Added
+- Add settings image widget, clean up settings page ([9912b76](https://github.com/Suwayomi/Tachidesk-qtui/commit/9912b76589158c14b541d9d50ce2d600e5781c71) by Norm).
+- Add switchs to settings. ([9c64146](https://github.com/Suwayomi/Tachidesk-qtui/commit/9c64146d61139ed25b27e0ec313daea581fffd0e) by Norm).
+- Add option to update manga manually ([6b796db](https://github.com/Suwayomi/Tachidesk-qtui/commit/6b796db72adb6299878ca35ffa85f7cfc483b376) by Norm).
+
+### Fixed
+- Fix authorized websockets, fix download button in manga number ([e7eb88e](https://github.com/Suwayomi/Tachidesk-qtui/commit/e7eb88ec8a4dc7b4d2bfe256bcb1d4220e3e9b66) by Norm).
+- Fix updates page not loading the viewer when selecting a chapter ([7e615c9](https://github.com/Suwayomi/Tachidesk-qtui/commit/7e615c9789d451a069598a7027a8d0cb6e430708) by Norm).
+- Fix marking chapter read from manga details page, (broke after adding manga view ([d059a69](https://github.com/Suwayomi/Tachidesk-qtui/commit/d059a69c13643d758b7e0580f2bbf569263be128) by Norm).
+- Fix reply bug when combining sources and extensions ([98b354a](https://github.com/Suwayomi/Tachidesk-qtui/commit/98b354a3a1dbe6a0eaa2da7d86113844fd7290fc) by Norm).
+- Fix updating page number and last read chapter when using the tap navigation ([74c6a45](https://github.com/Suwayomi/Tachidesk-qtui/commit/74c6a4560e2c75255b1a8a172a1b91bb1a85d650) by Norm).
+
+
+## [v2022.10.7](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.10.7) - 2022-10-07
+
+<small>[Compare with v2022.6.25](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.6.25...v2022.10.7)</small>
+
+### Added
+- Add changelog ([8ffb8ba](https://github.com/Suwayomi/Tachidesk-qtui/commit/8ffb8baf4cefc52f91738a4b614e9cb1a15b1a71) by Norm).
 
 ### Fixed
 - Fix downward movement in webtoon viewer ([59f9823](https://github.com/Suwayomi/Tachidesk-qtui/commit/59f9823dc84f87f082d07ccadde9a12716ebc5ca) by Norm).
