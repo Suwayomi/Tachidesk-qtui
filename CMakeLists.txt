@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(qtui)
+project(tachidesk-qtui)
 
 include(cmake/ProjectSettings.cmake)
 
@@ -25,7 +25,7 @@ set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
 set(app_icon_macos "${CMAKE_CURRENT_SOURCE_DIR}/images/AppIcon.icns")
 set_source_files_properties(${app_icon_macos} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-qt_add_executable(qtui MACOSX_BUNDLE ${app_icon_macos} MANUAL_FINALIZATION)
+qt_add_executable(tachidesk-qtui MACOSX_BUNDLE ${app_icon_macos} MANUAL_FINALIZATION)
 
 if (ANDROID)
     include(${CMAKE_SOURCE_DIR}/../android_openssl/CMakeLists.txt)
@@ -40,7 +40,7 @@ file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.pn
 
 list(APPEND src_files ${add_src_files})
 
-qt_add_qml_module(qtui
+qt_add_qml_module(tachidesk-qtui
   URI Tachidesk.qtui
   VERSION 1.0
   SOURCES
@@ -61,16 +61,16 @@ qt_add_qml_module(qtui
     QtQuick.Layouts
     SortFilterProxyModel)
 
-target_include_directories(qtui PUBLIC
+target_include_directories(tachidesk-qtui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/models>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/utils>)
 
 if (ANDROID)
-  set_target_properties(qtui PROPERTIES
+  set_target_properties(tachidesk-qtui PROPERTIES
     QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 
-  set_property(TARGET qtui PROPERTY
+  set_property(TARGET tachidesk-qtui PROPERTY
     QT_ANDROID_EXTRA_LIBS ${ANDROID_EXTRA_LIBS})
 
   #set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android CACHE INTERNAL "")
@@ -79,18 +79,18 @@ if (ANDROID)
 else()
 
   if (APPLE)
-     set_target_properties(qtui PROPERTIES
+     set_target_properties(tachidesk-qtui PROPERTIES
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.suwayomi.tachidesk-qtui"
         MACOSX_BUNDLE_BUNDLE_VERSION 1
         MACOSX_BUNDLE_SHORT_VERSION_STRING  1.0)
 
      SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION ios)
-     SET_PROPERTY(TARGET qtui PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist)
+     SET_PROPERTY(TARGET tachidesk-qtui PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist)
   endif()
 
 endif()
 
-target_link_libraries(qtui
+target_link_libraries(tachidesk-qtui
   PRIVATE
     Qt6::Quick
     Qt6::Core
@@ -99,8 +99,8 @@ target_link_libraries(qtui
     Qt6::WebSockets
     SortFilterProxyModel)
 
-qt_finalize_executable(qtui)
+qt_finalize_executable(tachidesk-qtui)
 
 if (NOT ANDROID AND NOT APPLE)
-  install (TARGETS qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
+  install (TARGETS tachidesk-qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
 endif()
