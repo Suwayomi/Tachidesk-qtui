@@ -1,19 +1,12 @@
 #include "ChaptersModel.h"
 #include "DownloadsModel.h"
+#include "../networkmanager.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
-
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChaptersModel)
-
 
 /******************************************************************************
  *
@@ -32,9 +25,7 @@ ChaptersModel::ChaptersModel(QObject* parent)
  *****************************************************************************/
 ChaptersModel::~ChaptersModel()
 {
-  if (_networkManager) {
-    _networkManager->abortRequest();
-  }
+  //NetworkManager::instance().abortRequest();
 }
 
 /******************************************************************************
@@ -44,51 +35,6 @@ ChaptersModel::~ChaptersModel()
  *****************************************************************************/
 void ChaptersModel::classBegin()
 {
-}
-
-/******************************************************************************
- *
- * gotChapters
- *
- *****************************************************************************/
-void ChaptersModel::gotChapters(const QJsonDocument& reply)
-{
-  if (reply.isEmpty()) {
-    return;
-  }
-
-  bool reset = static_cast<quint32>(reply.array().size()) != _chapters.size();
-  if (reset) {
-    beginResetModel();
-  }
-
-  _chapters.clear();
-
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry = entry_arr.toObject();
-    auto& info        = _chapters.emplace_back();
-    info.processChapter(entry);
-    if (!info.read) {
-      _lastReadChapter = info.index;
-    }
-  }
-  emit lastReadChapterChanged();
-
-  if (reset) {
-    endResetModel();
-  }
-  else {
-    emit dataChanged(createIndex(0, 0), createIndex(_chapters.size(), 0));
-  }
-
-  if (!_cachedChapters && _autoUpdate) {
-    _cachedChapters = true;
-    requestChapters(true);
-  }
-  else {
-    _loading = false;
-    emit loadingChanged();
-  }
 }
 
 /******************************************************************************
@@ -111,8 +57,46 @@ void ChaptersModel::requestChapters(bool onlineFetch)
   _loading = true;
   emit loadingChanged();
 
-  _networkManager->getChapters(QStringLiteral("manga/%1/chapters/?onlineFetch=%2")
-      .arg(_mangaNumber).arg(onlineFetch ? "true" : "false"));
+  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapters/?onlineFetch=" % QString::number(onlineFetch) ), this,
+    [&](const auto& doc)
+  {
+    if (doc.isEmpty()) {
+      return;
+    }
+
+    bool reset = static_cast<quint32>(doc.array().size()) != _chapters.size();
+    if (reset) {
+      beginResetModel();
+    }
+
+    _chapters.clear();
+
+    for (const auto& entry_arr : doc.array()) {
+      const auto& entry = entry_arr.toObject();
+      auto& info        = _chapters.emplace_back();
+      info.processChapter(entry);
+      if (!info.read) {
+        _lastReadChapter = info.index;
+      }
+    }
+    emit lastReadChapterChanged();
+
+    if (reset) {
+      endResetModel();
+    }
+    else {
+      emit dataChanged(createIndex(0, 0), createIndex(_chapters.size(), 0));
+    }
+
+    if (!_cachedChapters && _autoUpdate) {
+      _cachedChapters = true;
+      requestChapters(true);
+    }
+    else {
+      _loading = false;
+      emit loadingChanged();
+    }
+  });
 }
 
 /******************************************************************************
@@ -123,13 +107,7 @@ void ChaptersModel::requestChapters(bool onlineFetch)
 void ChaptersModel::componentComplete()
 {
   connect(
-      _networkManager,
-      &NetworkManager::receiveChapters,
-      this,
-      &ChaptersModel::gotChapters);
-
-  connect(
-      _networkManager,
+      &NetworkManager::instance(),
       &NetworkManager::receivePatch,
       this,
       &ChaptersModel::receivePatchReply);
@@ -256,11 +234,11 @@ void ChaptersModel::chapterRead(quint64 chapter, bool read)
   qDebug() << "read chapter: " << c->chapterNumber << " read? " << read;
   assert(chapter == c->index);
 
-  _networkManager->patch("read", read ? "true" : "false",
+  NetworkManager::instance().patch("read", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(c->chapterNumber));
 
   auto index = (_chapters.rend() - c - 1);
-  qDebug() << "index: " << index << " chapter numbeR: " << _chapters[index].chapterNumber;
+  qDebug() << "index: " << index << " chapter numbek: " << _chapters[index].chapterNumber;
   emit dataChanged(createIndex(index, 0), createIndex(index, 0), { RoleRead });
 
   emit lastReadChapterChanged();
@@ -273,7 +251,7 @@ void ChaptersModel::chapterRead(quint64 chapter, bool read)
  *****************************************************************************/
 void ChaptersModel::previousChaptersRead(qint32 chapter, bool read)
 {
-  _networkManager->patch("markPrevRead", read ? "true" : "false",
+  NetworkManager::instance().patch("markPrevRead", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
 }
 
@@ -286,7 +264,6 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
 {
   if (!_downloads) {
     _downloads = std::make_shared<DownloadsModel>();
-    _downloads->setNetworkManager(_networkManager);
     _downloads->setupWebsocket();
     connect(_downloads.get(), &DownloadsModel::downloadsUpdated, this, &ChaptersModel::onDownloadsUpdated);
   }
@@ -297,7 +274,7 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
       if (check(chapter) || chapter.downloaded) {
         continue;
       }
-      _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
+      NetworkManager::instance().get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
     }
   };
 
@@ -314,7 +291,7 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
       }
     case DownloadCustom:
       {
-        _networkManager->get(downloadEndpoint.arg(_mangaNumber).arg(chapterIndex));
+        NetworkManager::instance().get(downloadEndpoint.arg(_mangaNumber).arg(chapterIndex));
         break;
       }
   }

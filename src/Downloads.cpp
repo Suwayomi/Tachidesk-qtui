@@ -1,4 +1,5 @@
 #include "Downloads.h"
+#include "networkmanager.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -14,13 +15,9 @@
 Downloads::Downloads(QObject* parent)
   : QObject(parent)
 {
-  connect(this, &Downloads::networkManagerChanged, [&] {
-
-  });
-
   connect(&_webSocket, &QWebSocket::connected, this, &Downloads::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &Downloads::closed);
-  auto resolved = _networkManager->resolvedPath().arg("/api/v1/downloads");
+  auto resolved = NetworkManager::instance().resolvedPath().arg("/api/v1/downloads");
   bool ssl = resolved.startsWith("https");
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
   resolved = QStringLiteral("%1://%2")
@@ -84,7 +81,7 @@ void Downloads::onTextMessageReceived(const QString& message)
  *****************************************************************************/
 void Downloads::clear()
 {
-  _networkManager->get("downloads/clear");
+  NetworkManager::instance().get("downloads/clear");
 }
 
 /******************************************************************************
@@ -94,7 +91,7 @@ void Downloads::clear()
  *****************************************************************************/
 void Downloads::cancel(qint32 index)
 {
-  _networkManager->deleteResource(
+  NetworkManager::instance().deleteResource(
       QStringLiteral("download/%1/chapter/%2")
         .arg(_queue[index].mangaId)
         .arg(_queue[index].chapterIndex));

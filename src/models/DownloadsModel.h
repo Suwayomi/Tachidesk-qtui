@@ -5,20 +5,17 @@
 #include <QtWebSockets/QtWebSockets>
 
 #include "ChaptersModel.h"
-#include "../networkmanager.h"
 #include "MangaDetailsModel.h"
 #include "common_structs.h"
 
-class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
-{
+class DownloadsModel : public QAbstractListModel, public QQmlParserStatus {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
 
-  Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(QString status MEMBER _status NOTIFY statusChanged)
 
   QString _status;
-  NetworkManager* _networkManager = nullptr;
 
   QWebSocket _webSocket;
   std::vector<QueueInfo> _queue;
@@ -27,7 +24,6 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus
   QMap<MangaId, MangaDetails> _mangaInfo;
 
 protected:
-
   void classBegin() override;
 
   void componentComplete() override;
@@ -35,7 +31,6 @@ protected:
   virtual QHash<int, QByteArray> roleNames() const override;
 
 public:
-
   enum Role {
     RoleUrl = Qt::UserRole + 1,
     RoleName,
@@ -60,24 +55,13 @@ public:
     RoleTitle,
   };
 
-  DownloadsModel(QObject* parent = nullptr);
+  DownloadsModel(QObject *parent = nullptr);
 
-  virtual int rowCount(
-     const QModelIndex &parent = QModelIndex()) const override;
+  virtual int
+  rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-  virtual QVariant data(
-     const QModelIndex &index,
-     int role = Qt::DisplayRole) const override;
-
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
+  virtual QVariant data(const QModelIndex &index,
+                        int role = Qt::DisplayRole) const override;
 
   void setupWebsocket();
 
@@ -87,12 +71,10 @@ public:
   Q_INVOKABLE void cancel(qint32 index);
 signals:
   void statusChanged();
-  void networkManagerChanged();
-  void downloadsUpdated(const std::vector<QueueInfo>& info);
+  void downloadsUpdated(const std::vector<QueueInfo> &info);
 
 public slots:
   void onConnected();
   void closed();
-  void onTextMessageReceived(const QString& message);
-  void gotDetails(const QJsonDocument&);
+  void onTextMessageReceived(const QString &message);
 };

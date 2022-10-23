@@ -5,14 +5,9 @@
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
+#include <QStringBuilder>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, LibraryModel)
-
+#include "../networkmanager.h"
 /******************************************************************************
  *
  * LibraryModel
@@ -23,42 +18,14 @@ LibraryModel::LibraryModel(QObject* parent)
 {
 }
 
+/******************************************************************************
+ *
+ * classBegin
+ *
+ *****************************************************************************/
 void LibraryModel::classBegin()
 {
-  gotCategory = [&](const auto& reply) {
-    for (const auto& entry_arr : reply.array()) {
-      const auto& entry = entry_arr.toObject();
-      _networkManager->get(QStringLiteral("category/%1").arg(entry["id"].toInt()), gotCategoryId);
-    }
-  };
-
-  /******************************************************************************
-   *
-   * Method: receiveReply()
-   *
-   *****************************************************************************/
-  gotCategoryId = [&](const QJsonDocument& reply)
-  {
-    beginResetModel();
-
-    for (const auto& entry_arr : reply.array()) {
-      const auto& entry = entry_arr.toObject();
-      auto& info        = _entries.emplace_back();
-      info.id           = entry["id"].toInt();
-      info.sourceId     = entry["sourceId"].toString();
-      info.url          = entry["url"].toString();
-      info.title        = entry["title"].toString();
-      info.thumbnailUrl = entry["thumbnailUrl"].toString();
-      info.initalized   = entry["intialized"].toBool();
-      info.author       = entry["author"].toString();
-      info.artist       = entry["artist"].toString();
-      info.genre        = entry["genre"].toString();
-      info.status       = entry["status"].toString();
-      info.unread       = entry["unreadCount"].toInt();
-    }
-
-    endResetModel();
-  };
+  refreshLibrary();
 }
 
 /******************************************************************************
@@ -68,7 +35,6 @@ void LibraryModel::classBegin()
  *****************************************************************************/
 void LibraryModel::componentComplete()
 {
-  _networkManager->get("category", gotCategory);
 }
 
 
@@ -108,7 +74,7 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
       }
     case RoleThumbnail:
       {
-        return _networkManager->resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
       }
     case RoleId:
       {
@@ -149,6 +115,35 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
 void LibraryModel::refreshLibrary()
 {
   _entries.clear();
-  _networkManager->get("category", gotCategory);
+  NetworkManager::instance().get(QUrl("category"), this,
+    [&](const auto& doc)
+  {
+    for (const auto& entry_arr : doc.array()) {
+      const auto& entry = entry_arr.toObject();
+      NetworkManager::instance().get(QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
+        [&](const auto& doc1)
+      {
+        beginResetModel();
+
+        for (const auto& entry_arr : doc1.array()) {
+          const auto& entry = entry_arr.toObject();
+          auto& info        = _entries.emplace_back();
+          info.id           = entry["id"].toInt();
+          info.sourceId     = entry["sourceId"].toString();
+          info.url          = entry["url"].toString();
+          info.title        = entry["title"].toString();
+          info.thumbnailUrl = entry["thumbnailUrl"].toString();
+          info.initalized   = entry["intialized"].toBool();
+          info.author       = entry["author"].toString();
+          info.artist       = entry["artist"].toString();
+          info.genre        = entry["genre"].toString();
+          info.status       = entry["status"].toString();
+          info.unread       = entry["unreadCount"].toInt();
+        }
+
+        endResetModel();
+      });
+    }
+  });
 }
 

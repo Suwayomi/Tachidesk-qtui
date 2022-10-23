@@ -1,10 +1,10 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import Tachidesk.Models 1.0
-import SortFilterProxyModel 0.2
-import CustomControls 1.0
+import Tachidesk.Qtui
+import SortFilterProxyModel
+import CustomControls
 
 Rectangle {
 
@@ -12,7 +12,6 @@ Rectangle {
 
   DownloadsModel {
     id: chapterInfoModel
-    nm: networkManager
   }
 
   RowLayout {

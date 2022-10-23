@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
 
-import Tachidesk.Models
+import Tachidesk.Qtui
 
 import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
@@ -29,7 +29,6 @@ Item {
 
   ChapterModel {
     id: chapterModel
-    nm: networkManager
   }
 
   Connections {

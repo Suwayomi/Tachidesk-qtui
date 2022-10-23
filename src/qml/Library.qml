@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls
 
-import Tachidesk.Models
+import Tachidesk.Qtui
 import SortFilterProxyModel
 
 Item {
@@ -23,7 +23,6 @@ Item {
 
   LibraryModel {
     id: library
-    nm: networkManager
   }
 
   Rectangle {
@@ -80,7 +79,7 @@ Item {
       Layout.fillHeight: true
       scale: 0.5
       fillMode: Image.PreserveAspectFit
-      source: "qrc:/Tachidesk/qtui/images/outline_search_white_24dp.png"
+      source: "qrc:/Tachidesk/Qtui/images/outline_search_white_24dp.png"
     }
   }
 

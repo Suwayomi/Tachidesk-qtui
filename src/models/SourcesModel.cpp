@@ -6,12 +6,7 @@
 #include <qcoreapplication.h>
 #include <QQmlEngine>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, SourcesModel)
+#include "../networkmanager.h"
 
 /******************************************************************************
  *
@@ -32,13 +27,25 @@ void SourcesModel::classBegin() { }
  *****************************************************************************/
 void SourcesModel::componentComplete()
 {
-  _networkManager->getSources("source/list");
+  NetworkManager::instance().get(QUrl("source/list"), this,
+    [&](const auto& reply)
+  {
+    beginResetModel();
+    _sources.clear();
 
-  connect(
-      _networkManager,
-      &NetworkManager::receiveSources,
-      this,
-      &SourcesModel::receivedReply);
+    for (const auto& entry_arr : reply.array()) {
+      const auto& entry   = entry_arr.toObject();
+      auto& info          = _sources.emplace_back();
+      info.iconUrl        = entry["iconUrl"].toString();
+      info.name           = entry["name"].toString();
+      info.lang           = entry["lang"].toString();
+      info.id             = entry["id"].toString();
+      info.supportsLatest = entry["supportsLatest"].toBool();
+      info.isConfigurable = entry["isConfigurable"].toBool();
+    }
+
+    endResetModel();
+  });
 }
 
 /******************************************************************************
@@ -48,21 +55,6 @@ void SourcesModel::componentComplete()
  *****************************************************************************/
 void SourcesModel::receivedReply(const QJsonDocument& reply)
 {
-  beginResetModel();
-  _sources.clear();
-
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry   = entry_arr.toObject();
-    auto& info          = _sources.emplace_back();
-    info.iconUrl        = entry["iconUrl"].toString();
-    info.name           = entry["name"].toString();
-    info.lang           = entry["lang"].toString();
-    info.id             = entry["id"].toString();
-    info.supportsLatest = entry["supportsLatest"].toBool();
-    info.isConfigurable = entry["isConfigurable"].toBool();
-  }
-
-  endResetModel();
 }
 
 /******************************************************************************
@@ -97,7 +89,7 @@ QVariant SourcesModel::data(const QModelIndex &index, int role) const {
   {
     case RoleIconUrl:
       {
-        return _networkManager->resolvedPath().arg(entry.iconUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.iconUrl);
       }
     case RoleName:
       {

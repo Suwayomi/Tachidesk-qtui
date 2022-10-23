@@ -29,8 +29,6 @@ Item {
         color: "#F5F5F5"
         font.pixelSize: 18
         fontSizeMode: Text.Fit
-        //horizontalAlignment: Text.AlignHCenter
-        //verticalAlignment: Text.AlignVCenter
       }
       Text {
         id: valueText
@@ -38,8 +36,6 @@ Item {
         color: "#c2c2c2"
         font.pixelSize: 15
         fontSizeMode: Text.Fit
-        //horizontalAlignment: Text.AlignHCenter
-        //verticalAlignment: Text.AlignVCenter
       }
     }
   }

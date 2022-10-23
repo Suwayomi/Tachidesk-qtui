@@ -2,17 +2,13 @@
 
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
-
-#include "../networkmanager.h"
+#include <qqml.h>
 
 class ExtensionModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
-
-  Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-
-  NetworkManager* _networkManager = nullptr;
 
   struct ExtensionInfo {
     QString  iconUrl;
@@ -58,22 +54,7 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
-
-  void receivedReply(const QJsonDocument& reply);
-
   Q_INVOKABLE void update(const QString& pkgName, qint32 index);
   Q_INVOKABLE void install(const QString& pkgName, qint32 index);
   Q_INVOKABLE void uninstall(const QString& pkgName, qint32 index);
-
-signals:
-   void networkManagerChanged();
 };

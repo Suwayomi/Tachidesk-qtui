@@ -41,7 +41,7 @@ file(GLOB_RECURSE icon_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "images/*.pn
 list(APPEND src_files ${add_src_files})
 
 qt_add_qml_module(tachidesk-qtui
-  URI Tachidesk.qtui
+  URI Tachidesk.Qtui
   VERSION 1.0
   SOURCES
     ${src_files}
@@ -62,9 +62,10 @@ qt_add_qml_module(tachidesk-qtui
     SortFilterProxyModel)
 
 target_include_directories(tachidesk-qtui PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/models>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/utils>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/models>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/utils>
+    $<INSTALL_INTERFACE:include>)
 
 if (ANDROID)
   set_target_properties(tachidesk-qtui PROPERTIES

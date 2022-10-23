@@ -5,7 +5,6 @@
 #include <QWebSocket>
 
 #include "ChaptersModel.h"
-#include "../networkmanager.h"
 
 #include <optional>
 
@@ -15,14 +14,13 @@ struct QueueInfo;
 class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
 
-  Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(bool running MEMBER _running NOTIFY runningChanged)
   Q_PROPERTY(qint32 total MEMBER _total NOTIFY totalChanged)
   Q_PROPERTY(qint32 complete MEMBER _complete NOTIFY completeChanged)
 
-  NetworkManager* _networkManager = nullptr;
   QWebSocket _webSocket;
   std::shared_ptr<DownloadsModel> downloads;
 
@@ -87,24 +85,11 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
-
-  void receivedReply(const QJsonDocument& reply);
-
   Q_INVOKABLE void next();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
   Q_INVOKABLE void chapterRead(qint32 mangaId, quint32 chapter);
 signals:
-  void networkManagerChanged();
   void runningChanged();
   void totalChanged();
   void completeChanged();

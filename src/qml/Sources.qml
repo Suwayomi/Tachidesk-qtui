@@ -1,9 +1,9 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import Tachidesk.Models 1.0
-import SortFilterProxyModel 0.2
+import Tachidesk.Qtui
+import SortFilterProxyModel
 
 Rectangle {
 
@@ -11,7 +11,6 @@ Rectangle {
 
   SourcesModel {
     id: sourcesModel
-    nm: networkManager
   }
 
   SortFilterProxyModel {
@@ -40,7 +39,7 @@ Rectangle {
           Layout.fillHeight: true
           scale: 0.5
           fillMode: Image.PreserveAspectCrop
-          source: "qrc:/Tachidesk/qtui/images/outline_filter_white_24dp.png"
+          source: "qrc:/Tachidesk/Qtui/images/outline_filter_white_24dp.png"
       }
       TextField {
           id: searchBox

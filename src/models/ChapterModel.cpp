@@ -1,17 +1,12 @@
 #include "ChapterModel.h"
+#include "../networkmanager.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
-
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ChapterModel)
+#include <QStringBuilder>
 
 /******************************************************************************
  *
@@ -30,59 +25,6 @@ ChapterModel::ChapterModel(QObject* parent)
  *****************************************************************************/
 void ChapterModel::classBegin()
 {
-}
-
-/******************************************************************************
- *
- * gotChapter
- *
- *****************************************************************************/
-void ChapterModel::gotChapter(const QJsonDocument& reply)
-{
-  if (reply.isEmpty()) {
-    return;
-  }
-
-  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
-
-  auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
-    vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
-          [](const auto& a, const auto&b){ return a.index < b.index; }), item);
-  };
-
-  qint32 pageStart = 0;
-  qint32 pageEnd = 0;
-  for (auto& chapter : _chapters) {
-    pageStart += chapter.pageCount;
-  }
-
-  const auto& entry = reply.object();
-  ChapterInfo info;
-  info.url          = entry["url"].toString();
-  info.name         = entry["name"].toString();
-  info.uploadDate   = entry["uploadDate"].toInt();
-  info.chapterNumber= entry["chapterNumber"].toInt();
-  info.read         = entry["read"].toBool();
-  info.index        = entry["index"].toInt();
-  info.pageCount    = entry["pageCount"].toInt();
-  _pageCount = info.pageCount;
-  chapterLoaded(entry["lastPageRead"].toInt());
-  emit pageCountChanged();
-
-  info.chapterCount = entry["chapterCount"].toInt();
-
-  _chapterCount = info.chapterCount;
-
-  pageEnd = info.pageCount + pageStart - 1;
-
-  beginInsertRows({}, pageStart, pageEnd);
-
-  insert_sorted(_chapters, info);
-
-  endInsertRows();
-
-  _chapterName = info.name;
-  emit chapterNameChanged();
 }
 
 /******************************************************************************
@@ -181,7 +123,7 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
       }
     case RoleChapterUrl:
       {
-        return _networkManager->resolvedPath().arg(
+        return NetworkManager::instance().resolvedPath().arg(
                   QStringLiteral("/api/v1/manga/%1/chapter/%2/page/%3")
                     .arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber));
       }
@@ -248,7 +190,7 @@ void ChapterModel::updateChapter(qint32 page)
   pageCountChanged();
   pageIndexChanged();
 
-  _networkManager->patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
+  NetworkManager::instance().patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
 }
 
@@ -268,13 +210,52 @@ void ChapterModel::requestChapter(quint32 chapter)
       return;
     }
   }
-  _networkManager->get(QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapter/" % QString::number(chapter) ), this,
+    [&](const auto& doc)
+  {
+    if (doc.isEmpty()) {
+      return;
+    }
 
-  connect(
-      _networkManager,
-      &NetworkManager::receivedReply,
-      this,
-      &ChapterModel::gotChapter);
+    auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
+      vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
+            [](const auto& a, const auto&b){ return a.index < b.index; }), item);
+    };
+
+    qint32 pageStart = 0;
+    qint32 pageEnd = 0;
+    for (auto& chapter : _chapters) {
+      pageStart += chapter.pageCount;
+    }
+
+    const auto& entry = doc.object();
+    ChapterInfo info;
+    info.url          = entry["url"].toString();
+    info.name         = entry["name"].toString();
+    info.uploadDate   = entry["uploadDate"].toInt();
+    info.chapterNumber= entry["chapterNumber"].toInt();
+    info.read         = entry["read"].toBool();
+    info.index        = entry["index"].toInt();
+    info.pageCount    = entry["pageCount"].toInt();
+    _pageCount = info.pageCount;
+    chapterLoaded(entry["lastPageRead"].toInt());
+    emit pageCountChanged();
+
+    info.chapterCount = entry["chapterCount"].toInt();
+
+    _chapterCount = info.chapterCount;
+
+    pageEnd = info.pageCount + pageStart - 1;
+
+    beginInsertRows({}, pageStart, pageEnd);
+
+    insert_sorted(_chapters, info);
+
+    endInsertRows();
+
+    _chapterName = info.name;
+    emit chapterNameChanged();
+  });
 }
 
 

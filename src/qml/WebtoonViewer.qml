@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Window
 
-import Tachidesk.Models
+import Tachidesk.Qtui
 
 Item {
   id: base

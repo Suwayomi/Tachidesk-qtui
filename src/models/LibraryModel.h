@@ -1,17 +1,13 @@
 #pragma once
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
-
-#include "../networkmanager.h"
+#include <qqml.h>
 
 class LibraryModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
-
-  Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-
-  NetworkManager* _networkManager = nullptr;
 
   struct EntryInfo {
     uint32_t id;
@@ -28,9 +24,6 @@ class LibraryModel : public QAbstractListModel, public QQmlParserStatus
     quint32  unread;
   };
   std::vector<EntryInfo> _entries;
-
-  std::function<void (const QJsonDocument& )> gotCategory;
-  std::function<void (const QJsonDocument& )> gotCategoryId;
 
 protected:
   virtual QHash<int, QByteArray> roleNames() const override;
@@ -58,20 +51,7 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
-
   Q_INVOKABLE void refreshLibrary();
-
-signals:
-   void networkManagerChanged();
 
 public slots:
 };

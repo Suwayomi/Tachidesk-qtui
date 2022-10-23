@@ -4,14 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <qcoreapplication.h>
-#include <QQmlEngine>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, ExtensionModel)
+#include "../networkmanager.h"
 
 /******************************************************************************
  *
@@ -32,43 +26,32 @@ void ExtensionModel::classBegin() { }
  *****************************************************************************/
 void ExtensionModel::componentComplete()
 {
-  _networkManager->getExtensions("extension/list");
+  NetworkManager::instance().get(QUrl("extension/list"), this,
+    [&](const auto& doc)
+  {
+    beginResetModel();
+    _extensions.clear();
 
-  connect(
-      _networkManager,
-      &NetworkManager::receiveExtensions,
-      this,
-      &ExtensionModel::receivedReply);
+    uint32_t i = 0;
+    for (const auto& entry_arr : doc.array()) {
+      const auto& entry = entry_arr.toObject();
+      auto& info        = _extensions.emplace_back();
+      info.iconUrl      = entry["iconUrl"].toString();
+      info.name         = entry["name"].toString();
+      info.pkgName      = entry["pkgName"].toString();
+      info.lang         = entry["lang"].toString();
+      info.isNsfw       = entry["isNsfw"].toBool();
+      info.installed    = entry["installed"].toBool();
+      info.hasUpdate    = entry["hasUpdate"].toBool();
+      info.obsolete     = entry["obsolete"].toBool();
+      info.index        = i;
+      ++i;
+    }
+
+    endResetModel();
+  });
 }
 
-/******************************************************************************
- *
- * Method: receiveReply()
- *
- *****************************************************************************/
-void ExtensionModel::receivedReply(const QJsonDocument& reply)
-{
-  beginResetModel();
-  _extensions.clear();
-
-  uint32_t i = 0;
-  for (const auto& entry_arr : reply.array()) {
-    const auto& entry = entry_arr.toObject();
-    auto& info        = _extensions.emplace_back();
-    info.iconUrl      = entry["iconUrl"].toString();
-    info.name         = entry["name"].toString();
-    info.pkgName      = entry["pkgName"].toString();
-    info.lang         = entry["lang"].toString();
-    info.isNsfw       = entry["isNsfw"].toBool();
-    info.installed    = entry["installed"].toBool();
-    info.hasUpdate    = entry["hasUpdate"].toBool();
-    info.obsolete     = entry["obsolete"].toBool();
-    info.index        = i;
-    ++i;
-  }
-
-  endResetModel();
-}
 
 /******************************************************************************
  *
@@ -102,7 +85,7 @@ QVariant ExtensionModel::data(const QModelIndex &index, int role) const {
   {
     case RoleIconUrl:
       {
-        return _networkManager->resolvedPath().arg(entry.iconUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.iconUrl);
       }
     case RoleName:
       {
@@ -166,7 +149,7 @@ QHash<int, QByteArray> ExtensionModel::roleNames() const {
 void ExtensionModel::update(const QString& pkgName, qint32 row)
 {
   _extensions[row].hasUpdate = false;
-  _networkManager->get("extension/update/" + pkgName);
+  NetworkManager::instance().get("extension/update/" + pkgName);
 
   emit dataChanged(index(row, 0), index(row, 0), {RoleUpdate});
 }
@@ -174,7 +157,7 @@ void ExtensionModel::update(const QString& pkgName, qint32 row)
 void ExtensionModel::install(const QString& pkgName, qint32 row)
 {
   _extensions[row].installed = true;
-  _networkManager->get("extension/install/" + pkgName);
+  NetworkManager::instance().get("extension/install/" + pkgName);
 
   emit dataChanged(index(row, 0), index(row, 0), {RoleInstalled});
 }
@@ -182,7 +165,7 @@ void ExtensionModel::install(const QString& pkgName, qint32 row)
 void ExtensionModel::uninstall(const QString& pkgName, qint32 row)
 {
   _extensions[row].installed = false;
-  _networkManager->get("extension/uninstall/" + pkgName);
+  NetworkManager::instance().get("extension/uninstall/" + pkgName);
 
   emit dataChanged(index(row, 0), index(row, 0), {RoleInstalled});
 }

@@ -1,14 +1,13 @@
-import QtQuick 2.8
-import QtQuick.Layouts 1.0
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 
-import Tachidesk.Models 1.0
+import Tachidesk.Qtui
 
 Item {
   property alias source: libraryModel.source
   SourcesLibraryModel {
     id: libraryModel
-    nm: networkManager
   }
 
   Rectangle {
@@ -32,7 +31,7 @@ Item {
               Layout.fillHeight: true
               scale: 0.5
               fillMode: Image.PreserveAspectFit
-              source: Qt.resolvedUrl("images/outline_search_white_24dp.png")
+              source: "qrc:/Tachidesk/Qtui/images/outline_search_white_24dp.png"
           }
           TextField {
             id: search

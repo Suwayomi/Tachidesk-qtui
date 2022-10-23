@@ -9,12 +9,7 @@
 #include <QQmlEngine>
 #include <qurlquery.h>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, UpdatesModel)
+#include "../networkmanager.h"
 
 /******************************************************************************
  *
@@ -88,13 +83,8 @@ void UpdatesModel::componentComplete()
   [=](QAbstractSocket::SocketError error){
     qDebug() << "error: " << error << _webSocket.errorString();
   });
-  connect(
-      _networkManager,
-      &NetworkManager::receiveUpdates,
-      this,
-      &UpdatesModel::receivedReply);
 
-  auto resolved = _networkManager->resolvedPath().arg("/api/v1/update");
+  auto resolved = NetworkManager::instance().resolvedPath().arg("/api/v1/update");
   bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
   resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
   resolved = QStringLiteral("%1://%2")
@@ -103,7 +93,7 @@ void UpdatesModel::componentComplete()
 
   QNetworkRequest request;
   request.setUrl(resolved);
-  request.setRawHeader("Authorization", QString("Basic %1").arg(QByteArray(QString("%1:%2").arg(_networkManager->username()).arg(_networkManager->password()).toUtf8()).toBase64()).toUtf8());
+  request.setRawHeader("Authorization", QString("Basic %1").arg(QByteArray(QString("%1:%2").arg(NetworkManager::instance().username()).arg(NetworkManager::instance().password()).toUtf8()).toBase64()).toUtf8());
 
   _webSocket.open(request);
 
@@ -131,49 +121,6 @@ void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo>& queueInfo)
       row++;
     }
   }
-}
-
-/******************************************************************************
- *
- * Method: receiveReply()
- *
- *****************************************************************************/
-void UpdatesModel::receivedReply(const QJsonDocument& reply)
-{
-  if (!downloads) {
-    downloads = std::make_shared<DownloadsModel>();
-    downloads->setNetworkManager(_networkManager);
-    downloads->setupWebsocket();
-    connect(downloads.get(), &DownloadsModel::downloadsUpdated, this, &UpdatesModel::onDownloadsUpdated);
-  }
-
-  if (reply.isEmpty()) {
-    return;
-  }
-
-  _hasNext = reply["hasNextPage"].toBool();
-
-  auto pageArray = reply["page"].toArray();
-  beginInsertRows({}, _sources.size(), _sources.size() + pageArray.count() - 1);
-
-  _sources.reserve(reply.array().count());
-
-  for (const auto& entry_arr : pageArray) {
-    const auto& entry   = entry_arr.toObject();
-    const auto& manga   = entry["manga"].toObject();
-    auto& info          = _sources.emplace_back();
-    info.id             = manga["id"].toInt();
-    info.sourceId       = manga["sourceId"].toString();
-    info.title          = manga["title"].toString();
-    info.thumbnailUrl   = manga["thumbnailUrl"].toString();
-    info.url            = manga["url"].toString();
-    info.isInitialized  = manga["isInitialized"].toBool();
-    info.inLibrary      = manga["inLibrary"].toBool();
-
-    info.chapterInfo.processChapter(entry["chapter"].toObject());
-  }
-
-  endInsertRows();
 }
 
 /******************************************************************************
@@ -208,7 +155,7 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   {
     case RoleThumbnailUrl:
       {
-        return _networkManager->resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
       }
     case RoleTitle:
       {
@@ -332,7 +279,43 @@ void UpdatesModel::next()
     return;
   }
 
-  _networkManager->getUpdates(QStringLiteral("update/recentChapters/%1").arg(_pageNumber++));
+  NetworkManager::instance().get(QUrl(u"update/recentChapters/"_qs % QString::number(_pageNumber++)), this,
+    [&](const auto& reply)
+  {
+    if (!downloads) {
+      downloads = std::make_shared<DownloadsModel>();
+      downloads->setupWebsocket();
+      connect(downloads.get(), &DownloadsModel::downloadsUpdated, this, &UpdatesModel::onDownloadsUpdated);
+    }
+
+    if (reply.isEmpty()) {
+      return;
+    }
+
+    _hasNext = reply["hasNextPage"].toBool();
+
+    auto pageArray = reply["page"].toArray();
+    beginInsertRows({}, _sources.size(), _sources.size() + pageArray.count() - 1);
+
+    _sources.reserve(reply.array().count());
+
+    for (const auto& entry_arr : pageArray) {
+      const auto& entry   = entry_arr.toObject();
+      const auto& manga   = entry["manga"].toObject();
+      auto& info          = _sources.emplace_back();
+      info.id             = manga["id"].toInt();
+      info.sourceId       = manga["sourceId"].toString();
+      info.title          = manga["title"].toString();
+      info.thumbnailUrl   = manga["thumbnailUrl"].toString();
+      info.url            = manga["url"].toString();
+      info.isInitialized  = manga["isInitialized"].toBool();
+      info.inLibrary      = manga["inLibrary"].toBool();
+
+      info.chapterInfo.processChapter(entry["chapter"].toObject());
+    }
+
+    endInsertRows();
+  });
 }
 
 /******************************************************************************
@@ -344,7 +327,7 @@ void UpdatesModel::refresh()
 {
   QUrlQuery query;
   query.addQueryItem("category", 0);
-  _networkManager->post("update/fetch", query);
+  NetworkManager::instance().post("update/fetch", query);
 }
 
 /******************************************************************************
@@ -361,7 +344,7 @@ void UpdatesModel::downloadChapter(int index)
   // make as downloaded so we don't download more than once
   entry.chapterInfo.downloaded = true;
 
-  _networkManager->get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
+  NetworkManager::instance().get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
 }
 
 /******************************************************************************
@@ -377,7 +360,7 @@ void UpdatesModel::chapterRead(qint32 mangaId, quint32 chapter)
         info.chapterInfo.index == chapter)
     {
       info.chapterInfo.read = true;
-      _networkManager->patch("read", "true",
+      NetworkManager::instance().patch("read", "true",
         QStringLiteral("manga/%1/chapter/%2").arg(mangaId).arg(chapter));
       emit dataChanged(createIndex(i, 0), createIndex(i, 0), { RoleRead });
       break;

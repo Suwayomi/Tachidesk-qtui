@@ -3,22 +3,20 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "../networkmanager.h"
 #include "common_structs.h"
+#include <qqml.h>
 
 class ChapterModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
 
-  Q_PROPERTY(NetworkManager* nm   READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
   Q_PROPERTY(qint32 mangaNumber   MEMBER _mangaNumber    NOTIFY mangaNumberChanged)
   Q_PROPERTY(qint32 chapterNumber MEMBER _chapterNumber  NOTIFY chapterNumberChanged)
   Q_PROPERTY(QString chapterName  MEMBER _chapterName    NOTIFY chapterNameChanged)
   Q_PROPERTY(qint32 pageCount     MEMBER _pageCount      NOTIFY pageCountChanged)
   Q_PROPERTY(qint32 pageIndex     MEMBER _pageIndex      NOTIFY pageIndexChanged)
-
-  NetworkManager* _networkManager = nullptr;
 
   struct ChapterInfo {
     QString  url;
@@ -70,21 +68,10 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
-
   Q_INVOKABLE void updateChapter(qint32 page);
   Q_INVOKABLE void requestChapter(quint32 chapter);
   Q_INVOKABLE QVariantMap get(int row) const;
 signals:
-   void networkManagerChanged();
    void mangaNumberChanged();
    void pageCountChanged();
    void pageIndexChanged();
@@ -92,6 +79,4 @@ signals:
    void chapterNameChanged();
    void chapterLoaded(int lastRead);
 
-public slots:
-  void gotChapter(const QJsonDocument& reply);
 };

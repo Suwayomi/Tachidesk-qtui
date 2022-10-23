@@ -1,7 +1,7 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
 
-import Tachidesk.Models
+import Tachidesk.Qtui
 
 Rectangle {
   id: libraryBase

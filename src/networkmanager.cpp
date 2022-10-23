@@ -30,6 +30,15 @@ NetworkManager::NetworkManager(
 
 /********************************************************************
  *
+ *  NetworkManager::instance()
+ *
+ ********************************************************************/
+NetworkManager& NetworkManager::instance() {
+  return *s_instance;
+}
+
+/********************************************************************
+ *
  *  NetworkManager::create()
  *
  ********************************************************************/
@@ -101,41 +110,64 @@ void NetworkManager::get(const QString &endpoint)
 
 /********************************************************************
  *
- *  get()
+ *  endpointReply()
  *
  ********************************************************************/
-void NetworkManager::getChapters(const QString &endpoint)
-{
-  getEndpoint(endpoint, &NetworkManager::chaptersReply);
-}
+void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
 
 /********************************************************************
  *
  *  get()
  *
  ********************************************************************/
-void NetworkManager::getUpdates(const QString &endpoint)
+void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& callback)
 {
-  getEndpoint(endpoint, &NetworkManager::updatesReply);
-}
+  qDebug().noquote().nospace()
+     << "NetworkManager: get " << _host.resolved(QUrl(_host.path() + "/api/v1/")).toString() << uri.toString();
 
-/********************************************************************
- *
- *  get()
- *
- ********************************************************************/
-void NetworkManager::getSources(const QString &endpoint)
-{
-  getEndpoint(endpoint, &NetworkManager::sourcesReply);
-}
-/********************************************************************
- *
- *  get()
- *
- ********************************************************************/
-void NetworkManager::getExtensions(const QString &endpoint)
-{
-  getEndpoint(endpoint, &NetworkManager::extensionsReply);
+  QNetworkRequest req(_host.resolved(QUrl(_host.path() + "/api/v1/")).resolved(uri));
+
+  auto* reply = man->get(req);
+
+  connect(reply, &QNetworkReply::finished, context,
+    [=,this]()
+  {
+    //trackChange(authenticationFailed);
+    //trackChange(authenticating);
+
+    switch (reply->error()) {
+      case QNetworkReply::AuthenticationRequiredError:
+        //_authenticationFailed = true;
+        //_authenticating = false;
+        break;
+
+      default:
+        break;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      qDebug().noquote().nospace()
+          << "NetworkManager: get: " << reply->errorString();
+
+      //_authenticating = false;
+      return;
+    }
+
+    QJsonParseError parser;
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll(), &parser);
+
+    if (parser.error != QJsonParseError::NoError) {
+      qDebug().noquote().nospace()
+          << "NetworkManager: get: Error: "
+          << parser.errorString();
+      return;
+    }
+
+    callback(doc);
+  });
+
+  connect(reply, &QNetworkReply::finished, reply,
+   &QNetworkReply::deleteLater);
 }
 
 /********************************************************************
@@ -229,41 +261,6 @@ void NetworkManager::deleteResource(const QString &endpoint)
   connect(
     reply, &QNetworkReply::finished, this, &NetworkManager::endpointReply);
 }
-
-/********************************************************************
- *
- *  userReply()
- *
- ********************************************************************/
-void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
-
-/********************************************************************
- *
- *  userReply()
- *
- ********************************************************************/
-void NetworkManager::chaptersReply() { emit receiveChapters(processReply()); }
-
-/********************************************************************
- *
- *  userReply()
- *
- ********************************************************************/
-void NetworkManager::updatesReply() { emit receiveUpdates(processReply()); }
-
-/********************************************************************
- *
- *  userReply()
- *
- ********************************************************************/
-void NetworkManager::sourcesReply() { emit receiveSources(processReply()); }
-
-/********************************************************************
- *
- *  userReply()
- *
- ********************************************************************/
-void NetworkManager::extensionsReply() { emit receiveExtensions(processReply()); }
 
 /********************************************************************
  *

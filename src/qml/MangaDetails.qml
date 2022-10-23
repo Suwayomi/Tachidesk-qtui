@@ -5,7 +5,7 @@ import Qt5Compat.GraphicalEffects
 import QtQuick.Window
 import QtWebSockets
 
-import Tachidesk.Models 1.0
+import Tachidesk.Qtui
 
 import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
@@ -20,13 +20,11 @@ Item {
 
   MangaDetailsModel {
     id: detailsModel
-    nm: networkManager
     onLoaded: details = detailsModel.get(0)
   }
 
   ChaptersModel {
     id: chaptersModel
-    nm: networkManager
     mangaNumber: detailsModel.mangaNumber
     autoUpdate: settings.autoUpdate
   }
@@ -313,7 +311,7 @@ Item {
       MouseArea {
         anchors.fill: parent
         onClicked: {
-          var viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
+          const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                          chapter: chapterIndex })
           viewer.chapterRead.connect(markRead)
@@ -400,7 +398,7 @@ Item {
     MouseArea {
       anchors.fill: parent
       onClicked: {
-        var viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+        const viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
                                      { mangaNumber: detailsModel.mangaNumber,
                                        chapter: chaptersModel.lastReadChapter })
         viewer.chapterRead.connect((chapter) => {

@@ -5,13 +5,9 @@
 #include <QJsonObject>
 #include <qcoreapplication.h>
 #include <QQmlEngine>
+#include <QStringBuilder>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, SourcesLibraryModel)
+#include "../networkmanager.h"
 
 /******************************************************************************
  *
@@ -21,6 +17,38 @@ IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, SourcesLibraryModel)
 SourcesLibraryModel::SourcesLibraryModel(QObject* parent)
   : QAbstractListModel(parent)
 {
+  receiveReply = [&](const QJsonDocument& reply) {
+    const auto& mangaList = reply["mangaList"].toArray();
+
+    if (resetModel) {
+      beginResetModel();
+      _sources.clear();
+    } else {
+      beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
+    }
+
+
+    for (const auto& entry_arr : mangaList) {
+      const auto& entry   = entry_arr.toObject();
+      auto& info          = _sources.emplace_back();
+      info.id             = entry["id"].toInt();
+      info.title          = entry["title"].toString();
+      info.thumbnailUrl   = entry["thumbnailUrl"].toString();
+      info.url            = entry["url"].toString();
+      info.isInitialized  = entry["isInitialized"].toBool();
+      info.inLibrary      = entry["inLibrary"].toBool();
+      if (info.isInitialized) {
+        // TODO: fill in details
+      }
+    }
+
+    if (resetModel) {
+      resetModel = false;
+      endResetModel();
+    } else {
+      endInsertRows();
+    }
+  };
 }
 
 void SourcesLibraryModel::classBegin() { }
@@ -33,47 +61,6 @@ void SourcesLibraryModel::classBegin() { }
 void SourcesLibraryModel::componentComplete()
 {
   next();
-}
-
-/******************************************************************************
- *
- * Method: receiveReply()
- *
- *****************************************************************************/
-void SourcesLibraryModel::receivedReply(const QJsonDocument& reply)
-{
-  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
-
-  const auto& mangaList = reply["mangaList"].toArray();
-
-  if (resetModel) {
-    beginResetModel();
-    _sources.clear();
-  } else {
-    beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
-  }
-
-
-  for (const auto& entry_arr : mangaList) {
-    const auto& entry   = entry_arr.toObject();
-    auto& info          = _sources.emplace_back();
-    info.id             = entry["id"].toInt();
-    info.title          = entry["title"].toString();
-    info.thumbnailUrl   = entry["thumbnailUrl"].toString();
-    info.url            = entry["url"].toString();
-    info.isInitialized  = entry["isInitialized"].toBool();
-    info.inLibrary      = entry["inLibrary"].toBool();
-    if (info.isInitialized) {
-      // TODO: fill in details
-    }
-  }
-
-  if (resetModel) {
-    resetModel = false;
-    endResetModel();
-  } else {
-    endInsertRows();
-  }
 }
 
 /******************************************************************************
@@ -108,7 +95,7 @@ QVariant SourcesLibraryModel::data(const QModelIndex &index, int role) const {
   {
     case RoleThumbnailUrl:
       {
-        return _networkManager->resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
       }
     case RoleTitle:
       {
@@ -167,13 +154,7 @@ QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
 void SourcesLibraryModel::search(const QString& searchTerm)
 {
   resetModel = true;
-  _networkManager->get(QStringLiteral("source/%1/search/%2/1").arg(_source).arg(searchTerm));
-
-  connect(
-      _networkManager,
-      &NetworkManager::receivedReply,
-      this,
-      &SourcesLibraryModel::receivedReply);
+  NetworkManager::instance().get(QUrl(u"source/"_qs % _source % "/search/" % searchTerm), this, receiveReply);
 }
 
 /******************************************************************************
@@ -183,11 +164,7 @@ void SourcesLibraryModel::search(const QString& searchTerm)
  *****************************************************************************/
 void SourcesLibraryModel::next()
 {
-  _networkManager->get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(++_pageNumber));
+  NetworkManager::instance().get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(++_pageNumber));
+  NetworkManager::instance().get(QUrl(u"source/"_qs % _source % "/latest/" % QString::number(++_pageNumber)), this, receiveReply);
 
-  connect(
-      _networkManager,
-      &NetworkManager::receivedReply,
-      this,
-      &SourcesLibraryModel::receivedReply);
 }

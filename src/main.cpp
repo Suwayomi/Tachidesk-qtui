@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   QGuiApplication app(argc, argv);
 #endif
 
-  if (QFontDatabase::addApplicationFont(":/Tachidesk/qtui/libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf") < 0) {
+  if (QFontDatabase::addApplicationFont(":/Tachidesk/Qtui/libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf") < 0) {
     assert(false);
   }
 

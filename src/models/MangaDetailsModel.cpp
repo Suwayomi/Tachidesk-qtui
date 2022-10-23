@@ -6,13 +6,9 @@
 #include <qcoreapplication.h>
 #include <QQmlEngine>
 #include <QDesktopServices>
+#include <QStringBuilder>
 
-#define exportQmlType(ns, cls) qmlRegisterType<cls>(#ns, 1, 0, #cls)
-#define IMPLEMENT_QTQUICK_TYPE(ns, cls) \
-  void register ## cls ## Type() { exportQmlType(ns, cls); } \
-  Q_COREAPP_STARTUP_FUNCTION(register ## cls ## Type)
-
-IMPLEMENT_QTQUICK_TYPE(Tachidesk.Models, MangaDetailsModel)
+#include "../networkmanager.h"
 
 void MangaDetails::processDetails(const QJsonObject& entry)
 {
@@ -57,40 +53,25 @@ void MangaDetailsModel::classBegin()
 
 /******************************************************************************
  *
- * gotDetails
- *
- *****************************************************************************/
-void MangaDetailsModel::gotDetails(const QJsonDocument& reply)
-{
-  disconnect(_networkManager, &NetworkManager::receivedReply, this, nullptr);
-
-  beginResetModel();
-  _entries.clear();
-
-
-  const auto& entry = reply.object();
-  auto& info        = _entries.emplace_back();
-  info.processDetails(entry);
-
-  endResetModel();
-
-  emit loaded();
-}
-
-/******************************************************************************
- *
  * componentComplete
  *
  *****************************************************************************/
 void MangaDetailsModel::componentComplete()
 {
-  connect(
-      _networkManager,
-      &NetworkManager::receivedReply,
-      this,
-      &MangaDetailsModel::gotDetails);
+  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber)), this,
+      [&](const auto& doc) {
+        beginResetModel();
+        _entries.clear();
 
-  _networkManager->get(QStringLiteral("manga/%1").arg(_mangaNumber));
+
+        const auto& entry = doc.object();
+        auto& info        = _entries.emplace_back();
+        info.processDetails(entry);
+
+        endResetModel();
+
+        emit loaded();
+      });
 }
 
 /******************************************************************************
@@ -145,7 +126,7 @@ QVariant MangaDetailsModel::data(const QModelIndex &index, int role) const {
       }
     case RoleThumbnailUrl:
       {
-        return _networkManager->resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
       }
     case RoleInitialized:
       {
@@ -233,7 +214,7 @@ QVariantMap MangaDetailsModel::get(int row) const
  *****************************************************************************/
 void MangaDetailsModel::addToLibrary()
 {
-  _networkManager->get(QStringLiteral("manga/%1/library").arg(_mangaNumber));
+  NetworkManager::instance().get(QStringLiteral("manga/%1/library").arg(_mangaNumber));
 
   _entries[0].inLibrary = true;
   emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});
@@ -246,7 +227,7 @@ void MangaDetailsModel::addToLibrary()
  *****************************************************************************/
 void MangaDetailsModel::removeFromLibrary()
 {
-  _networkManager->deleteResource(QStringLiteral("manga/%1/library").arg(_mangaNumber));
+  NetworkManager::instance().deleteResource(QStringLiteral("manga/%1/library").arg(_mangaNumber));
 
   _entries[0].inLibrary = false;
   emit dataChanged(index(0, 0), index(0, 0), {RoleInLibrary});

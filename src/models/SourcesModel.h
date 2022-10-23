@@ -3,16 +3,13 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 
-#include "../networkmanager.h"
+#include <qqml.h>
 
 class SourcesModel : public QAbstractListModel, public QQmlParserStatus
 {
   Q_OBJECT
+  QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
-
-  Q_PROPERTY(NetworkManager* nm READ getNetworkManager WRITE setNetworkManager NOTIFY networkManagerChanged)
-
-  NetworkManager* _networkManager = nullptr;
 
   struct SourceInfo {
     QString  id;
@@ -52,18 +49,6 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  auto getNetworkManager() const
-  {
-    return _networkManager;
-  }
-
-  void setNetworkManager(NetworkManager* nm) {
-    _networkManager = nm;
-    networkManagerChanged();
-  }
-
   void receivedReply(const QJsonDocument& reply);
 
-signals:
-   void networkManagerChanged();
 };
