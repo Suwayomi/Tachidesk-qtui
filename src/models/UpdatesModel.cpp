@@ -84,12 +84,9 @@ void UpdatesModel::componentComplete()
     qDebug() << "error: " << error << _webSocket.errorString();
   });
 
-  auto resolved = NetworkManager::instance().resolvedPath().arg("/api/v1/update");
-  bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
-  resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
-  resolved = QStringLiteral("%1://%2")
-    .arg(ssl ? "wss" : "ws")
-    .arg(resolved);
+  auto resolved = NetworkManager::instance().resolvedPath().resolved(QString("api/v1/update"));
+  bool ssl = !resolved.scheme().compare("https", Qt::CaseInsensitive);
+  resolved.setScheme(ssl ? "wss" : "ws");
 
   QNetworkRequest request;
   request.setUrl(resolved);
@@ -155,7 +152,7 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   {
     case RoleThumbnailUrl:
       {
-        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().resolved(entry.thumbnailUrl.mid(1));
       }
     case RoleTitle:
       {

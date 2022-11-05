@@ -123,7 +123,7 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
       }
     case RoleChapterUrl:
       {
-        return NetworkManager::instance().resolvedPath().arg(
+        return NetworkManager::instance().resolvedPath().resolved(
                   QStringLiteral("/api/v1/manga/%1/chapter/%2/page/%3")
                     .arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber));
       }

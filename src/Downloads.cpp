@@ -17,12 +17,9 @@ Downloads::Downloads(QObject* parent)
 {
   connect(&_webSocket, &QWebSocket::connected, this, &Downloads::onConnected);
   connect(&_webSocket, &QWebSocket::disconnected, this, &Downloads::closed);
-  auto resolved = NetworkManager::instance().resolvedPath().arg("/api/v1/downloads");
-  bool ssl = resolved.startsWith("https");
-  resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':'))+2);
-  resolved = QStringLiteral("%1://%2")
-    .arg(ssl ? "wss" : "ws")
-    .arg(resolved);
+  auto resolved = NetworkManager::instance().resolvedPath().resolved(QString("api/v1/downloads"));
+  bool ssl = !resolved.scheme().compare("https", Qt::CaseInsensitive);
+  resolved.setScheme(ssl ? "wss" : "ws");
 
   _webSocket.open(QUrl(resolved));
 }

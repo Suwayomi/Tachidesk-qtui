@@ -44,10 +44,9 @@ void DownloadsModel::setupWebsocket() {
           [=](QAbstractSocket::SocketError error) {
             qDebug() << "error: " << error << _webSocket.errorString();
           });
-  auto resolved = NetworkManager::instance().resolvedPath().arg("/api/v1/downloads");
-  bool ssl = resolved.startsWith("https", Qt::CaseInsensitive);
-  resolved = resolved.mid(resolved.indexOf('/', resolved.indexOf(':')) + 2);
-  resolved = QStringLiteral("%1://%2").arg(ssl ? "wss" : "ws").arg(resolved);
+  auto resolved = NetworkManager::instance().resolvedPath().resolved(QString("api/v1/downloads"));
+  bool ssl = !resolved.scheme().compare("https", Qt::CaseInsensitive);
+  resolved.setScheme(ssl ? "wss" : "ws");
 
   QNetworkRequest request;
   request.setUrl(resolved);
@@ -200,8 +199,8 @@ QVariant DownloadsModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleThumbnail: {
-    return NetworkManager::instance().resolvedPath().arg(
-        _mangaInfo[entry.mangaId].thumbnailUrl);
+    return NetworkManager::instance().resolvedPath().resolved(
+        _mangaInfo[entry.mangaId].thumbnailUrl.mid(1));
   }
 
   // case Role

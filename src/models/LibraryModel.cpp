@@ -74,7 +74,7 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
       }
     case RoleThumbnail:
       {
-        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().resolved(entry.thumbnailUrl.mid(1));
       }
     case RoleId:
       {

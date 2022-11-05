@@ -89,7 +89,7 @@ QVariant SourcesModel::data(const QModelIndex &index, int role) const {
   {
     case RoleIconUrl:
       {
-        return NetworkManager::instance().resolvedPath().arg(entry.iconUrl);
+        return NetworkManager::instance().resolvedPath().resolved(entry.iconUrl.mid(1));
       }
     case RoleName:
       {

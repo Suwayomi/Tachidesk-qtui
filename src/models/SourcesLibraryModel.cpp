@@ -95,7 +95,7 @@ QVariant SourcesLibraryModel::data(const QModelIndex &index, int role) const {
   {
     case RoleThumbnailUrl:
       {
-        return NetworkManager::instance().resolvedPath().arg(entry.thumbnailUrl);
+        return NetworkManager::instance().resolvedPath().resolved(entry.thumbnailUrl.mid(1));
       }
     case RoleTitle:
       {

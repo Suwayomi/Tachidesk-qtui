@@ -23,7 +23,7 @@ NetworkManager::NetworkManager(
   std::shared_ptr<Settings> &settings, const QString &host, QObject *parent)
 : QObject(parent)
 , QQmlNetworkAccessManagerFactory()
-, _host(host)
+, _host(host.endsWith('/') ? host : host + '/')
 , _settings(settings)
 {
 }
@@ -123,22 +123,18 @@ void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
 void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& callback)
 {
   qDebug().noquote().nospace()
-     << "NetworkManager: get " << _host.resolved(QUrl(_host.path() + "/api/v1/")).toString() << uri.toString();
+     << "NetworkManager: get " << _host.resolved(QString("api/v1/")).resolved(uri);
 
-  QNetworkRequest req(_host.resolved(QUrl(_host.path() + "/api/v1/")).resolved(uri));
+  QNetworkRequest req(_host.resolved(QString("api/v1/")).resolved(uri));
 
   auto* reply = man->get(req);
 
   connect(reply, &QNetworkReply::finished, context,
     [=,this]()
   {
-    //trackChange(authenticationFailed);
-    //trackChange(authenticating);
 
     switch (reply->error()) {
       case QNetworkReply::AuthenticationRequiredError:
-        //_authenticationFailed = true;
-        //_authenticating = false;
         break;
 
       default:
@@ -148,8 +144,6 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
     if (reply->error() != QNetworkReply::NoError) {
       qDebug().noquote().nospace()
           << "NetworkManager: get: " << reply->errorString();
-
-      //_authenticating = false;
       return;
     }
 
@@ -177,10 +171,8 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
  ********************************************************************/
 void NetworkManager::post(const QString &endpoint, const QUrlQuery &query)
 {
-  QUrl url(resolvedPath().arg("/api/v1/" + endpoint));
-
   QNetworkRequest request;
-  request.setUrl(url);
+  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
@@ -221,7 +213,7 @@ void NetworkManager::get(
   const std::function<void(const QJsonDocument &)> &func)
 {
   QNetworkRequest request;
-  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
@@ -252,7 +244,7 @@ void NetworkManager::get(
 void NetworkManager::deleteResource(const QString &endpoint)
 {
   QNetworkRequest request;
-  request.setUrl(QUrl(resolvedPath().arg("/api/v1/" + endpoint)));
+  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
