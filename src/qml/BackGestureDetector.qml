@@ -34,7 +34,7 @@ MouseArea {
       return
     }
 
-    var currVel = (mouse.x - xPrev)
+    const currVel = (mouse.x - xPrev)
     velocity = (velocity + currVel)/2.0
     xPrev = mouse.x
 

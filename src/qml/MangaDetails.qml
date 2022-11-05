@@ -284,85 +284,114 @@ Item {
 
 
     model: chaptersModel
-    delegate: Rectangle {
+    delegate: SwipeDelegate {
       width: chapterView.width
       height: 60
-      color: "#212121"
-      border {
-        width: 1
-        color: "#F5F5F5"
-      }
-      Text {
-        anchors {
-          left: parent.left
-          right: downloadedText.left
-          top: parent.top
-          bottom: parent.bottom
-          margins: 4
-        }
-        text: name
-        color: read ? "grey" : "#F5F5F5"
-        horizontalAlignment: Text.AlignCenter
-        verticalAlignment: Text.AlignVCenter
-        leftPadding: 12
-        font.pixelSize: 24
-        fontSizeMode: Text.Fit
-      }
-      MouseArea {
-        anchors.fill: parent
-        onClicked: {
+      TapHandler {
+        onTapped: (mouse) => {
           const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                          chapter: chapterIndex })
           viewer.chapterRead.connect(markRead)
         }
-        onPressAndHold: {
+        onLongPressed: {
           chapterNumberPopup = chapterIndex
           console.log("chapter was : ", read)
           chapterReadPopup = read
           popupChapter.open()
         }
       }
-      Item {
-        id: downloadedText
-        anchors {
-          right: parent.right
-          top: parent.top
-          bottom: parent.bottom
-        }
-
-        width: parent.height * .75
+      swipe.right: Rectangle {
+        id: rightLabel
+        color: "#2E7D32"
+        width: parent.width
+        height: parent.height
+        anchors.right: parent.right
         Text {
-          id: downloadStatus
-          visible: progress < 0 || progress >= 100
-          anchors.fill: parent
-          font.family: "Material Design Icons"
-          color: "#F5F5F5"
-          text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
-          horizontalAlignment: Text.AlignRight
-          verticalAlignment: Text.AlignVCenter
-          rightPadding: 12
-          font.pixelSize: 24
-        }
-        RadialBarShape {
+          id: icon
           anchors {
-            centerIn: parent
+            right: parent.right
+            rightMargin: 12
+            top: parent.top
+            bottom: parent.bottom
           }
-          height: parent.height * .90
-          width: parent.width * .90
-          visible: progress > 0 && progress < 100
-          progressColor: "#e6436d"
-          value: progress
-          spanAngle: 270
-          dialType: RadialBarShape.DialType.FullDial
-          backgroundColor: "#6272a4"
-          penStyle: Qt.FlatCap
-          dialColor: "transparent"
+
+          text: read ? MdiFont.Icon.eyeOff : MdiFont.Icon.eye
+          font.family: "Material Design Icons"
+          font.pixelSize: 20
+          horizontalAlignment: Text.AlignHCenter
+          verticalAlignment: Text.AlignVCenter
+          color: "#F5F5F5"
         }
-        MouseArea {
-          anchors.fill: parent
-          onClicked: {
-            chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterIndex)
+      }
+      swipe.onOpened: {
+        console.log("hello opened")
+        chaptersModel.chapterRead(chapterIndex, !read)
+        swipe.close()
+      }
+      contentItem: Rectangle {
+        color: "#212121"
+        border {
+          width: 1
+          color: "#F5F5F5"
+        }
+        Text {
+          anchors {
+            left: parent.left
+            right: downloadedText.left
+            top: parent.top
+            bottom: parent.bottom
+            margins: 4
+          }
+          text: name
+          color: read ? "grey" : "#F5F5F5"
+          horizontalAlignment: Text.AlignCenter
+          verticalAlignment: Text.AlignVCenter
+          leftPadding: 12
+          font.pixelSize: 24
+          fontSizeMode: Text.Fit
+        }
+        Item {
+          id: downloadedText
+          anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+          }
+
+          width: parent.height * .75
+          Text {
+            id: downloadStatus
+            visible: progress < 0 || progress >= 100
+            anchors.fill: parent
+            font.family: "Material Design Icons"
+            color: "#F5F5F5"
+            text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
+            horizontalAlignment: Text.AlignRight
+            verticalAlignment: Text.AlignVCenter
+            rightPadding: 12
+            font.pixelSize: 24
+          }
+          RadialBarShape {
+            anchors {
+              centerIn: parent
+            }
+            height: parent.height * .90
+            width: parent.width * .90
+            visible: progress > 0 && progress < 100
+            progressColor: "#e6436d"
+            value: progress
+            spanAngle: 270
+            dialType: RadialBarShape.DialType.FullDial
+            backgroundColor: "#6272a4"
+            penStyle: Qt.FlatCap
+            dialColor: "transparent"
+          }
+          MouseArea {
+            anchors.fill: parent
+            onClicked: {
+              chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterIndex)
+            }
           }
         }
       }
