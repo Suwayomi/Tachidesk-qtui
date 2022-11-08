@@ -71,6 +71,7 @@ public:
   Q_INVOKABLE void updateChapter(qint32 page);
   Q_INVOKABLE void requestChapter(quint32 chapter);
   Q_INVOKABLE QVariantMap get(int row) const;
+  Q_INVOKABLE quint32 getLastChapter() const;
 signals:
    void mangaNumberChanged();
    void pageCountChanged();

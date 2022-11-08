@@ -47,17 +47,16 @@ Item {
 
     onMovementEnded: {
       const indexIs = indexAt(contentX,contentY + base.height - 10)
-      chapterModel.updateChapter(indexIs)
+      model.updateChapter(indexIs)
     }
     onAtYEndChanged: {
       if (!listviewLoaded) {
         return
       }
       if (listView.atYEnd) {
-        const chapterIndex = model.get(currentIndex).chapterIndex
-        console.log("chapter index, manga number: ", chapterIndex, chapterModel.mangaNumber)
-        chapterRead(chapterModel.mangaNumber, chapterIndex)
-        chapterModel.requestChapter(chapterIndex + 1)
+        const chapterIndex = model.getLastChapter()
+        chapterRead(model.mangaNumber, chapterIndex)
+        model.requestChapter(chapterIndex + 1)
       }
     }
 
@@ -86,7 +85,11 @@ Item {
         listView.contentY += moveHeight
 
         const indexIs = listView.indexAt(listView.contentX, listView.contentY + base.height - 10)
-        chapterModel.updateChapter(indexIs)
+        model.updateChapter(indexIs)
+        if (listView.atYend) {
+          const chapterIndex = model.getLastChapter()
+          model.requestChapter(chapterIndex + 1)
+        }
 
         mouse.accepted = false
 

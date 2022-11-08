@@ -50,8 +50,17 @@ const ChapterModel::ChapterInfo* ChapterModel::getChapterByRow(qint32 index, qui
     }
     chapterNumber += chapter.pageCount;
   }
-  qDebug() << "not found!" << index;
-  return nullptr;
+  qDebug() << "not found!" << index << "returning last chapter";
+  return &_chapters.back();
+}
+
+/******************************************************************************
+ *
+ * Method: getLastChapter()
+ *
+ *****************************************************************************/
+quint32 ChapterModel::getLastChapter() const {
+  return _chapters.back().index;
 }
 
 /******************************************************************************
@@ -124,7 +133,7 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
     case RoleChapterUrl:
       {
         return NetworkManager::instance().resolvedPath().resolved(
-                  QStringLiteral("/api/v1/manga/%1/chapter/%2/page/%3")
+                  QStringLiteral("api/v1/manga/%1/chapter/%2/page/%3")
                     .arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber));
       }
     //case Role
@@ -190,7 +199,7 @@ void ChapterModel::updateChapter(qint32 page)
   pageCountChanged();
   pageIndexChanged();
 
-  NetworkManager::instance().patch("lastPageRead", page - chapterNumber, //"read", read ? "true" : "false",
+  NetworkManager::instance().patch("lastPageRead", page - chapterNumber,
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
 }
 
