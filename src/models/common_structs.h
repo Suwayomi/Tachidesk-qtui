@@ -18,6 +18,7 @@ struct ChapterInfo {
   quint32  lastPageRead;
   QDateTime  fetchedAt;
   std::optional<qint32>  downloadProgress;
+  std::optional<bool> downloadPrepairing;
 
   void processChapter(const QJsonObject& entry)
   {

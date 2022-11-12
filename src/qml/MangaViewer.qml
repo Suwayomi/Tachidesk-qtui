@@ -26,7 +26,6 @@ Item {
           WebtoonImage {
             anchors.fill: parent
             imageHeight: parent.height
-            //onImageLoaded: base.imageLoaded()
           }
           MouseArea {
             anchors.centerIn: parent
@@ -88,7 +87,7 @@ Item {
         }
 
         chapterModel.updateChapter(listView.currentIndex)
-        if ((listView.currentIndex + 1) == listView.count) {
+        if ((listView.currentIndex + 1) === listView.count) {
           chapterRead(chapterModel.mangaNumber, chapterModel.chapterNumber)
           chapterModel.chapterNumber++
           chapterModel.requestChapter(chapterModel.chapterNumber)

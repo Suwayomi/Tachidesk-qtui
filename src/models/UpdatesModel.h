@@ -74,6 +74,7 @@ public:
     RoleDownloaded,
     RoleFetchedAt,
     RoleDownloadProgress,
+    RoleDownloadPrepairing,
   };
 
   UpdatesModel(QObject* parent = nullptr);

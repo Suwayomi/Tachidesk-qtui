@@ -130,7 +130,7 @@ Rectangle {
             width: 30
             height: 30
             anchors.centerIn: parent
-            visible: downloadProgress < 0 || downloadProgress >= 100
+            visible: !downloadPrepairing && (downloadProgress < 0 || downloadProgress >= 100)
             Text {
               text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
               horizontalAlignment: Text.AlignCenter
@@ -150,7 +150,7 @@ Rectangle {
           RadialBarShape {
             height: parent.height
             width: parent.width
-            visible: downloadProgress > 0 && downloadProgress < 100
+            visible: downloadPrepairing || (downloadProgress > 0 && downloadProgress < 100)
             progressColor: "#e6436d"
             value: downloadProgress
             spanAngle: 270

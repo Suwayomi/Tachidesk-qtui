@@ -112,7 +112,8 @@ void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo>& queueInfo)
       {
         source.queueInfo = std::make_shared<QueueInfo>(info);
         source.chapterInfo.downloaded = info.progress >= 100;
-        emit dataChanged(createIndex(row, 0), createIndex(row, 0), { RoleDownloadProgress, RoleDownloaded });
+        source.chapterInfo.downloadPrepairing = false;
+        emit dataChanged(createIndex(row, 0), createIndex(row, 0), { RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
         break;
       }
       row++;
@@ -229,6 +230,9 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
         }
         return entry.queueInfo->progress;
       }
+    case RoleDownloadPrepairing:
+      return entry.chapterInfo.downloadPrepairing.value_or(false);
+
     default:
       return {};
   }
@@ -260,6 +264,7 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
                                           {RoleChapterCount,  "chapterCount"},
                                           {RoleFetchedAt,     "fetchedAt"},
                                           {RoleDownloadProgress,"downloadProgress"},
+                                          {RoleDownloadPrepairing,"downloadPrepairing"},
   };
 
   return roles;
@@ -338,9 +343,12 @@ void UpdatesModel::downloadChapter(int index)
   if (entry.chapterInfo.downloaded) {
     return;
   }
-  // make as downloaded so we don't download more than once
+  // mark as downloaded so we don't download more than once
   entry.chapterInfo.downloaded = true;
+  entry.chapterInfo.downloadPrepairing = true;
 
+  qDebug() << "source index? " << index;
+  emit dataChanged(createIndex(index, 0), createIndex(index, 0), { RoleDownloadPrepairing });
   NetworkManager::instance().get(QStringLiteral("download/%1/chapter/%2").arg(entry.id).arg(entry.chapterInfo.index));
 }
 

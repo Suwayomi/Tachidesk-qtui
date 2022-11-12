@@ -282,25 +282,44 @@ Item {
       return base.height - detailsColumn.childrenRect.height - 4
     }
 
-
     model: chaptersModel
     delegate: SwipeDelegate {
       width: chapterView.width
       height: 60
-      TapHandler {
-        onTapped: (mouse) => {
+
+      property bool timerTriggered: false
+      Timer {
+        id: longPressTimer
+
+        interval: 800 //your press-and-hold interval here
+        repeat: false
+        running: false
+
+        onTriggered: {
+          timerTriggered = true;
+          chapterNumberPopup = chapterIndex
+          console.log("long press chapter is: ", read)
+          chapterReadPopup = read
+          popupChapter.open()
+        }
+      }
+      onClicked: {
+        if (!timerTriggered) {
           const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                        { mangaNumber: detailsModel.mangaNumber,
                                          chapter: chapterIndex })
           viewer.chapterRead.connect(markRead)
         }
-        onLongPressed: {
-          chapterNumberPopup = chapterIndex
-          console.log("chapter was : ", read)
-          chapterReadPopup = read
-          popupChapter.open()
+        timerTriggered = false;
+      }
+      onPressedChanged: {
+        if ( pressed && !swipe.position ) {
+          longPressTimer.running = true;
+        } else {
+          longPressTimer.running = false;
         }
       }
+      swipe.onPositionChanged: longPressTimer.running = false;
       swipe.right: Rectangle {
         id: rightLabel
         color: "#2E7D32"

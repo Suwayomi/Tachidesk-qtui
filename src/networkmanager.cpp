@@ -172,7 +172,7 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
 void NetworkManager::post(const QString &endpoint, const QUrlQuery &query)
 {
   QNetworkRequest request;
-  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
+  request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
@@ -213,7 +213,7 @@ void NetworkManager::get(
   const std::function<void(const QJsonDocument &)> &func)
 {
   QNetworkRequest request;
-  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
+  request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
@@ -244,7 +244,7 @@ void NetworkManager::get(
 void NetworkManager::deleteResource(const QString &endpoint)
 {
   QNetworkRequest request;
-  request.setUrl(_host.resolved(QString("/api/v1/")).resolved(endpoint));
+  request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
