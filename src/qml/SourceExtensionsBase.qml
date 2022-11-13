@@ -27,7 +27,7 @@ Item {
         width: pageText.contentWidth + 10
         height: pageText.contentHeight + 10
         Rectangle {
-          visible: index == view.currentIndex
+          visible: index === view.currentIndex
           anchors.fill: parent
           radius: 10
           color: "#0492c2"

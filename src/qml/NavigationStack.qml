@@ -71,11 +71,11 @@ Item {
     anchors {
       left: parent.left
       right: parent.right
-      bottom: navigation.visible ? navigation.top : parent.bottom
+      bottom: parent.bottom
       top: parent.top
     }
 
-    Component.onCompleted: stack.push(Qt.resolvedUrl("Library.qml"))
+    Component.onCompleted: stack.push(Qt.resolvedUrl("NavigationBase.qml"))
 
     pushEnter: Transition {
       PropertyAnimation {
@@ -124,21 +124,6 @@ Item {
         to:0
         duration: 200
       }
-    }
-  }
-
-  Rectangle {
-    id: navigation
-    visible: navigationVisible
-    color: "#212121"
-    anchors {
-      left: parent.left
-      right: parent.right
-      bottom: parent.bottom
-    }
-    height: 50
-    NavigationHome {
-      anchors.fill: parent
     }
   }
 

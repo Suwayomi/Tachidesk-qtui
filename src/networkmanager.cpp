@@ -90,7 +90,7 @@ bool handleNetworkError(QNetworkReply *reply)
       // no connection
     }
 
-    qDebug() << reply->errorString();
+    qDebug() << reply->errorString() << reply->error();
 
     return false;
   }
@@ -143,7 +143,7 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
 
     if (reply->error() != QNetworkReply::NoError) {
       qDebug().noquote().nospace()
-          << "NetworkManager: get: " << reply->errorString();
+          << "NetworkManager: get: " << reply->errorString() << reply->error();
       return;
     }
 
@@ -153,7 +153,7 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
     if (parser.error != QJsonParseError::NoError) {
       qDebug().noquote().nospace()
           << "NetworkManager: get: Error: "
-          << parser.errorString();
+          << parser.errorString() << parser.error;
       return;
     }
 
