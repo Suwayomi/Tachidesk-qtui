@@ -57,7 +57,7 @@ void ChaptersModel::requestChapters(bool onlineFetch)
   _loading = true;
   emit loadingChanged();
 
-  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapters/?onlineFetch=" % QString::number(onlineFetch) ), this,
+  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapters/?onlineFetch=" % (onlineFetch ? "true" : "false") ), this,
     [&](const auto& doc)
   {
     if (doc.isEmpty()) {
