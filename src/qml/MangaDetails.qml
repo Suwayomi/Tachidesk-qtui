@@ -344,7 +344,6 @@ Item {
         }
       }
       swipe.onOpened: {
-        console.log("hello opened")
         chaptersModel.chapterRead(chapterIndex, !read)
         swipe.close()
       }
@@ -446,7 +445,7 @@ Item {
     MouseArea {
       anchors.fill: parent
       onClicked: {
-        const viewer = navigatePage(Qt.resolvedUrl("WebtoonViewer.qml"),
+        const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                      { mangaNumber: detailsModel.mangaNumber,
                                        chapter: chaptersModel.lastReadChapter })
         viewer.chapterRead.connect((chapter) => {

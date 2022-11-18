@@ -223,22 +223,21 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
  *****************************************************************************/
 void ChaptersModel::chapterRead(quint64 chapter, bool read)
 {
-  if (chapter > _chapters.size()) {
+  auto c = std::lower_bound(_chapters.rbegin(), _chapters.rend(), chapter,
+      [](const auto& c, quint64 value) {
+        return c.index < value;
+      });
+  if (c == _chapters.rend()) {
     return;
   }
 
-  auto c = std::lower_bound(_chapters.rbegin(), _chapters.rend(), chapter, [](const auto& c, quint64 value) {
-        return c.index < value;
-      });
   c->read = read;
-  qDebug() << "read chapter: " << c->chapterNumber << " read? " << read;
   assert(chapter == c->index);
 
   NetworkManager::instance().patch("read", read ? "true" : "false",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(c->chapterNumber));
+      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(c->index));
 
   auto index = (_chapters.rend() - c - 1);
-  qDebug() << "index: " << index << " chapter numbek: " << _chapters[index].chapterNumber;
   emit dataChanged(createIndex(index, 0), createIndex(index, 0), { RoleRead });
 
   emit lastReadChapterChanged();

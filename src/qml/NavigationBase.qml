@@ -15,11 +15,13 @@ Item {
       bottom: indicator.top
     }
 
-    Library { }
-    Updates { }
-    SourceExtensionsBase { }
-    Downloads { }
-    Settings { }
+    Repeater {
+      model: [ "Library.qml", "Updates.qml", "SourceExtensionsBase.qml", "Downloads.qml", "Settings.qml" ]
+      Loader {
+        active: SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem
+        source: modelData
+      }
+    }
   }
   ListModel {
     id: navigationModel

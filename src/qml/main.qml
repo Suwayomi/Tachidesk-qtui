@@ -32,7 +32,7 @@ ApplicationWindow {
   property variant rootWindow: root
 
   onClosing: (close) => {
-    if (Qt.platform.os != "android" || ac.canExit()) {
+    if (Qt.platform.os !== "android" || ac.canExit()) {
       close.accepted = true
       Qt.quit()
       return

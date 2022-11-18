@@ -36,7 +36,7 @@ Item {
       }
     }
 
-    var item = stack.find(function(item, index) {
+    const item = stack.find(function(item, index) {
       if (!item.url) {
         return false
       }
