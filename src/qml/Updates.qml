@@ -15,6 +15,11 @@ Rectangle {
     id: updatesModel
   }
 
+  function refresh() {
+    // idk is this even needed? ... need proper refresh for getting new chapters
+    console.log("updates refresh")
+  }
+
   function markRead(mangaId, chapter) {
     updatesModel.chapterRead(mangaId, chapter)
   }

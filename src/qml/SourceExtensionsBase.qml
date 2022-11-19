@@ -3,21 +3,46 @@ import QtQuick.Layouts
 import QtQuick.Controls
 
 Item {
+
+  function refresh() {
+    console.log("refresh extension base")
+  }
+
   SwipeView {
-    id: view
+    id: sourceView
 
     anchors {
       left: parent.left
       right: parent.right
       bottom: parent.bottom
-      top: indicator.bottom
+      top: sourceIndicator.bottom
     }
 
-    Sources { }
-    Extensions { }
+    Repeater {
+      model: [ "Sources.qml", "Extensions.qml" ]
+      Loader {
+        id: delegate
+        property bool isCurrentItem: SwipeView.isCurrentItem
+        source: modelData
+        onVisibleChanged: {
+          if (isCurrentItem && visible) {
+            delegate.item.refresh()
+          }
+        }
+        Connections {
+          target: sourceView
+          function onCurrentItemChanged() {
+            if (isCurrentItem) {
+              delegate.item.refresh()
+            }
+          }
+        }
+      }
+    }
   }
+
   Row {
-    id: indicator
+    id: sourceIndicator
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     spacing: 8
@@ -27,7 +52,7 @@ Item {
         width: pageText.contentWidth + 10
         height: pageText.contentHeight + 10
         Rectangle {
-          visible: index === view.currentIndex
+          visible: index === sourceView.currentIndex
           anchors.fill: parent
           radius: 10
           color: "#0492c2"
@@ -43,7 +68,7 @@ Item {
         }
         MouseArea {
           anchors.fill: parent
-          onClicked: view.currentIndex = index
+          onClicked: sourceView.currentIndex = index
         }
       }
     }

@@ -51,4 +51,5 @@ public:
 
   void receivedReply(const QJsonDocument& reply);
 
+  Q_INVOKABLE void refresh();
 };

@@ -13,6 +13,10 @@ Rectangle {
     id: sourcesModel
   }
 
+  function refresh() {
+    sourcesModel.refresh()
+  }
+
   SortFilterProxyModel {
     id: sources
     sourceModel: sourcesModel

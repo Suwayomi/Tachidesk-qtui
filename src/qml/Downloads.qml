@@ -8,6 +8,10 @@ import CustomControls
 
 Rectangle {
 
+  function refresh() {
+    console.log("refresh downloads")
+  }
+
   color: "#212121"
 
   DownloadsModel {

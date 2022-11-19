@@ -114,6 +114,7 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
  *****************************************************************************/
 void LibraryModel::refreshLibrary()
 {
+  auto entriesSize = _entries.size();
   _entries.clear();
   NetworkManager::instance().get(QUrl("category"), this,
     [&](const auto& doc)
@@ -123,7 +124,10 @@ void LibraryModel::refreshLibrary()
       NetworkManager::instance().get(QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
         [&](const auto& doc1)
       {
-        beginResetModel();
+        bool reset = static_cast<quint32>(doc.array().size()) != entriesSize;
+        if (reset) {
+          beginResetModel();
+        }
 
         for (const auto& entry_arr : doc1.array()) {
           const auto& entry = entry_arr.toObject();
@@ -141,7 +145,12 @@ void LibraryModel::refreshLibrary()
           info.unread       = entry["unreadCount"].toInt();
         }
 
-        endResetModel();
+        if (reset) {
+          endResetModel();
+        }
+        else {
+          emit dataChanged(createIndex(0, 0), createIndex(_entries.size(), 0));
+        }
       });
     }
   });

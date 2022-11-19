@@ -69,7 +69,7 @@ public:
      int role = Qt::DisplayRole) const override;
 
   Q_INVOKABLE void chapterRead(quint64 chapter, bool read);
-  Q_INVOKABLE void previousChaptersRead(qint32 chapter, bool read);
+  Q_INVOKABLE void previousChaptersRead(quint32 chapter, bool read);
   Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
   Q_INVOKABLE void requestChapters(bool onlineFetch);
 

@@ -18,8 +18,23 @@ Item {
     Repeater {
       model: [ "Library.qml", "Updates.qml", "SourceExtensionsBase.qml", "Downloads.qml", "Settings.qml" ]
       Loader {
-        active: SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem
+        id: delegate
+        //active: SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem
+        property bool isCurrentItem: SwipeView.isCurrentItem
         source: modelData
+        onVisibleChanged: {
+          if (isCurrentItem && visible) {
+            delegate.item.refresh()
+          }
+        }
+        Connections {
+          target: view
+          function onCurrentItemChanged() {
+            if (isCurrentItem) {
+              delegate.item.refresh()
+            }
+          }
+        }
       }
     }
   }

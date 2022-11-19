@@ -27,10 +27,24 @@ void SourcesModel::classBegin() { }
  *****************************************************************************/
 void SourcesModel::componentComplete()
 {
+  refresh();
+}
+
+/******************************************************************************
+ *
+ * refresh
+ *
+ *****************************************************************************/
+void SourcesModel::refresh()
+{
+  qDebug() << "queury sources";
   NetworkManager::instance().get(QUrl("source/list"), this,
     [&](const auto& reply)
   {
-    beginResetModel();
+    bool reset = static_cast<quint32>(reply.array().size()) != _sources.size();
+    if (reset) {
+      beginResetModel();
+    }
     _sources.clear();
 
     for (const auto& entry_arr : reply.array()) {
@@ -44,7 +58,12 @@ void SourcesModel::componentComplete()
       info.isConfigurable = entry["isConfigurable"].toBool();
     }
 
-    endResetModel();
+    if (reset) {
+      endResetModel();
+    }
+    else {
+      emit dataChanged(createIndex(0, 0), createIndex(_sources.size(), 0));
+    }
   });
 }
 

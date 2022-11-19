@@ -25,7 +25,6 @@ ChaptersModel::ChaptersModel(QObject* parent)
  *****************************************************************************/
 ChaptersModel::~ChaptersModel()
 {
-  //NetworkManager::instance().abortRequest();
 }
 
 /******************************************************************************
@@ -44,7 +43,6 @@ void ChaptersModel::classBegin()
  *****************************************************************************/
 void ChaptersModel::receivePatchReply()
 {
-  //requestChapters(false);
 }
 
 /******************************************************************************
@@ -248,10 +246,23 @@ void ChaptersModel::chapterRead(quint64 chapter, bool read)
  * Method: chapterRead()
  *
  *****************************************************************************/
-void ChaptersModel::previousChaptersRead(qint32 chapter, bool read)
+void ChaptersModel::previousChaptersRead(quint32 chapter, bool read)
 {
   NetworkManager::instance().patch("markPrevRead", read ? "true" : "false",
       QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+
+  qint32 start = 0, end = 0;
+  for (auto& c : _chapters) {
+    if (c.index < chapter) {
+      c.read = read;
+      if (!start) {
+        start = end;
+      }
+    }
+    end++;
+  }
+
+  emit dataChanged(createIndex(start, 0), createIndex(end, 0), { RoleRead });
 }
 
 /******************************************************************************

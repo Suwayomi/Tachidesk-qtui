@@ -8,6 +8,10 @@ import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 Rectangle {
   color: "#212121"
 
+  function refresh() {
+    console.log("refresh settings")
+  }
+
   Popup {
     id: hostnamePopup
     width: parent.width * .80

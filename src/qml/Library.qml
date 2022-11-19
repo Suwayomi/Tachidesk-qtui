@@ -25,6 +25,10 @@ Item {
     id: library
   }
 
+  function refresh() {
+    library.refreshLibrary()
+  }
+
   Rectangle {
     anchors.fill: parent
     color: "#424242"
