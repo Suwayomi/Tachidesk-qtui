@@ -87,6 +87,7 @@ public:
      int role = Qt::DisplayRole) const override;
 
   Q_INVOKABLE void next();
+  Q_INVOKABLE void pageRefresh();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
   Q_INVOKABLE void chapterRead(qint32 mangaId, quint32 chapter);

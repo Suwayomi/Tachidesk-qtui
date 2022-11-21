@@ -41,7 +41,7 @@ Rectangle {
       listviewLoaded = true
     }
     onAtYEndChanged: {
-      if (!listviewLoaded) {
+      if (!listviewLoaded || !flicking) {
         return
       }
       reachedEnd()

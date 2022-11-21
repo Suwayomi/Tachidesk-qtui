@@ -20,13 +20,15 @@ SourcesLibraryModel::SourcesLibraryModel(QObject* parent)
   receiveReply = [&](const QJsonDocument& reply) {
     const auto& mangaList = reply["mangaList"].toArray();
 
-    if (resetModel) {
+    if (_resetModel) {
       beginResetModel();
       _sources.clear();
     } else {
       beginInsertRows({}, _sources.size(), _sources.size() + mangaList.count() - 1);
     }
 
+    _hasNextPage = reply["hasNextPage"].toBool();
+    qDebug() << "has next page?" << _hasNextPage;
 
     for (const auto& entry_arr : mangaList) {
       const auto& entry   = entry_arr.toObject();
@@ -42,8 +44,8 @@ SourcesLibraryModel::SourcesLibraryModel(QObject* parent)
       }
     }
 
-    if (resetModel) {
-      resetModel = false;
+    if (_resetModel) {
+      _resetModel = false;
       endResetModel();
     } else {
       endInsertRows();
@@ -153,8 +155,13 @@ QHash<int, QByteArray> SourcesLibraryModel::roleNames() const {
  *****************************************************************************/
 void SourcesLibraryModel::search(const QString& searchTerm)
 {
-  resetModel = true;
-  NetworkManager::instance().get(QUrl(u"source/"_qs % _source % "/search/" % searchTerm), this, receiveReply);
+  beginResetModel();
+  _resetModel = true;
+  _hasNextPage = false;
+  _sources.clear();
+  endResetModel();
+
+  NetworkManager::instance().get(QUrl(u"source/"_qs % _source % "/search?searchTerm=" % QUrl::toPercentEncoding(searchTerm)), this, receiveReply);
 }
 
 /******************************************************************************
@@ -164,7 +171,9 @@ void SourcesLibraryModel::search(const QString& searchTerm)
  *****************************************************************************/
 void SourcesLibraryModel::next()
 {
-  NetworkManager::instance().get(QStringLiteral("source/%1/latest/%2").arg(_source).arg(++_pageNumber));
+  if (!_hasNextPage) {
+    return;
+  }
   NetworkManager::instance().get(QUrl(u"source/"_qs % _source % "/latest/" % QString::number(++_pageNumber)), this, receiveReply);
 
 }

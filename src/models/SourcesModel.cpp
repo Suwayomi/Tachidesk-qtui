@@ -37,7 +37,6 @@ void SourcesModel::componentComplete()
  *****************************************************************************/
 void SourcesModel::refresh()
 {
-  qDebug() << "queury sources";
   NetworkManager::instance().get(QUrl("source/list"), this,
     [&](const auto& reply)
   {

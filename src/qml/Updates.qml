@@ -16,8 +16,9 @@ Rectangle {
   }
 
   function refresh() {
-    // idk is this even needed? ... need proper refresh for getting new chapters
+    // idk is this even needed? ... need proper refresh for getting new chapters and badges
     console.log("updates refresh")
+    updatesModel.pageRefresh()
   }
 
   function markRead(mangaId, chapter) {
