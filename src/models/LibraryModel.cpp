@@ -124,7 +124,7 @@ void LibraryModel::refreshLibrary()
       NetworkManager::instance().get(QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
         [&](const auto& doc1)
       {
-        bool reset = static_cast<quint32>(doc.array().size()) != entriesSize;
+        bool reset = static_cast<quint32>(doc1.array().size()) != entriesSize;
         if (reset) {
           beginResetModel();
         }
