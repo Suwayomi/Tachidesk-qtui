@@ -6,6 +6,8 @@ import QtQuick.Controls
 import Tachidesk.Qtui
 import SortFilterProxyModel
 
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
+
 Item {
   id: libraryBase
   SortFilterProxyModel {
@@ -67,6 +69,7 @@ Item {
       color: "#F5F5F5"
       font.pointSize: 12
       horizontalAlignment: TextInput.AlignRight
+      verticalAlignment: TextInput.AlignVCenter
       Layout.fillWidth: true
       Layout.fillHeight: true
       background: Rectangle {
@@ -75,15 +78,18 @@ Item {
       placeholderText: qsTr("Search")
       onTextEdited: libraryModel.filterPattern = text
     }
-    Image {
+    Text {
       id: searchIcon
       Layout.alignment: Qt.AlignCenter
       Layout.maximumWidth: 50
       Layout.fillWidth: true
       Layout.fillHeight: true
-      scale: 0.5
-      fillMode: Image.PreserveAspectFit
-      source: "qrc:/Tachidesk/Qtui/resources/images/outline_search_white_24dp.png"
+      font.family: "Material Design Icons"
+      font.pixelSize: 20
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+      color: "#F5F5F5"
+      text: MdiFont.Icon.magnify
     }
   }
 

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 
 import Tachidesk.Qtui
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
 Item {
   property alias source: libraryModel.source
@@ -23,15 +24,18 @@ Item {
       RowLayout {
           anchors.fill: searchField
           spacing: 0
-          Image {
-              id: searchIcon
-              Layout.alignment: Qt.AlignCenter
-              Layout.maximumWidth: 50
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              scale: 0.5
-              fillMode: Image.PreserveAspectFit
-              source: "qrc:/Tachidesk/Qtui/images/outline_search_white_24dp.png"
+          Text {
+            id: searchIcon
+            Layout.alignment: Qt.AlignCenter
+            Layout.maximumWidth: 50
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            font.family: "Material Design Icons"
+            font.pixelSize: 20
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: "#F5F5F5"
+            text: MdiFont.Icon.magnify
           }
           TextField {
             id: search

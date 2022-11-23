@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 import Tachidesk.Qtui
 import SortFilterProxyModel
+import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
 Rectangle {
 
@@ -35,15 +36,18 @@ Rectangle {
       height: 50
       width: parent.width
       spacing: 0
-      Image {
-          id: searchIcon
-          Layout.alignment: Qt.AlignCenter
-          Layout.maximumWidth: 50
-          Layout.fillWidth: true
-          Layout.fillHeight: true
-          scale: 0.5
-          fillMode: Image.PreserveAspectCrop
-          source: "qrc:/Tachidesk/Qtui/images/outline_filter_white_24dp.png"
+      Text {
+        id: searchIcon
+        Layout.alignment: Qt.AlignCenter
+        Layout.maximumWidth: 50
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        font.family: "Material Design Icons"
+        font.pixelSize: 20
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: "#F5F5F5"
+        text: MdiFont.Icon.filterOutline
       }
       TextField {
           id: searchBox
