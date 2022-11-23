@@ -21,7 +21,7 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus {
   std::vector<QueueInfo> _queue;
 
   typedef quint32 MangaId;
-  QMap<MangaId, MangaDetails> _mangaInfo;
+  //QMap<MangaId, MangaDetails> _mangaInfo;
 
 protected:
   void classBegin() override;

@@ -66,7 +66,7 @@ public:
   // TODO needs similar to patch for extra arguments
   void post(const QString &endpoint, const QUrlQuery &query);
 
-  auto resolvedPath() const { return _host; }
+  Q_INVOKABLE QUrl resolvedPath() const { return _host; }
 
   void patch(QHttpMultiPart *patchData, const QString &endpoint) {
     QNetworkRequest request;

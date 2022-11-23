@@ -100,19 +100,9 @@ void DownloadsModel::onTextMessageReceived(const QString &message) {
     info.state = entry["state"].toString();
     info.progress = entry["progress"].toDouble() * 100;
     info.tries = entry["tries"].toInt();
-
-    if (!_mangaInfo.contains(info.mangaId)) {
-      NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(info.mangaId)), this,
-        [&](const auto& doc)
-      {
-        beginResetModel();
-        const auto &entry = doc.object();
-        auto &info = _mangaInfo[entry["id"].toInt()];
-        info.processDetails(entry);
-        endResetModel();
-      });
-      _mangaInfo[info.mangaId] = {};
-    }
+    const auto &manga = entry["manga"];
+    info.title          = manga["title"].toString();
+    info.thumbnailUrl   = manga["thumbnailUrl"].toString();
 
     info.chapterInfo.processChapter(entry["chapter"].toObject());
   }
@@ -195,12 +185,13 @@ QVariant DownloadsModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleTitle: {
-    return _mangaInfo[entry.mangaId].title;
+    return entry.title;
   }
 
   case RoleThumbnail: {
+                  qDebug() << "entry url: " << entry.thumbnailUrl;
     return NetworkManager::instance().resolvedPath().resolved(
-        _mangaInfo[entry.mangaId].thumbnailUrl.mid(1));
+        entry.thumbnailUrl);
   }
 
   // case Role

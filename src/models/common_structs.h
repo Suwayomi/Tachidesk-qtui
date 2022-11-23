@@ -41,5 +41,7 @@ struct QueueInfo {
   QString  state;
   quint32  progress;
   quint32  tries;
+  QString  title;
+  QUrl     thumbnailUrl;
   ChapterInfo chapterInfo;
 };

@@ -11,7 +11,7 @@ import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
 Item {
   id: base
-  property alias mangaNumber: detailsModel.mangaNumber
+  property alias mangaNumber: details.mangaNumber
   property bool doWrap: false
   property int chapterNumberPopup
   property bool chapterReadPopup: false
@@ -19,21 +19,18 @@ Item {
   signal mangaChanged();
 
   MangaDetailsModel {
-    id: detailsModel
-    onLoaded: details = detailsModel.get(0)
+    id: details
   }
 
   ChaptersModel {
     id: chaptersModel
-    mangaNumber: detailsModel.mangaNumber
+    mangaNumber: base.mangaNumber
     autoUpdate: settings.autoUpdate
   }
 
   function markRead(mangaId, chapter) {
     chaptersModel.chapterRead(chapter, true)
   }
-
-  property var details: detailsModel.get(0)
 
   Popup {
     id: popup
@@ -118,7 +115,7 @@ Item {
 
   Image {
     id: backgroundImage
-    source: details.thumbnailUrl
+    source: networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
     fillMode: Image.Tile
     width: detailsColumn.width
     anchors {
@@ -156,7 +153,7 @@ Item {
 
       Image {
         id: image
-        source: details.thumbnailUrl
+        source: networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
         fillMode: Image.PreserveAspectFit
         sourceSize.width: parent.width * .33
       }
@@ -166,32 +163,32 @@ Item {
           Layout.fillWidth: true
           font.pixelSize: 20
           fontSizeMode: Text.Fit
-          text: details.title
+          text: details.data.title
         }
         Text {
           Layout.fillWidth: true
           font.pixelSize: 20
           fontSizeMode: Text.Fit
-          text: details.author
+          text: details.data.author
         }
         Text {
           Layout.fillWidth: true
           font.pixelSize: 20
           fontSizeMode: Text.Fit
-          text: details.artist
+          text: details.data.artist
         }
         Text {
           Layout.fillWidth: true
           fontSizeMode: Text.Fit
           font.pixelSize: 10
-          text: "%1 - %2".arg(details.status).arg(details.sourceName)
+          text: "%1 - %2".arg(details.data.status).arg(details.data.source.name)
           color: "#222222"
         }
       }
     }
 
     Text {
-      text: details.description
+      text: details.data.description
       elide: Text.ElideRight
       width: parent.width
       maximumLineCount: 2
@@ -210,10 +207,18 @@ Item {
         }
       }
     }
-    Text {
-      text: details.genre
-      wrapMode: Text.WordWrap
+
+    Row {
       width: parent.width
+      height: 20
+      spacing: 4
+      Repeater {
+        model: details.data.genre
+        delegate: Text {
+          text: modelData
+          wrapMode: Text.WordWrap
+        }
+      }
     }
 
     RowLayout {
@@ -229,18 +234,17 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         font.family: "Material Design Icons"
-        text: details.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
+        text: details.data.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
         onClicked:  {
           mangaChanged()
-          details.inLibrary ? detailsModel.removeFromLibrary() : detailsModel.addToLibrary()
-          details = detailsModel.get(0)
+          details.data.inLibrary ? details.removeFromLibrary() : details.addToLibrary()
         }
       }
       Button {
         Layout.fillHeight: true
         Layout.fillWidth: true
         text: qsTr("View in Browser")
-        onClicked: detailsModel.openUrl()
+        onClicked: details.openUrl()
       }
       Button {
         Layout.fillHeight: true
