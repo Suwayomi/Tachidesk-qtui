@@ -310,7 +310,7 @@ Item {
       onClicked: {
         if (!timerTriggered) {
           const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
-                                       { mangaNumber: detailsModel.mangaNumber,
+                                       { mangaNumber: details.mangaNumber,
                                          chapter: chapterIndex })
           viewer.chapterRead.connect(markRead)
         }
@@ -450,7 +450,7 @@ Item {
       anchors.fill: parent
       onClicked: {
         const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
-                                     { mangaNumber: detailsModel.mangaNumber,
+                                     { mangaNumber: details.mangaNumber,
                                        chapter: chaptersModel.lastReadChapter })
         viewer.chapterRead.connect((chapter) => {
           chaptersModel.chapterRead(chapter, true)
