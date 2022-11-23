@@ -54,7 +54,7 @@ Rectangle {
           Layout.fillHeight: true
           scale: 0.5
           fillMode: Image.PreserveAspectFit
-          source: "qrc:/Tachidesk/Qtui/images/outline_search_white_24dp.png"
+          source: "qrc:/Tachidesk/Qtui/resources/images/outline_search_white_24dp.png"
       }
       TextField {
         id: searchBox
