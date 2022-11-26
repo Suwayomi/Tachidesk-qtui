@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v2022.11.26](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.11.26) - 2022-11-26
+
+<small>[Compare with v2022.10.11](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.10.11...v2022.11.26)</small>
+
+### Added
+- Add resource images for linux desktop ([24e54c8](https://github.com/Suwayomi/Tachidesk-qtui/commit/24e54c81ec33731fa0bb6ae3bc8c75fe447f78c2) by Norm).
+- Add swipe genester to mark read,unread ([5135845](https://github.com/Suwayomi/Tachidesk-qtui/commit/5135845e5d84785def83fc7e63a0af948f550048) by Norm).
+
+### Fixed
+- Fix threading issue with network manager, fix download model's thumbnails ([971fb49](https://github.com/Suwayomi/Tachidesk-qtui/commit/971fb499e2dfafefb46d68b2a4d616f3c77406eb) by Norm).
+- Fix crash when initalily loading library on somee platforms ([f1e636d](https://github.com/Suwayomi/Tachidesk-qtui/commit/f1e636daadaf85a15c59f8981ce87b99aaac2b7d) by Norm).
+- Fix desktop file, fix missed manga details model rename ([05706ef](https://github.com/Suwayomi/Tachidesk-qtui/commit/05706ef4394f70621fbf9d5dd5d6d3c13d1408b0) by Norm).
+- Fix crash when adding not yet loaded manga, simplify manga details model, use updated downloads information to get title and thumbnail ([aaa7f53](https://github.com/Suwayomi/Tachidesk-qtui/commit/aaa7f53e6756e40f77f0c60e9e4e62e75fff3a02) by Norm).
+- Fix searching source library, fix reloading updates when visiting page ([6b79991](https://github.com/Suwayomi/Tachidesk-qtui/commit/6b799911c629c4c7624449ee1f35e7d1148232cd) by Norm).
+- Fix refreshing library, sources (includes badges updating, adding new manga to library), fix showing previously read as read/unread ([9dd9429](https://github.com/Suwayomi/Tachidesk-qtui/commit/9dd9429a5862901b1aee276697becaa93d403673) by Norm).
+- Fix marking read not working properly sometimes, fix refreshing manga from the details page, fix start button in details page ([abf61a5](https://github.com/Suwayomi/Tachidesk-qtui/commit/abf61a533ccfdbe7822ae76cfbaab7cb4e690584) by Norm).
+- Fix android icon ([8c7594f](https://github.com/Suwayomi/Tachidesk-qtui/commit/8c7594fc4e27c50dfa780fe891bd70b73ce55e00) by Norm).
+- Fix fetching new chapters from manga details page ([6b80fce](https://github.com/Suwayomi/Tachidesk-qtui/commit/6b80fcebca97081426490bfeb506138330275fbe) by Norm).
+- Fix manga details swiping on mobile, improve downloads pending, fix call to updates ([ce9c8a4](https://github.com/Suwayomi/Tachidesk-qtui/commit/ce9c8a4da0e691afa6dd5e9efb7f4df84dbbfcad) by Norm).
+- Fix couple of places where host was not resolved properly. fix getting next chapter ([7a761e7](https://github.com/Suwayomi/Tachidesk-qtui/commit/7a761e783352fb6b85f30debd28e7a389c51d5d6) by Norm).
+
+
+## [v2022.10.11](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.10.11) - 2022-10-12
+
+<small>[Compare with v2022.10.10](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.10.10...v2022.10.11)</small>
+
+### Changed
+- Change executable name back to tachidesk-qtui ([ea5146e](https://github.com/Suwayomi/Tachidesk-qtui/commit/ea5146e3e1a4a95bcf4c9161e42c15f6e4d452da) by Norm).
+
+
 ## [v2022.10.10](https://github.com/Suwayomi/Tachidesk-qtui/releases/tag/v2022.10.10) - 2022-10-11
 
 <small>[Compare with v2022.10.7](https://github.com/Suwayomi/Tachidesk-qtui/compare/v2022.10.7...v2022.10.10)</small>
