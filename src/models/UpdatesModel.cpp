@@ -48,13 +48,13 @@ void UpdatesModel::onTextMessageReceived(const QString &message) {
   _running = doc["running"].toBool();
 
   auto statusMap = doc["statusMap"].toObject();
-  _complete = statusMap["COMPLETE"].toInt();
-  _complete += statusMap["FAILED"].toInt();
+  _complete = statusMap["COMPLETE"].toArray().count();
+  _complete += statusMap["FAILED"].toArray().count();
 
-  _total = statusMap["FAILED"].toInt();
-  _total += statusMap["COMPLETE"].toInt();
-  _total += statusMap["RUNNING"].toInt();
-  _total += statusMap["PENDING"].toInt();
+  _total = statusMap["FAILED"].toArray().count();
+  _total += statusMap["COMPLETE"].toArray().count();
+  _total += statusMap["RUNNING"].toArray().count();
+  _total += statusMap["PENDING"].toArray().count();
 
   emit totalChanged();
   emit completeChanged();

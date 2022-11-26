@@ -30,7 +30,8 @@ NetworkManager::NetworkManager(
   _password = _settings->password();
 
   connect(_settings.get(), &Settings::hostnameChanged, [&]() {
-    _host = _settings->hostname();
+    const auto& h = _settings->hostname();
+    _host = h.endsWith('/') ? h : h + '/';
   });
 
   connect(_settings.get(), &Settings::usernameChanged, [&]() {
