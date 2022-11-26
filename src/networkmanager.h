@@ -30,8 +30,7 @@ private:
   QString _username;
   QString _password;
 
-  QNetworkDiskCache *_cache;
-  QNetworkAccessManager *man;
+  QNetworkAccessManager *_man;
 
   std::shared_ptr<Settings> _settings;
 
@@ -74,7 +73,7 @@ public:
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
                          QNetworkRequest::PreferCache);
 
-    auto reply = man->sendCustomRequest(request, "PATCH", patchData);
+    auto reply = _man->sendCustomRequest(request, "PATCH", patchData);
     patchData->setParent(reply);
 
     connect(reply, &QNetworkReply::finished, this, &NetworkManager::patchReply);
@@ -107,7 +106,7 @@ private:
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
                          QNetworkRequest::PreferCache);
 
-    QNetworkReply *reply = man->get(request);
+    QNetworkReply *reply = _man->get(request);
 
     connect(reply, &QNetworkReply::finished, this, f);
 

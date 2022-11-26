@@ -26,6 +26,22 @@ NetworkManager::NetworkManager(
 , _host(host.endsWith('/') ? host : host + '/')
 , _settings(settings)
 {
+  _username = _settings->username();
+  _password = _settings->password();
+
+  connect(_settings.get(), &Settings::hostnameChanged, [&]() {
+    _host = _settings->hostname();
+  });
+
+  connect(_settings.get(), &Settings::usernameChanged, [&]() {
+    _username = _settings->username();
+  });
+
+  connect(_settings.get(), &Settings::passwordChanged, [&]() {
+    _password = _settings->password();
+  });
+
+  _man = create(parent);
 }
 
 /********************************************************************
@@ -44,28 +60,14 @@ NetworkManager& NetworkManager::instance() {
  ********************************************************************/
 QNetworkAccessManager *NetworkManager::create(QObject *parent)
 {
-  man    = new QNetworkAccessManager(parent);
-  _cache = new QNetworkDiskCache(parent);
-  _cache->setCacheDirectory(
+  auto man   = new QNetworkAccessManager(parent);
+  auto cache = new QNetworkDiskCache(parent);
+  cache->setCacheDirectory(
     QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
     "/network-cache");
-  _cache->setMaximumCacheSize(419430400);
-  man->setCache(_cache);
+  cache->setMaximumCacheSize(419430400);
 
-  _username = _settings->username();
-  _password = _settings->password();
-
-  connect(_settings.get(), &Settings::hostnameChanged, [&]() {
-    _host = _settings->hostname();
-  });
-
-  connect(_settings.get(), &Settings::usernameChanged, [&]() {
-    _username = _settings->username();
-  });
-
-  connect(_settings.get(), &Settings::passwordChanged, [&]() {
-    _password = _settings->password();
-  });
+  man->setCache(cache);
 
   connect(
     man,
@@ -127,7 +129,7 @@ void NetworkManager::get(const QUrl& uri, QObject* context, const Callback& call
 
   QNetworkRequest req(_host.resolved(QString("api/v1/")).resolved(uri));
 
-  auto* reply = man->get(req);
+  auto* reply = _man->get(req);
 
   connect(reply, &QNetworkReply::finished, context,
     [=,this]()
@@ -180,7 +182,7 @@ void NetworkManager::post(const QString &endpoint, const QUrlQuery &query)
 
   // request.setRawHeader("Authorization", "Basic " +
   // QByteArray(QString("%1:%2").arg(_username).arg(_password)).toBase64());
-  man->post(request, dataParam.append(query.toString().toStdString().c_str()));
+  _man->post(request, dataParam.append(query.toString().toStdString().c_str()));
 }
 
 /********************************************************************
@@ -217,7 +219,7 @@ void NetworkManager::get(
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
-  QNetworkReply *reply = man->get(request);
+  QNetworkReply *reply = _man->get(request);
 
   connect(reply, &QNetworkReply::finished, this, [&]() {
     QNetworkReply *r = qobject_cast<QNetworkReply *>(sender());
@@ -248,7 +250,7 @@ void NetworkManager::deleteResource(const QString &endpoint)
   request.setAttribute(
     QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
-  QNetworkReply *reply = man->deleteResource(request);
+  QNetworkReply *reply = _man->deleteResource(request);
 
   connect(
     reply, &QNetworkReply::finished, this, &NetworkManager::endpointReply);

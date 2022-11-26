@@ -1,11 +1,10 @@
 #pragma once
 
+#include <qqml.h>
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 #include <QtWebSockets/QtWebSockets>
 
-#include "ChaptersModel.h"
-#include "MangaDetailsModel.h"
 #include "common_structs.h"
 
 class DownloadsModel : public QAbstractListModel, public QQmlParserStatus {
@@ -21,7 +20,6 @@ class DownloadsModel : public QAbstractListModel, public QQmlParserStatus {
   std::vector<QueueInfo> _queue;
 
   typedef quint32 MangaId;
-  //QMap<MangaId, MangaDetails> _mangaInfo;
 
 protected:
   void classBegin() override;

@@ -3,9 +3,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <qcoreapplication.h>
 #include <QQmlEngine>
 #include <QStringBuilder>
+#include <qcoreapplication.h>
 
 #include "../networkmanager.h"
 /******************************************************************************
@@ -13,30 +13,21 @@
  * LibraryModel
  *
  *****************************************************************************/
-LibraryModel::LibraryModel(QObject* parent)
-  : QAbstractListModel(parent)
-{
-}
+LibraryModel::LibraryModel(QObject *parent) : QAbstractListModel(parent) {}
 
 /******************************************************************************
  *
  * classBegin
  *
  *****************************************************************************/
-void LibraryModel::classBegin()
-{
-  refreshLibrary();
-}
+void LibraryModel::classBegin() { refreshLibrary(); }
 
 /******************************************************************************
  *
  * componentComplete
  *
  *****************************************************************************/
-void LibraryModel::componentComplete()
-{
-}
-
+void LibraryModel::componentComplete() {}
 
 /******************************************************************************
  *
@@ -57,37 +48,31 @@ int LibraryModel::rowCount(const QModelIndex &parent) const {
  *
  *****************************************************************************/
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
-  if (!((index.isValid()) &&
-       (index.row() >= 0) &&
-       (index.row() < rowCount())))
-  {
+  if (!((index.isValid()) && (index.row() >= 0) &&
+        (index.row() < rowCount()))) {
     return {};
   }
 
-  const auto& entry = _entries[index.row()];
+  const auto &entry = _entries[index.row()];
 
-  switch (role)
-  {
-    case RoleTitle:
-      {
-        return entry.title;
-      }
-    case RoleThumbnail:
-      {
-        return NetworkManager::instance().resolvedPath().resolved(entry.thumbnailUrl.mid(1));
-      }
-    case RoleId:
-      {
-        return entry.id;
-      }
-    case RoleUnread:
-      {
-        return entry.unread;
-      }
+  switch (role) {
+  case RoleTitle: {
+    return entry.title;
+  }
+  case RoleThumbnail: {
+    return NetworkManager::instance().resolvedPath().resolved(
+        entry.thumbnailUrl.mid(1));
+  }
+  case RoleId: {
+    return entry.id;
+  }
+  case RoleUnread: {
+    return entry.unread;
+  }
 
-    //case Role
-    default:
-      return {};
+  // case Role
+  default:
+    return {};
   }
 
   return {};
@@ -99,10 +84,10 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
  *
  *****************************************************************************/
 QHash<int, QByteArray> LibraryModel::roleNames() const {
-  static QHash<int, QByteArray> roles = { {RoleTitle, "title"},
-                                          {RoleThumbnail, "thumbnailUrl"},
-                                          {RoleUnread, "unread"},
-                                          {RoleId, "mangaId"} };
+  static QHash<int, QByteArray> roles = {{RoleTitle, "title"},
+                                         {RoleThumbnail, "thumbnailUrl"},
+                                         {RoleUnread, "unread"},
+                                         {RoleId, "mangaId"}};
 
   return roles;
 }
@@ -112,47 +97,44 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
  * Method: refreshLibrary()
  *
  *****************************************************************************/
-void LibraryModel::refreshLibrary()
-{
+void LibraryModel::refreshLibrary() {
   auto entriesSize = _entries.size();
   _entries.clear();
-  NetworkManager::instance().get(QUrl("category"), this,
-    [&](const auto& doc)
-  {
-    for (const auto& entry_arr : doc.array()) {
-      const auto& entry = entry_arr.toObject();
-      NetworkManager::instance().get(QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
-        [&](const auto& doc1)
-      {
-        bool reset = static_cast<quint32>(doc1.array().size()) != entriesSize;
-        if (reset) {
-          beginResetModel();
-        }
+  NetworkManager::instance().get(QUrl("category"), this, [&](const auto &doc) {
+    for (const auto &entry_arr : doc.array()) {
+      const auto &entry = entry_arr.toObject();
+      NetworkManager::instance().get(
+          QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
+          [&](const auto &doc1) {
+            bool reset =
+                static_cast<quint32>(doc1.array().size()) != entriesSize;
+            if (reset) {
+              beginResetModel();
+            }
 
-        for (const auto& entry_arr : doc1.array()) {
-          const auto& entry = entry_arr.toObject();
-          auto& info        = _entries.emplace_back();
-          info.id           = entry["id"].toInt();
-          info.sourceId     = entry["sourceId"].toString();
-          info.url          = entry["url"].toString();
-          info.title        = entry["title"].toString();
-          info.thumbnailUrl = entry["thumbnailUrl"].toString();
-          info.initalized   = entry["intialized"].toBool();
-          info.author       = entry["author"].toString();
-          info.artist       = entry["artist"].toString();
-          info.genre        = entry["genre"].toString();
-          info.status       = entry["status"].toString();
-          info.unread       = entry["unreadCount"].toInt();
-        }
+            for (const auto &entry_arr : doc1.array()) {
+              const auto &entry = entry_arr.toObject();
+              auto &info = _entries.emplace_back();
+              info.id = entry["id"].toInt();
+              info.sourceId = entry["sourceId"].toString();
+              info.url = entry["url"].toString();
+              info.title = entry["title"].toString();
+              info.thumbnailUrl = entry["thumbnailUrl"].toString();
+              info.initalized = entry["intialized"].toBool();
+              info.author = entry["author"].toString();
+              info.artist = entry["artist"].toString();
+              info.genre = entry["genre"].toString();
+              info.status = entry["status"].toString();
+              info.unread = entry["unreadCount"].toInt();
+            }
 
-        if (reset) {
-          endResetModel();
-        }
-        else {
-          emit dataChanged(createIndex(0, 0), createIndex(_entries.size(), 0));
-        }
-      });
+            if (reset) {
+              endResetModel();
+            } else {
+              emit dataChanged(createIndex(0, 0),
+                               createIndex(_entries.size(), 0));
+            }
+          });
     }
   });
 }
-

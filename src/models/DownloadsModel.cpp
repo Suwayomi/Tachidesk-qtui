@@ -44,20 +44,22 @@ void DownloadsModel::setupWebsocket() {
           [=](QAbstractSocket::SocketError error) {
             qDebug() << "error: " << error << _webSocket.errorString();
           });
-  auto resolved = NetworkManager::instance().resolvedPath().resolved(QString("api/v1/downloads"));
+  auto resolved = NetworkManager::instance().resolvedPath().resolved(
+      QString("api/v1/downloads"));
   bool ssl = !resolved.scheme().compare("https", Qt::CaseInsensitive);
   resolved.setScheme(ssl ? "wss" : "ws");
 
   QNetworkRequest request;
   request.setUrl(resolved);
-  request.setRawHeader("Authorization",
-                       QString("Basic %1")
-                           .arg(QByteArray(QString("%1:%2")
-                                               .arg(NetworkManager::instance().username())
-                                               .arg(NetworkManager::instance().password())
-                                               .toUtf8())
-                                    .toBase64())
-                           .toUtf8());
+  request.setRawHeader(
+      "Authorization",
+      QString("Basic %1")
+          .arg(QByteArray(QString("%1:%2")
+                              .arg(NetworkManager::instance().username())
+                              .arg(NetworkManager::instance().password())
+                              .toUtf8())
+                   .toBase64())
+          .toUtf8());
 
   _webSocket.open(request);
 }
@@ -101,8 +103,8 @@ void DownloadsModel::onTextMessageReceived(const QString &message) {
     info.progress = entry["progress"].toDouble() * 100;
     info.tries = entry["tries"].toInt();
     const auto &manga = entry["manga"];
-    info.title          = manga["title"].toString();
-    info.thumbnailUrl   = manga["thumbnailUrl"].toString();
+    info.title = manga["title"].toString();
+    info.thumbnailUrl = manga["thumbnailUrl"].toString();
 
     info.chapterInfo.processChapter(entry["chapter"].toObject());
   }
@@ -189,9 +191,7 @@ QVariant DownloadsModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleThumbnail: {
-                  qDebug() << "entry url: " << entry.thumbnailUrl;
-    return NetworkManager::instance().resolvedPath().resolved(
-        entry.thumbnailUrl);
+    return NetworkManager::instance().resolvedPath().resolved(entry.thumbnailUrl.mid(1));
   }
 
   // case Role
@@ -237,21 +237,27 @@ QHash<int, QByteArray> DownloadsModel::roleNames() const {
  * Method: clear()
  *
  *****************************************************************************/
-void DownloadsModel::clear() { NetworkManager::instance().get("downloads/clear"); }
+void DownloadsModel::clear() {
+  NetworkManager::instance().get("downloads/clear");
+}
 
 /******************************************************************************
  *
  * Method: clear()
  *
  *****************************************************************************/
-void DownloadsModel::pause() { NetworkManager::instance().get("downloads/stop"); }
+void DownloadsModel::pause() {
+  NetworkManager::instance().get("downloads/stop");
+}
 
 /******************************************************************************
  *
  * Method: clear()
  *
  *****************************************************************************/
-void DownloadsModel::start() { NetworkManager::instance().get("downloads/start"); }
+void DownloadsModel::start() {
+  NetworkManager::instance().get("downloads/start");
+}
 
 /******************************************************************************
  *
@@ -259,7 +265,8 @@ void DownloadsModel::start() { NetworkManager::instance().get("downloads/start")
  *
  *****************************************************************************/
 void DownloadsModel::cancel(qint32 index) {
-  NetworkManager::instance().deleteResource(QStringLiteral("download/%1/chapter/%2")
-                                      .arg(_queue[index].mangaId)
-                                      .arg(_queue[index].chapterIndex));
+  NetworkManager::instance().deleteResource(
+      QStringLiteral("download/%1/chapter/%2")
+          .arg(_queue[index].mangaId)
+          .arg(_queue[index].chapterIndex));
 }

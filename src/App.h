@@ -18,7 +18,7 @@ class App : public QObject
 
   std::shared_ptr<Settings> _settings;
 
-  std::unique_ptr<NetworkManager> _nm;
+  NetworkManager _nm;
 
   const CommandLine& _commandLine;
 

@@ -16,7 +16,7 @@ Item {
     }
 
     Repeater {
-      model: [ "Library.qml", "Updates.qml", "SourceExtensionsBase.qml", "Downloads.qml", "Settings.qml" ]
+      model: [ "Library.qml" , "Updates.qml", "SourceExtensionsBase.qml", "Downloads.qml", "Settings.qml" ]
       Loader {
         id: delegate
         //active: SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem

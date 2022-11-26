@@ -4,18 +4,18 @@
 #include <QDir>
 #include <qstringbuilder.h>
 #include <QQmlContext>
+#include <QAuthenticator>
 
 #include "App.h"
 
 App::App(const CommandLine& cmd, QObject * parent)
   : QObject(parent)
   , _settings(std::make_shared<Settings>())
-  , _nm(std::make_unique<NetworkManager>(
-          _settings,
+  , _nm(_settings,
           cmd.isSet(CommandLine::hostname)
             ? cmd.value(CommandLine::hostname)
             : _settings->hostname(),
-          this))
+          this)
   , _commandLine(cmd)
   , _engine(new QQmlApplicationEngine(this))
 {
@@ -54,11 +54,9 @@ void App::reload()
  ***************************************************************************/
 void App::initalize()
 {
-  _nm->create(this);
-
   // Global context variables to inject into QML
   const std::pair<const char*, QObject*> contextVars[] = {
-    { "networkManager", _nm.get()},
+    { "networkManager", &_nm},
     { "settings", _settings.get()},
     { "app", this },
   };
@@ -67,7 +65,7 @@ void App::initalize()
     context->setContextProperty(var.first, QVariant::fromValue(var.second));
   }
 
-  _engine->setNetworkAccessManagerFactory(_nm.get());
+  _engine->setNetworkAccessManagerFactory(&_nm);
   _engine->addImportPath(QStringLiteral("qrc:/"));
   _engine->load(makeUrl(QStringLiteral("main.qml")));
 }
