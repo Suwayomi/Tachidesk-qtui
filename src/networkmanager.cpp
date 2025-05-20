@@ -12,6 +12,12 @@
 #include <QStandardPaths>
 #include <QUrlQuery>
 
+#include "graphql/tachideskClient.h"
+
+#include <graphqlservice/GraphQLResponse.h>
+#include <graphqlservice/GraphQLParse.h>
+#include <graphqlservice/JSONResponse.h>
+
 #include "settings.h"
 
 /********************************************************************
@@ -117,6 +123,85 @@ void NetworkManager::get(const QString &endpoint)
  *
  ********************************************************************/
 void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
+
+
+
+/********************************************************************
+ *
+ *  postGraphQL()
+ *
+ ********************************************************************/
+void NetworkManager::postGraphQL(
+    const std::string &query, QJsonObject &&value,
+    std::function<void(graphql::response::Value &&)> callback) {
+  QNetworkRequest request;
+  request.setRawHeader("Content-Type", "application/json");
+  request.setUrl(_host.resolved(QString("api/graphql/")));
+  request.setAttribute(
+    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
+
+  QJsonObject requestObject;
+  requestObject.insert("query", QString::fromStdString(graphql::client::qtui::GetRequestText()));
+  requestObject.insert("operationName", QString::fromStdString(query));
+  requestObject["variables"] = value;
+
+  QJsonDocument doc(requestObject);
+  QByteArray jsonData = doc.toJson();
+
+  request.setRawHeader("Authorization", "Basic " +
+    QByteArray(QString("%1:%2").arg(_username).arg(_password).toStdString()).toBase64());
+
+  auto reply = _man->post(request, jsonData);
+  if (!reply) {
+    qDebug() << "no reply";
+    return;
+  }
+  connect(reply,  &QNetworkReply::finished, this,
+     [=]()-> void
+  {
+    switch (reply->error()) {
+      case QNetworkReply::AuthenticationRequiredError:
+      case QNetworkReply::ContentAccessDenied:
+        qDebug() << "there was error : " << reply->error();
+        return;
+
+      default:
+        break;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+      qDebug() << "Errors" << reply->error() << reply->errorString();
+      return;
+    }
+
+    QByteArray responseData = reply->readAll();
+
+    try {
+      // Parse JSON to graphql::response::Value
+      graphql::response::Value gqlResponse =
+          graphql::response::parseJSON(responseData.toStdString());
+      auto members = gqlResponse.release<graphql::response::MapType>();
+
+      auto it = std::find_if(
+          members.begin(), members.end(),
+          [](const auto& pair) { return pair.first == "data"; });
+
+      if (it == members.end()) {
+          throw std::runtime_error("Missing 'data' key in GraphQL response");
+      }
+
+      graphql::response::Value data = std::move(it->second);
+
+      callback(std::move(data));
+    }
+    catch (const std::exception& ex) {
+        qWarning() << "Failed to parse GraphQL response:" << ex.what();
+    }
+  });
+
+  connect( reply,  &QNetworkReply::finished,  reply,
+    &QNetworkReply::deleteLater);
+}
 
 /********************************************************************
  *

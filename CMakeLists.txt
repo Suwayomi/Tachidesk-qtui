@@ -18,6 +18,8 @@ find_package(
              WebSockets
   REQUIRED)
 
+find_package(cppgraphqlgen CONFIG REQUIRED)
+
 add_subdirectory(libs/SortFilterProxyModel)
 
 set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
@@ -98,6 +100,8 @@ target_link_libraries(tachidesk-qtui
     Qt6::Widgets
     Qt6::Gui
     Qt6::WebSockets
+    cppgraphqlgen::graphqljson
+    cppgraphqlgen::graphqlclient
     SortFilterProxyModel)
 
 qt_finalize_executable(tachidesk-qtui)

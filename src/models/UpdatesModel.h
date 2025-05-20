@@ -5,6 +5,7 @@
 #include <QWebSocket>
 
 #include "ChaptersModel.h"
+#include "graphql/tachideskClient.h"
 
 #include <optional>
 
@@ -23,6 +24,8 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 
   QWebSocket _webSocket;
   std::shared_ptr<DownloadsModel> downloads;
+  graphql::client::query::GET_CHAPTERS_UPDATES::Response _entries;
+  bool _isRequesting = false;
 
   struct SourceInfo {
     qint32   id;

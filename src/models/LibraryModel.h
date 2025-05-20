@@ -1,4 +1,5 @@
 #pragma once
+#include "graphql/tachideskClient.h"
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 #include <qqml.h>
@@ -9,21 +10,7 @@ class LibraryModel : public QAbstractListModel, public QQmlParserStatus
   QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
 
-  struct EntryInfo {
-    uint32_t id;
-    QString  sourceId;
-    QString  url;
-    QString  title;
-    QString  thumbnailUrl;
-    bool     initalized = false;
-    QString  artist;
-    QString  author;
-    QString  description;
-    QString  genre;
-    QString  status;
-    quint32  unread;
-  };
-  std::vector<EntryInfo> _entries;
+  graphql::client::query::AllCategories::Response _entries;
 
 protected:
   virtual QHash<int, QByteArray> roleNames() const override;

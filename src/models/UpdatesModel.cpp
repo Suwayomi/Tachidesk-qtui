@@ -74,7 +74,7 @@ void UpdatesModel::componentComplete() {
   connect(&_webSocket, &QWebSocket::disconnected, this, &UpdatesModel::closed);
   connect(&_webSocket,
           QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
-          [=](QAbstractSocket::SocketError error) {
+          [=,this](QAbstractSocket::SocketError error) {
             qDebug() << "error: " << error << _webSocket.errorString();
           });
 
@@ -130,11 +130,11 @@ void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo> &queueInfo) {
  *
  *****************************************************************************/
 int UpdatesModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid()) {
+  if (parent.isValid() || _entries.chapters.nodes.empty()) {
     return 0;
   }
 
-  return _sources.size();
+  return _entries.chapters.nodes.size();
 }
 
 /******************************************************************************
@@ -144,77 +144,78 @@ int UpdatesModel::rowCount(const QModelIndex &parent) const {
  *****************************************************************************/
 QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) && (index.row() >= 0) &&
-        (index.row() < rowCount()))) {
+        (index.row() < rowCount())) || _entries.chapters.nodes.empty()) {
     return {};
   }
 
-  const auto &entry = _sources[index.row()];
+  const auto &entry = _entries.chapters.nodes[index.row()];
 
   switch (role) {
   case RoleThumbnailUrl: {
     return NetworkManager::instance().resolvedPath().resolved(
-        entry.thumbnailUrl.mid(1));
+        QString::fromStdString(entry.manga.thumbnailUrl.value_or("")));
   }
   case RoleTitle: {
-    return entry.title;
+    return entry.manga.title.c_str();
   }
   case RoleUrl: {
-    return entry.url;
+    return entry.realUrl.value_or("").c_str();
   }
   case RoleId: {
-    return entry.id;
+    return entry.manga.id;
   }
   case RoleInitialized: {
-    return entry.isInitialized;
+    return entry.manga.initialized;
   }
   case RoleInLibrary: {
-    return entry.inLibrary;
+    return entry.manga.inLibrary;
   }
-  case RoleFreshData: {
-    return entry.freshData;
-  }
+  // case RoleFreshData: {
+  //   return entry.manga.freshData;
+  // }
   case RoleChapterUrl: {
-    return entry.url;
+    return "";
   }
   case RoleName: {
-    return entry.chapterInfo.name;
+    return entry.name.c_str();
   }
   case RoleChapterNumber: {
-    return entry.chapterInfo.chapterNumber;
+    return entry.chapterNumber;
   }
   case RoleRead: {
-    return entry.chapterInfo.read;
+    return entry.isRead;
   }
   case RoleChapterIndex: {
-    return entry.chapterInfo.index;
+    return entry.chapterNumber;
   }
-  case RolePageCount: {
-    return entry.chapterInfo.pageCount;
-  }
+  // case RolePageCount: {
+  //   return entry.chapterInfo.pageCount;
+  // }
   case RoleChapterCount: {
-    return entry.chapterInfo.chapterCount;
+    return entry.sourceOrder;
   }
 
-  case RoleLastPageRead: {
-    return entry.chapterInfo.lastPageRead;
-  }
+  // case RoleLastPageRead: {
+  //   return entry.lastPageRead;
+  // }
 
   case RoleDownloaded: {
-    return entry.chapterInfo.downloaded;
+    return entry.isDownloaded;
   }
 
   case RoleFetchedAt: {
-    return entry.chapterInfo.fetchedAt;
+    return QString(entry.fetchedAt.get<std::string>().c_str());
   }
 
   case RoleDownloadProgress: {
-    if (!entry.queueInfo) {
-      return -1;
-    }
-    return entry.queueInfo->progress;
+    return 0;
+    // if (!entry.queueInfo) {
+    //   return -1;
+    // }
+    // return entry.queueInfo->progress;
   }
   case RoleDownloadPrepairing:
-    return entry.chapterInfo.downloadPrepairing.value_or(false);
+    return !entry.isDownloaded; //.downloadPrepairing.value_or(false);
 
   default:
     return {};
@@ -273,10 +274,60 @@ void UpdatesModel::pageRefresh() {
  *
  *****************************************************************************/
 void UpdatesModel::next() {
-  if (_pageNumber && !_hasNext) {
+  if (_isRequesting) {
     return;
   }
 
+  _isRequesting = true;
+
+  QJsonObject variablesObj;
+  variablesObj.insert("first", 50);
+  variablesObj.insert("offset", 50 * _pageNumber++);
+
+  QJsonObject filterObj;
+  QJsonObject inLibraryObj;
+  inLibraryObj.insert("equalTo", true);
+  filterObj.insert("inLibrary", inLibraryObj);
+  variablesObj.insert("filter", filterObj);
+
+  QJsonArray orderArray;
+  {
+      QJsonObject order1;
+      order1.insert("by", "FETCHED_AT");
+      order1.insert("byType", "DESC");
+      orderArray.append(order1);
+
+      QJsonObject order2;
+      order2.insert("by", "SOURCE_ORDER");
+      order2.insert("byType", "DESC");
+      orderArray.append(order2);
+  }
+  variablesObj.insert("order", orderArray);
+
+  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_UPDATES::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+      if (!downloads) {
+        downloads = std::make_shared<DownloadsModel>();
+        downloads->setupWebsocket();
+        connect(downloads.get(), &DownloadsModel::downloadsUpdated, this,
+                &UpdatesModel::onDownloadsUpdated);
+      }
+      _isRequesting = false;
+
+      auto parsed = graphql::client::query::GET_CHAPTERS_UPDATES::parseResponse(std::move(data));
+      if (_entries.chapters.nodes.empty()) {
+        beginResetModel();
+        _entries = std::move(parsed);
+        endResetModel();
+      }
+      else {
+        beginInsertRows({}, _entries.chapters.nodes.size(),
+                        _entries.chapters.nodes.size() + parsed.chapters.nodes.size() - 1);
+        std::copy(parsed.chapters.nodes.begin(), parsed.chapters.nodes.end(), std::back_inserter(_entries.chapters.nodes));
+        endInsertRows();
+      }
+    });
+  return;
   NetworkManager::instance().get(
       QUrl(u"update/recentChapters/"_qs % QString::number(_pageNumber++)), this,
       [&](const auto &reply) {

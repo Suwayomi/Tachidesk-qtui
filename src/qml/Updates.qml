@@ -18,7 +18,7 @@ Rectangle {
   function refresh() {
     // idk is this even needed? ... need proper refresh for getting new chapters and badges
     console.log("updates refresh")
-    updatesModel.pageRefresh()
+    // updatesModel.pageRefresh()
   }
 
   function markRead(mangaId, chapter) {
@@ -67,9 +67,10 @@ Rectangle {
       MouseArea {
         anchors.fill: parent
         onClicked: {
+          console.log("manga id??", mangaId, chapterIndex)
           var viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                         { mangaNumber: mangaId,
-                          chapter:     chapterIndex  })
+                          chapter:     chapterIndex })
           viewer.chapterRead.connect(markRead)
         }
       }
@@ -104,7 +105,7 @@ Rectangle {
           Text {
             Layout.fillWidth: true
             width: parent.width
-            text: "%1".arg(Qt.formatDate(fetchedAt, "MMM dd"))
+            text: "%1".arg(Qt.formatDate(new Date(fetchedAt * 1000), "MMM dd"))
             font.pixelSize: 16
             fontSizeMode: Text.Fit
             color: "#F5F5F5"

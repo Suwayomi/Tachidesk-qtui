@@ -8,6 +8,9 @@
 #include <qcoreapplication.h>
 
 #include "../networkmanager.h"
+#include "../graphql/tachideskClient.h"
+#include <graphqlservice/GraphQLClient.h>
+
 /******************************************************************************
  *
  * LibraryModel
@@ -35,11 +38,11 @@ void LibraryModel::componentComplete() {}
  *
  *****************************************************************************/
 int LibraryModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid()) {
+  if (parent.isValid() || _entries.categories.nodes.empty()) {
     return 0;
   }
 
-  return _entries.size();
+  return _entries.categories.nodes[0].mangas.nodes.size();
 }
 
 /******************************************************************************
@@ -49,25 +52,25 @@ int LibraryModel::rowCount(const QModelIndex &parent) const {
  *****************************************************************************/
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) && (index.row() >= 0) &&
-        (index.row() < rowCount()))) {
+        (index.row() < rowCount())) || _entries.categories.nodes.empty()) {
     return {};
   }
 
-  const auto &entry = _entries[index.row()];
+  const auto &entry = _entries.categories.nodes[0].mangas.nodes[index.row()];
 
   switch (role) {
   case RoleTitle: {
-    return entry.title;
+    return entry.title.c_str();
   }
   case RoleThumbnail: {
     return NetworkManager::instance().resolvedPath().resolved(
-        entry.thumbnailUrl.mid(1));
+        QString::fromStdString(entry.thumbnailUrl.value_or(""))); //.mid(1));
   }
   case RoleId: {
     return entry.id;
   }
   case RoleUnread: {
-    return entry.unread;
+    return entry.unreadCount;
   }
 
   // case Role
@@ -98,43 +101,12 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
  *
  *****************************************************************************/
 void LibraryModel::refreshLibrary() {
-  auto entriesSize = _entries.size();
-  _entries.clear();
-  NetworkManager::instance().get(QUrl("category"), this, [&](const auto &doc) {
-    for (const auto &entry_arr : doc.array()) {
-      const auto &entry = entry_arr.toObject();
-      NetworkManager::instance().get(
-          QUrl(u"category/"_qs % QString::number(entry["id"].toInt())), this,
-          [&](const auto &doc1) {
-            bool reset =
-                static_cast<quint32>(doc1.array().size()) != entriesSize;
-            if (reset) {
-              beginResetModel();
-            }
-
-            for (const auto &entry_arr : doc1.array()) {
-              const auto &entry = entry_arr.toObject();
-              auto &info = _entries.emplace_back();
-              info.id = entry["id"].toInt();
-              info.sourceId = entry["sourceId"].toString();
-              info.url = entry["url"].toString();
-              info.title = entry["title"].toString();
-              info.thumbnailUrl = entry["thumbnailUrl"].toString();
-              info.initalized = entry["intialized"].toBool();
-              info.author = entry["author"].toString();
-              info.artist = entry["artist"].toString();
-              info.genre = entry["genre"].toString();
-              info.status = entry["status"].toString();
-              info.unread = entry["unreadCount"].toInt();
-            }
-
-            if (reset) {
-              endResetModel();
-            } else {
-              emit dataChanged(createIndex(0, 0),
-                               createIndex(_entries.size(), 0));
-            }
-          });
-    }
-  });
+  NetworkManager::instance().postGraphQL(graphql::client::query::AllCategories::GetOperationName(), {},
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::query::AllCategories::parseResponse(std::move(data));
+      beginResetModel();
+      _entries = parsed;
+      endResetModel();
+    });
+  return;
 }
