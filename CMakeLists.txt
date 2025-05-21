@@ -16,6 +16,7 @@ find_package(
              Network
              Widgets
              WebSockets
+             ShaderTools
   REQUIRED)
 
 find_package(cppgraphqlgen CONFIG REQUIRED)
@@ -62,6 +63,12 @@ qt_add_qml_module(tachidesk-qtui
     QtQuick.Controls
     QtQuick.Layouts
     SortFilterProxyModel)
+
+# Add shaders
+qt_add_shaders(tachidesk-qtui "shaders"
+    FILES
+        shaders/darken_mask.frag
+)
 
 target_include_directories(tachidesk-qtui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -110,7 +117,7 @@ if (NOT ANDROID AND NOT APPLE)
   install (TARGETS tachidesk-qtui RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME Tachidesk-QtUI)
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT ANDROID)
   set(APPID "tachidesk-qtui")
 
 	install (TARGETS tachidesk-qtui RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")

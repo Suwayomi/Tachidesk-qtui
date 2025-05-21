@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import QtQuick.Window
 import QtWebSockets
 
@@ -111,26 +110,6 @@ Item {
         }
       }
     }
-  }
-
-  Image {
-    id: backgroundImage
-    source: networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
-    fillMode: Image.Tile
-    width: detailsColumn.width
-    anchors {
-      top: parent.top
-      bottom: parent.bottom
-      //topMargin: (height / 1.2) - height
-    }
-  }
-
-  Colorize {
-    anchors.fill: backgroundImage
-    source: backgroundImage
-    lightness: 0.80
-    saturation: 0.5
-    hue: 0.57
   }
 
   Column {

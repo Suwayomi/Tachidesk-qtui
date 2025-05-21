@@ -27,21 +27,6 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
   graphql::client::query::GET_CHAPTERS_UPDATES::Response _entries;
   bool _isRequesting = false;
 
-  struct SourceInfo {
-    qint32   id;
-    QString  sourceId;
-    QString  title;
-    QString  url;
-    QString  thumbnailUrl;
-    bool     isInitialized;
-    bool     inLibrary;
-    bool     freshData;
-
-    ChapterInfo chapterInfo;
-    std::shared_ptr<QueueInfo> queueInfo;
-  };
-  std::vector<SourceInfo> _sources;
-
   bool _running = false;
   qint32 _total = 0;
   qint32 _complete = 0;
@@ -93,7 +78,7 @@ public:
   Q_INVOKABLE void pageRefresh();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
-  Q_INVOKABLE void chapterRead(qint32 mangaId, quint32 chapter);
+  Q_INVOKABLE void chapterRead(qint32 mangaId, int chapter);
 signals:
   void runningChanged();
   void totalChanged();

@@ -106,22 +106,22 @@ void UpdatesModel::componentComplete() {
  *
  *****************************************************************************/
 void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo> &queueInfo) {
-  for (auto &info : queueInfo) {
-    int row = 0;
-    for (auto &source : _sources) {
-      if (info.mangaId == source.id &&
-          info.chapterInfo.chapterNumber == source.chapterInfo.chapterNumber) {
-        source.queueInfo = std::make_shared<QueueInfo>(info);
-        source.chapterInfo.downloaded = info.progress >= 100;
-        source.chapterInfo.downloadPrepairing = false;
-        emit dataChanged(
-            createIndex(row, 0), createIndex(row, 0),
-            {RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
-        break;
-      }
-      row++;
-    }
-  }
+  // for (auto &info : queueInfo) {
+  //   int row = 0;
+  //   for (auto &source : _sources) {
+  //     if (info.mangaId == source.id &&
+  //         info.chapterInfo.chapterNumber == source.chapterInfo.chapterNumber) {
+  //       source.queueInfo = std::make_shared<QueueInfo>(info);
+  //       source.chapterInfo.downloaded = info.progress >= 100;
+  //       source.chapterInfo.downloadPrepairing = false;
+  //       emit dataChanged(
+  //           createIndex(row, 0), createIndex(row, 0),
+  //           {RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
+  //       break;
+  //     }
+  //     row++;
+  //   }
+  // }
 }
 
 /******************************************************************************
@@ -186,11 +186,12 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
     return entry.isRead;
   }
   case RoleChapterIndex: {
-    return entry.chapterNumber;
+    return entry.sourceOrder;
   }
   // case RolePageCount: {
   //   return entry.chapterInfo.pageCount;
   // }
+  // not sure this is even used?
   case RoleChapterCount: {
     return entry.sourceOrder;
   }
@@ -263,7 +264,7 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
 void UpdatesModel::pageRefresh() {
   _pageNumber = 0;
   _hasNext = false;
-  _sources.clear();
+  _entries.chapters.nodes.clear();
   beginResetModel();
   next();
   endResetModel();
@@ -327,46 +328,6 @@ void UpdatesModel::next() {
         endInsertRows();
       }
     });
-  return;
-  NetworkManager::instance().get(
-      QUrl(u"update/recentChapters/"_qs % QString::number(_pageNumber++)), this,
-      [&](const auto &reply) {
-        if (!downloads) {
-          downloads = std::make_shared<DownloadsModel>();
-          downloads->setupWebsocket();
-          connect(downloads.get(), &DownloadsModel::downloadsUpdated, this,
-                  &UpdatesModel::onDownloadsUpdated);
-        }
-
-        if (reply.isEmpty()) {
-          return;
-        }
-
-        _hasNext = reply["hasNextPage"].toBool();
-
-        auto pageArray = reply["page"].toArray();
-        beginInsertRows({}, _sources.size(),
-                        _sources.size() + pageArray.count() - 1);
-
-        _sources.reserve(reply.array().count());
-
-        for (const auto &entry_arr : pageArray) {
-          const auto &entry = entry_arr.toObject();
-          const auto &manga = entry["manga"].toObject();
-          auto &info = _sources.emplace_back();
-          info.id = manga["id"].toInt();
-          info.sourceId = manga["sourceId"].toString();
-          info.title = manga["title"].toString();
-          info.thumbnailUrl = manga["thumbnailUrl"].toString();
-          info.url = manga["url"].toString();
-          info.isInitialized = manga["isInitialized"].toBool();
-          info.inLibrary = manga["inLibrary"].toBool();
-
-          info.chapterInfo.processChapter(entry["chapter"].toObject());
-        }
-
-        endInsertRows();
-      });
 }
 
 /******************************************************************************
@@ -386,20 +347,19 @@ void UpdatesModel::refresh() {
  *
  *****************************************************************************/
 void UpdatesModel::downloadChapter(int index) {
-  auto &entry = _sources[index];
-  if (entry.chapterInfo.downloaded) {
+  auto &entry = _entries.chapters.nodes[index];
+  if (entry.isDownloaded) {
     return;
   }
   // mark as downloaded so we don't download more than once
-  entry.chapterInfo.downloaded = true;
-  entry.chapterInfo.downloadPrepairing = true;
+  entry.isDownloaded = true;
+  // entry.downloadPrepairing = true;
 
-  qDebug() << "source index? " << index;
   emit dataChanged(createIndex(index, 0), createIndex(index, 0),
                    {RoleDownloadPrepairing});
   NetworkManager::instance().get(QStringLiteral("download/%1/chapter/%2")
                                      .arg(entry.id)
-                                     .arg(entry.chapterInfo.index));
+                                     .arg(entry.sourceOrder));
 }
 
 /******************************************************************************
@@ -407,11 +367,11 @@ void UpdatesModel::downloadChapter(int index) {
  * Method: chapterRead()
  *
  *****************************************************************************/
-void UpdatesModel::chapterRead(qint32 mangaId, quint32 chapter) {
+void UpdatesModel::chapterRead(qint32 mangaId, int chapter) {
   int i = 0;
-  for (auto &info : _sources) {
-    if (info.id == mangaId && info.chapterInfo.index == chapter) {
-      info.chapterInfo.read = true;
+  for (auto &info : _entries.chapters.nodes) {
+    if (info.id == mangaId && info.sourceOrder == chapter) {
+      info.isRead = true;
       NetworkManager::instance().patch(
           "read", "true",
           QStringLiteral("manga/%1/chapter/%2").arg(mangaId).arg(chapter));

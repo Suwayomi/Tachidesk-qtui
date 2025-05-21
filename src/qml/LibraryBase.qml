@@ -1,5 +1,4 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
 
 import Tachidesk.Qtui
 
@@ -59,39 +58,37 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         source: thumbnailUrl
 
-        OpacityMask {
-          source: mask
-          maskSource: image
-        }
-
-        LinearGradient {
-          id: mask
-          anchors.fill: image
-          gradient: Gradient {
-              GradientStop { position: 0.5;  color: "transparent"}
-              GradientStop { position: 0.99; color: "black" }
-          }
-        }
-
-        Text {
-          id: infoText
-          anchors {
-            margins: 5
-            bottom: image.bottom
-            left: image.left
-            right: image.right
-          }
-          color: "#F5F5F5"
-          font.pixelSize: 14
-          //font.weight: Font.DemiBold
-          wrapMode: Text.WordWrap
-          maximumLineCount: 3
-          text: title
-          style: Text.Outline
-          styleColor: "black"
-        }
-
+        visible: false
       }
+
+
+      ShaderEffect {
+        anchors.fill: parent
+
+        // must match the single sampler name in the GLSL:
+        property var source: image
+
+        fragmentShader: "qrc:/shaders/darken_mask.frag.qsb"
+      }
+
+      Text {
+        id: infoText
+        anchors {
+          margins: 5
+          bottom: image.bottom
+          left: image.left
+          right: image.right
+        }
+        color: "#F5F5F5"
+        font.pixelSize: 14
+        //font.weight: Font.DemiBold
+        wrapMode: Text.WordWrap
+        maximumLineCount: 3
+        text: title
+        style: Text.Outline
+        styleColor: "black"
+      }
+
       Rectangle {
         visible: unread > 0
         width: unreadText.width + 10
