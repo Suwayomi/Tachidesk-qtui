@@ -44,4 +44,5 @@ struct QueueInfo {
   QString  title;
   QString  thumbnailUrl;
   ChapterInfo chapterInfo;
+  bool downloadPrepairing = false;
 };

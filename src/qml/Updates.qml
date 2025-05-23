@@ -67,7 +67,8 @@ Rectangle {
         onClicked: {
           var viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                         { mangaNumber: mangaId,
-                          chapter:     chapterIndex })
+                        chapter:     chapterIndex,
+                        chapterId:   chapterId })
           viewer.chapterRead.connect(markRead)
         }
       }

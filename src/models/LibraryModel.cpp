@@ -38,11 +38,11 @@ void LibraryModel::componentComplete() {}
  *
  *****************************************************************************/
 int LibraryModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid() || _entries.categories.nodes.empty()) {
+  if (parent.isValid()) {
     return 0;
   }
 
-  return _entries.categories.nodes[0].mangas.nodes.size();
+  return _entries.category.mangas.nodes.size();
 }
 
 /******************************************************************************
@@ -52,11 +52,11 @@ int LibraryModel::rowCount(const QModelIndex &parent) const {
  *****************************************************************************/
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) && (index.row() >= 0) &&
-        (index.row() < rowCount())) || _entries.categories.nodes.empty()) {
+        (index.row() < rowCount()))) {
     return {};
   }
 
-  const auto &entry = _entries.categories.nodes[0].mangas.nodes[index.row()];
+  const auto &entry = _entries.category.mangas.nodes[index.row()];
 
   switch (role) {
   case RoleTitle: {
@@ -71,6 +71,12 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
   }
   case RoleUnread: {
     return entry.unreadCount;
+  }
+  case RoleRecentlyRead: {
+    if (!entry.latestReadChapter) {
+      return 0;
+    }
+    return QString::fromStdString(entry.latestReadChapter->lastReadAt.get<std::string>()).toInt();
   }
 
   // case Role
@@ -90,7 +96,9 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
   static QHash<int, QByteArray> roles = {{RoleTitle, "title"},
                                          {RoleThumbnail, "thumbnailUrl"},
                                          {RoleUnread, "unread"},
-                                         {RoleId, "mangaId"}};
+                                         {RoleId, "mangaId"},
+                                         {RoleRecentlyRead, "recentlyRead"},
+  };
 
   return roles;
 }
@@ -101,11 +109,14 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
  *
  *****************************************************************************/
 void LibraryModel::refreshLibrary() {
-  NetworkManager::instance().postGraphQL(graphql::client::query::AllCategories::GetOperationName(), {},
+  QJsonObject variablesObj;
+  variablesObj.insert("id", 0);
+
+  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CATEGORY_MANGAS::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::query::AllCategories::parseResponse(std::move(data));
+      auto parsed = graphql::client::query::GET_CATEGORY_MANGAS::parseResponse(std::move(data));
       beginResetModel();
-      _entries = parsed;
+      _entries = std::move(parsed);
       endResetModel();
     });
   return;

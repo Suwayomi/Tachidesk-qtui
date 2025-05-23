@@ -24,6 +24,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
 
   QWebSocket _webSocket;
   std::shared_ptr<DownloadsModel> downloads;
+  std::map<quint32, std::shared_ptr<QueueInfo>> _queueInfo;
   graphql::client::query::GET_CHAPTERS_UPDATES::Response _entries;
   bool _isRequesting = false;
 
@@ -56,6 +57,7 @@ public:
     RoleChapterNumber,
     RoleRead,
     RoleChapterIndex,
+    RoleChapterId,
     RolePageCount,
     RoleChapterCount,
     RoleLastPageRead,

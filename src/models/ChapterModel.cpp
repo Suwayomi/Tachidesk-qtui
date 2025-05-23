@@ -219,6 +219,21 @@ void ChapterModel::requestChapter(quint32 chapter)
       return;
     }
   }
+
+  QJsonObject variablesObj;
+
+  QJsonObject input;
+  input.insert("chapterId", _chapterId);
+  variablesObj.insert("input", input);
+  qDebug() << "input:" << input;
+
+  NetworkManager::instance().postGraphQL(graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+    beginResetModel();
+    _chaptersFetch = graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
+    endResetModel();
+    qDebug() << "pageds count:" << _chaptersFetch.fetchChapterPages->chapter.pageCount;
+  });
   NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapter/" % QString::number(chapter) ), this,
     [&](const auto& doc)
   {

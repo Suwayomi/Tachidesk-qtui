@@ -10,6 +10,7 @@ Item {
   id: viewerBase
   property alias mangaNumber: chapterModel.mangaNumber
   property alias chapter: chapterModel.chapterNumber
+  property alias chapterId: chapterModel.chapterId
   property int lastReadPage: 0
   property bool positioned: false
   signal chapterRead(int mangaId, int chapter)

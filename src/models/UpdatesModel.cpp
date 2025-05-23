@@ -106,22 +106,25 @@ void UpdatesModel::componentComplete() {
  *
  *****************************************************************************/
 void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo> &queueInfo) {
-  // for (auto &info : queueInfo) {
-  //   int row = 0;
-  //   for (auto &source : _sources) {
-  //     if (info.mangaId == source.id &&
-  //         info.chapterInfo.chapterNumber == source.chapterInfo.chapterNumber) {
-  //       source.queueInfo = std::make_shared<QueueInfo>(info);
-  //       source.chapterInfo.downloaded = info.progress >= 100;
-  //       source.chapterInfo.downloadPrepairing = false;
-  //       emit dataChanged(
-  //           createIndex(row, 0), createIndex(row, 0),
-  //           {RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
-  //       break;
-  //     }
-  //     row++;
-  //   }
-  // }
+  for (auto &info : queueInfo) {
+    int row = 0;
+    auto source = _queueInfo.find(info.mangaId);
+    if (!source->second) {
+      source->second = std::make_shared<QueueInfo>(info);
+      source->second->chapterInfo.downloaded = info.progress >= 100;
+      source->second->downloadPrepairing = false;
+
+      auto it = std::find_if(_entries.chapters.nodes.begin(),
+                             _entries.chapters.nodes.end(),
+                             [&info](const auto &entry) {
+                               return entry.manga.id == info.mangaId;
+                             });
+      size_t index = std::distance(_entries.chapters.nodes.begin(), it);
+      emit dataChanged(
+          createIndex(index, 0), createIndex(index, 0),
+          {RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
+    }
+  }
 }
 
 /******************************************************************************
@@ -149,6 +152,7 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   }
 
   const auto &entry = _entries.chapters.nodes[index.row()];
+  const auto &queueInfo = _queueInfo.find(entry.manga.id)->second;
 
   switch (role) {
   case RoleThumbnailUrl: {
@@ -188,6 +192,10 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   case RoleChapterIndex: {
     return entry.sourceOrder;
   }
+
+  case RoleChapterId: {
+    return entry.id;
+  }
   // case RolePageCount: {
   //   return entry.chapterInfo.pageCount;
   // }
@@ -209,14 +217,17 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleDownloadProgress: {
-    return 0;
-    // if (!entry.queueInfo) {
-    //   return -1;
-    // }
-    // return entry.queueInfo->progress;
+    if (!queueInfo) {
+      return -1;
+    }
+    return queueInfo->progress;
   }
   case RoleDownloadPrepairing:
-    return !entry.isDownloaded; //.downloadPrepairing.value_or(false);
+    if (!queueInfo) {
+      return false;
+    }
+    return queueInfo->downloadPrepairing;
+    //return !entry.isDownloaded; //.downloadPrepairing.value_or(false);
 
   default:
     return {};
@@ -244,6 +255,7 @@ QHash<int, QByteArray> UpdatesModel::roleNames() const {
       {RoleChapterNumber, "chapterNumber"},
       {RoleRead, "read"},
       {RoleChapterIndex, "chapterIndex"},
+      {RoleChapterId, "chapterId"},
       {RolePageCount, "pageCount"},
       {RoleDownloaded, "downloaded"},
       {RoleLastPageRead, "lastPageRead"},

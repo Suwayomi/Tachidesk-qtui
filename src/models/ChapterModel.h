@@ -4,6 +4,7 @@
 #include <QQmlParserStatus>
 
 #include "common_structs.h"
+#include "graphql/tachideskClient.h"
 #include <qqml.h>
 
 class ChapterModel : public QAbstractListModel, public QQmlParserStatus
@@ -17,6 +18,7 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(QString chapterName  MEMBER _chapterName    NOTIFY chapterNameChanged)
   Q_PROPERTY(qint32 pageCount     MEMBER _pageCount      NOTIFY pageCountChanged)
   Q_PROPERTY(qint32 pageIndex     MEMBER _pageIndex      NOTIFY pageIndexChanged)
+  Q_PROPERTY(qint32 chapterId     MEMBER _chapterId      NOTIFY chapterIdChanged)
 
   struct ChapterInfo {
     QString  url;
@@ -30,12 +32,15 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   };
   std::vector<ChapterInfo> _chapters;
 
+  graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response _chaptersFetch;
+
   qint32 _mangaNumber;
   qint32 _chapterNumber;
   QString _chapterName;
   quint32 _chapterCount;
   qint32 _pageCount = 0;
   qint32 _pageIndex = 0;
+  qint32 _chapterId = 0;
 
   const ChapterInfo* getChapterByRow(qint32 index, quint32& chapterNumber) const;
 protected:
@@ -78,6 +83,7 @@ signals:
    void pageIndexChanged();
    void chapterNumberChanged();
    void chapterNameChanged();
+   void chapterIdChanged();
    void chapterLoaded(int lastRead);
 
 };
