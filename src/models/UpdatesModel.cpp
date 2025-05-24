@@ -107,7 +107,6 @@ void UpdatesModel::componentComplete() {
  *****************************************************************************/
 void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo> &queueInfo) {
   for (auto &info : queueInfo) {
-    int row = 0;
     auto source = _queueInfo.find(info.mangaId);
     if (!source->second) {
       source->second = std::make_shared<QueueInfo>(info);
@@ -152,7 +151,7 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   }
 
   const auto &entry = _entries.chapters.nodes[index.row()];
-  const auto &queueInfo = _queueInfo.find(entry.manga.id)->second;
+  const auto &queueInfo = _queueInfo.find(entry.manga.id);
 
   switch (role) {
   case RoleThumbnailUrl: {
@@ -217,16 +216,16 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleDownloadProgress: {
-    if (!queueInfo) {
+    if (queueInfo == _queueInfo.end() || !queueInfo->second) {
       return -1;
     }
-    return queueInfo->progress;
+    return queueInfo->second->progress;
   }
   case RoleDownloadPrepairing:
-    if (!queueInfo) {
+    if (queueInfo == _queueInfo.end() || !queueInfo->second) {
       return false;
     }
-    return queueInfo->downloadPrepairing;
+    return queueInfo->second->downloadPrepairing;
     //return !entry.isDownloaded; //.downloadPrepairing.value_or(false);
 
   default:
@@ -328,6 +327,7 @@ void UpdatesModel::next() {
       _isRequesting = false;
 
       auto parsed = graphql::client::query::GET_CHAPTERS_UPDATES::parseResponse(std::move(data));
+
       if (_entries.chapters.nodes.empty()) {
         beginResetModel();
         _entries = std::move(parsed);
