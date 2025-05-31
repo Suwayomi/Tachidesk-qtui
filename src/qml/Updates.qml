@@ -19,8 +19,9 @@ Rectangle {
     updatesModel.pageRefresh()
   }
 
-  function markRead(mangaId, chapter) {
-    updatesModel.chapterRead(mangaId, chapter)
+  function markRead(chapterId, chapter) {
+    console.log("marking chapter as read:", chapterId, chapter)
+    updatesModel.chapterRead(chapterId, chapter)
   }
 
   ProgressBar {

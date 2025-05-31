@@ -7,8 +7,6 @@
 #include "ChaptersModel.h"
 #include "graphql/tachideskClient.h"
 
-#include <optional>
-
 class DownloadsModel;
 struct QueueInfo;
 
@@ -80,7 +78,7 @@ public:
   Q_INVOKABLE void pageRefresh();
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void downloadChapter(int index);
-  Q_INVOKABLE void chapterRead(qint32 mangaId, int chapter);
+  Q_INVOKABLE void chapterRead(qint32 Id, int chapter);
 signals:
   void runningChanged();
   void totalChanged();

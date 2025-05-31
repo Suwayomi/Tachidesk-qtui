@@ -88,7 +88,7 @@ Item {
 
         chapterModel.updateChapter(listView.currentIndex)
         if ((listView.currentIndex + 1) === listView.count) {
-          chapterRead(chapterModel.mangaNumber, chapterModel.chapterNumber)
+          chapterRead(chapterModel.chapterId, chapterModel.chapterNumber)
           chapterModel.chapterNumber++
           chapterModel.requestChapter(chapterModel.chapterNumber)
         }

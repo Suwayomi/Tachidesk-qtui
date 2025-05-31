@@ -112,6 +112,12 @@ Item {
     }
   }
 
+  Rectangle {
+    id: backgroundColor
+    anchors.fill: parent
+    color: "#F5F5F5"
+  }
+
   Column {
     id: detailsColumn
     spacing: 8
@@ -290,7 +296,8 @@ Item {
         if (!timerTriggered) {
           const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                        { mangaNumber: details.mangaNumber,
-                                         chapter: chapterIndex })
+                                       chapter: chapterIndex,
+                                       chapterId: chapterId })
           viewer.chapterRead.connect(markRead)
         }
         timerTriggered = false;

@@ -19,20 +19,9 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(qint32 pageCount     MEMBER _pageCount      NOTIFY pageCountChanged)
   Q_PROPERTY(qint32 pageIndex     MEMBER _pageIndex      NOTIFY pageIndexChanged)
   Q_PROPERTY(qint32 chapterId     MEMBER _chapterId      NOTIFY chapterIdChanged)
+  Q_PROPERTY(bool requestingChapter MEMBER _requestingChapter NOTIFY requestingChapterChanged)
 
-  struct ChapterInfo {
-    QString  url;
-    QString  name;
-    qint64   uploadDate;
-    qint32   chapterNumber;
-    bool     read;
-    quint32  index;
-    quint32  pageCount;
-    quint32  chapterCount;
-  };
-  std::vector<ChapterInfo> _chapters;
-
-  graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response _chaptersFetch;
+  std::vector<graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response> _chaptersFetch;
 
   qint32 _mangaNumber;
   qint32 _chapterNumber;
@@ -41,8 +30,9 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   qint32 _pageCount = 0;
   qint32 _pageIndex = 0;
   qint32 _chapterId = 0;
+  bool _requestingChapter = false;
 
-  const ChapterInfo* getChapterByRow(qint32 index, quint32& chapterNumber) const;
+  const graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* getChapterFetchByRow(quint32 index, quint32& chapterNumber) const;
 protected:
 
   void classBegin() override;
@@ -74,7 +64,7 @@ public:
      int role = Qt::DisplayRole) const override;
 
   Q_INVOKABLE void updateChapter(qint32 page);
-  Q_INVOKABLE void requestChapter(quint32 chapter);
+  Q_INVOKABLE void requestChapter(qint32 chapter);
   Q_INVOKABLE QVariantMap get(int row) const;
   Q_INVOKABLE quint32 getLastChapter() const;
 signals:
@@ -85,5 +75,6 @@ signals:
    void chapterNameChanged();
    void chapterIdChanged();
    void chapterLoaded(int lastRead);
+   void requestingChapterChanged();
 
 };

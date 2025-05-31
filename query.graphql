@@ -1,0 +1,397 @@
+query AllCategories {
+  categories {
+    nodes {
+      mangas {
+        nodes {
+          title
+          id
+          thumbnailUrl
+          unreadCount
+        }
+      }
+    }
+  }
+}
+
+fragment CHAPTER_BASE_FIELDS on ChapterType {
+  id
+  name
+  mangaId
+  scanlator
+  realUrl
+  sourceOrder
+  chapterNumber
+  __typename
+}
+
+fragment CHAPTER_STATE_FIELDS on ChapterType {
+  id
+  isRead
+  isDownloaded
+  isBookmarked
+  __typename
+}
+
+fragment CHAPTER_LIST_FIELDS on ChapterType {
+  ...CHAPTER_BASE_FIELDS
+  ...CHAPTER_STATE_FIELDS
+  fetchedAt
+  uploadDate
+  lastReadAt
+  __typename
+}
+
+fragment MANGA_BASE_FIELDS on MangaType {
+  id
+  title
+  thumbnailUrl
+  thumbnailUrlLastFetched
+  inLibrary
+  initialized
+  sourceId
+  __typename
+}
+
+fragment CHAPTER_UPDATE_LIST_FIELDS on ChapterType {
+  ...CHAPTER_LIST_FIELDS
+  manga {
+    ...MANGA_BASE_FIELDS
+    __typename
+  }
+  __typename
+}
+
+fragment PAGE_INFO on PageInfo {
+  endCursor
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  __typename
+}
+
+query GET_CHAPTERS_UPDATES($after: Cursor, $before: Cursor, $condition: ChapterConditionInput, $filter: ChapterFilterInput, $first: Int, $last: Int, $offset: Int, $order: [ChapterOrderInput!]) {
+  chapters(
+    after: $after
+    before: $before
+    condition: $condition
+    filter: $filter
+    first: $first
+    last: $last
+    offset: $offset
+    order: $order
+  ) {
+    nodes {
+      ...CHAPTER_UPDATE_LIST_FIELDS
+      __typename
+    }
+    pageInfo {
+      ...PAGE_INFO
+      __typename
+    }
+    totalCount
+    __typename
+  }
+}
+
+fragment UPDATER_JOB_INFO_FIELDS on UpdaterJobsInfoType {
+  isRunning
+  totalJobs
+  finishedJobs
+  skippedCategoriesCount
+  skippedMangasCount
+  __typename
+}
+
+fragment UPDATER_CATEGORY_FIELDS on CategoryUpdateType {
+  status
+  category {
+    id
+    name
+    __typename
+  }
+  __typename
+}
+
+fragment MANGA_CHAPTER_STAT_FIELDS on MangaType {
+  id
+  unreadCount
+  downloadCount
+  bookmarkCount
+  hasDuplicateChapters
+  chapters {
+    totalCount
+    __typename
+  }
+  __typename
+}
+
+fragment MANGA_CHAPTER_NODE_FIELDS on MangaType {
+  firstUnreadChapter {
+    id
+    sourceOrder
+    isRead
+    mangaId
+    __typename
+  }
+  lastReadChapter {
+    id
+    sourceOrder
+    lastReadAt
+    __typename
+  }
+  latestReadChapter {
+    id
+    sourceOrder
+    lastReadAt
+    __typename
+  }
+  latestFetchedChapter {
+    id
+    fetchedAt
+    __typename
+  }
+  latestUploadedChapter {
+    id
+    uploadDate
+    __typename
+  }
+  __typename
+}
+
+fragment UPDATER_MANGA_FIELDS on MangaUpdateType {
+  status
+  manga {
+    id
+    title
+    thumbnailUrl
+    ...MANGA_CHAPTER_STAT_FIELDS
+    ...MANGA_CHAPTER_NODE_FIELDS
+    __typename
+  }
+  __typename
+}
+
+fragment UPDATER_STATUS_FIELDS on LibraryUpdateStatus {
+  jobsInfo {
+    ...UPDATER_JOB_INFO_FIELDS
+    __typename
+  }
+  categoryUpdates {
+    ...UPDATER_CATEGORY_FIELDS
+    __typename
+  }
+  mangaUpdates {
+    ...UPDATER_MANGA_FIELDS
+    __typename
+  }
+  __typename
+}
+
+mutation UPDATE_LIBRARY($input: UpdateLibraryInput = {}) {
+  updateLibrary(input: $input) {
+    updateStatus {
+      ...UPDATER_STATUS_FIELDS
+      __typename
+    }
+    __typename
+  }
+}
+
+query GET_LAST_UPDATE_TIMESTAMP {
+  lastUpdateTimestamp {
+    timestamp
+    __typename
+  }
+}
+
+query GET_UPDATE_STATUS {
+  libraryUpdateStatus {
+    ...UPDATER_STATUS_FIELDS
+    __typename
+  }
+}
+
+fragment CATEGORY_BASE_FIELDS on CategoryType {
+  id
+  name
+  default
+  order
+  __typename
+}
+
+fragment CATEGORY_META_FIELDS on CategoryMetaType {
+  categoryId
+  key
+  value
+  __typename
+}
+
+fragment CATEGORY_LIBRARY_FIELDS on CategoryType {
+  ...CATEGORY_BASE_FIELDS
+  meta {
+    ...CATEGORY_META_FIELDS
+    __typename
+  }
+  mangas {
+    totalCount
+    __typename
+  }
+  __typename
+}
+
+query GET_CATEGORIES_LIBRARY($after: Cursor, $before: Cursor, $condition: CategoryConditionInput, $filter: CategoryFilterInput, $first: Int, $last: Int, $offset: Int, $order: [CategoryOrderInput!]) {
+  categories(
+    after: $after
+    before: $before
+    condition: $condition
+    filter: $filter
+    first: $first
+    last: $last
+    offset: $offset
+    order: $order
+  ) {
+    nodes {
+      ...CATEGORY_LIBRARY_FIELDS
+      __typename
+    }
+    pageInfo {
+      ...PAGE_INFO
+      __typename
+    }
+    totalCount
+    __typename
+  }
+}
+
+fragment MANGA_LIBRARY_FIELDS on MangaType {
+  ...MANGA_BASE_FIELDS
+  ...MANGA_CHAPTER_STAT_FIELDS
+  ...MANGA_CHAPTER_NODE_FIELDS
+  genre
+  lastFetchedAt
+  inLibraryAt
+  status
+  artist
+  author
+  description
+  source {
+    id
+    displayName
+    __typename
+  }
+  trackRecords {
+    totalCount
+    nodes {
+      id
+      trackerId
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+query GET_CATEGORY_MANGAS($id: Int!) {
+  category(id: $id) {
+    id
+    mangas {
+      nodes {
+        ...MANGA_LIBRARY_FIELDS
+        __typename
+      }
+      pageInfo {
+        ...PAGE_INFO
+        __typename
+      }
+      totalCount
+      __typename
+    }
+    __typename
+  }
+}
+
+mutation GET_CHAPTER_PAGES_FETCH($input: FetchChapterPagesInput!) {
+  fetchChapterPages(input: $input) {
+    chapter {
+      id
+      pageCount
+      sourceOrder
+      name
+      __typename
+    }
+    pages
+    __typename
+  }
+}
+
+fragment TRACK_RECORD_BIND_FIELDS on TrackRecordType {
+  id
+  remoteId
+  trackerId
+  remoteUrl
+  title
+  status
+  lastChapterRead
+  totalChapters
+  score
+  displayScore
+  startDate
+  finishDate
+  __typename
+}
+
+mutation UPDATE_CHAPTERS($input: UpdateChaptersInput!, $getBookmarked: Boolean!, $getRead: Boolean!, $getLastPageRead: Boolean!, $chapterIdsToDelete: [Int!]!, $deleteChapters: Boolean!, $mangaId: Int!, $trackProgress: Boolean!) {
+  updateChapters(input: $input) {
+    chapters {
+      id
+      isBookmarked @include(if: $getBookmarked)
+      isRead @include(if: $getRead)
+      lastReadAt @include(if: $getRead)
+      lastPageRead @include(if: $getLastPageRead)
+      manga @include(if: $getRead) {
+        id
+        unreadCount
+        lastReadChapter {
+          id
+          __typename
+        }
+        latestReadChapter {
+          id
+          __typename
+        }
+        firstUnreadChapter {
+          id
+          __typename
+        }
+        __typename
+      }
+      manga @include(if: $getBookmarked) {
+        id
+        bookmarkCount
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  deleteDownloadedChapters(input: {ids: $chapterIdsToDelete}) @include(if: $deleteChapters) {
+    chapters {
+      id
+      isDownloaded
+      manga {
+        id
+        downloadCount
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  trackProgress(input: {mangaId: $mangaId}) @include(if: $trackProgress) {
+    trackRecords {
+      ...TRACK_RECORD_BIND_FIELDS
+      __typename
+    }
+    __typename
+  }
+}

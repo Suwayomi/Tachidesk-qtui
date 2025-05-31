@@ -13,7 +13,7 @@ Item {
   property alias chapterId: chapterModel.chapterId
   property int lastReadPage: 0
   property bool positioned: false
-  signal chapterRead(int mangaId, int chapter)
+  signal chapterRead(int chapterId, int chapter)
 
   Component.onCompleted: {
     if (Qt.platform.os === "android")
@@ -77,6 +77,8 @@ Item {
     }
   }
 
+
+
   states: [
     State {
       name: "MangaReader"
@@ -99,6 +101,15 @@ Item {
   Loader {
     id: listView
     anchors.fill: parent
+  }
+
+  BusyIndicator {
+    id: loadingIndicator
+    anchors.centerIn: parent
+    visible: chapterModel.requestingChapter
+    running: chapterModel.requestingChapter
+    width: 50
+    height: 50
   }
 
   Text {

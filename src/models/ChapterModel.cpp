@@ -34,7 +34,7 @@ void ChapterModel::classBegin()
  *****************************************************************************/
 void ChapterModel::componentComplete()
 {
-  requestChapter(_chapterNumber);
+  requestChapter(_chapterId);
 }
 
 /******************************************************************************
@@ -42,16 +42,17 @@ void ChapterModel::componentComplete()
  * Method: getChapterByRow()
  *
  *****************************************************************************/
-const ChapterModel::ChapterInfo* ChapterModel::getChapterByRow(qint32 index, quint32& chapterNumber) const
+const graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* ChapterModel::getChapterFetchByRow(
+    quint32 index, quint32& chapterNumber) const
 {
-  for (const auto& chapter : _chapters) {
-    if (index < chapter.pageCount + chapterNumber) {
+  for (const auto& chapter : _chaptersFetch) {
+    if (index < chapter.fetchChapterPages->chapter.pageCount + chapterNumber) {
       return &chapter;
     }
-    chapterNumber += chapter.pageCount;
+    chapterNumber += chapter.fetchChapterPages->chapter.pageCount;
   }
   qDebug() << "not found!" << index << "returning last chapter";
-  return &_chapters.back();
+  return &_chaptersFetch.back();
 }
 
 /******************************************************************************
@@ -60,7 +61,10 @@ const ChapterModel::ChapterInfo* ChapterModel::getChapterByRow(qint32 index, qui
  *
  *****************************************************************************/
 quint32 ChapterModel::getLastChapter() const {
-  return _chapters.back().index;
+  if (_chaptersFetch.empty()) {
+    return 0;
+  }
+  return _chaptersFetch.back().fetchChapterPages->chapter.sourceOrder;
 }
 
 /******************************************************************************
@@ -73,8 +77,8 @@ int ChapterModel::rowCount(const QModelIndex &parent) const {
     return 0;
   }
   qint32 pages = 0;
-  for (auto& chapter : _chapters) {
-    pages += chapter.pageCount;
+  for (auto& chapter : _chaptersFetch) {
+    pages += chapter.fetchChapterPages->chapter.pageCount - 1;
   }
 
   return pages;
@@ -88,13 +92,13 @@ int ChapterModel::rowCount(const QModelIndex &parent) const {
 QVariant ChapterModel::data(const QModelIndex &index, int role) const {
   if (!((index.isValid()) &&
        (index.row() >= 0) &&
-       (index.row() < rowCount())))
+       (index.row() < rowCount())) || _chaptersFetch.empty())
   {
     return {};
   }
 
   quint32 chapterNumber = 0;
-  const auto entry = getChapterByRow(index.row(), chapterNumber);
+  const auto entry = getChapterFetchByRow(index.row(), chapterNumber);
   if (!entry) {
     qDebug() << "entry not found";
     return {};
@@ -104,39 +108,38 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
   {
     case RoleUrl:
       {
-        return entry->url;
+        {}
+        // return entry->fetchChapterPages->chapter.
       }
     case RoleName:
       {
-        return entry->name;
+        return QString::fromStdString(entry->fetchChapterPages->chapter.name);
       }
     case RoleChapterNumber:
       {
-        return entry->chapterNumber;
+        // return entry->chapterNumber;
       }
     case RoleRead:
       {
-        return entry->read;
+        // return entry->read;
       }
     case RoleIndex:
       {
-        return entry->index;
+        return entry->fetchChapterPages->chapter.sourceOrder;
       }
     case RolePageCount:
       {
-        return entry->pageCount;
+        return entry->fetchChapterPages->chapter.pageCount;
       }
     case RoleChapterCount:
       {
-        return entry->chapterCount;
+        // return entry->chapterCount;
       }
     case RoleChapterUrl:
       {
         return NetworkManager::instance().resolvedPath().resolved(
-                  QStringLiteral("api/v1/manga/%1/chapter/%2/page/%3")
-                    .arg(_mangaNumber).arg(entry->index).arg(index.row() - chapterNumber));
+            QString::fromStdString(entry->fetchChapterPages->pages[index.row() - chapterNumber]));
       }
-    //case Role
     default:
       return {};
   }
@@ -187,20 +190,24 @@ QVariantMap ChapterModel::get(int row) const
  *****************************************************************************/
 void ChapterModel::updateChapter(qint32 page)
 {
+  if (_chaptersFetch.empty() || page < 0) {
+    return;
+  }
+
   quint32 chapterNumber = 0;
-  const auto entry = getChapterByRow(page, chapterNumber);
+  const auto entry = getChapterFetchByRow(page, chapterNumber);
   if (!entry) {
     return;
   }
-  _chapterName = entry->name;
+  _chapterName = QString::fromStdString(entry->fetchChapterPages->chapter.name);
   chapterNumberChanged();
-  _pageCount = entry->pageCount;
+  _pageCount = entry->fetchChapterPages->chapter.pageCount;
   _pageIndex = page - chapterNumber + 1;
   pageCountChanged();
   pageIndexChanged();
 
-  NetworkManager::instance().patch("lastPageRead", page - chapterNumber,
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
+  // NetworkManager::instance().patch("lastPageRead", page - chapterNumber,
+  //     QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
 }
 
 /******************************************************************************
@@ -208,14 +215,15 @@ void ChapterModel::updateChapter(qint32 page)
  * Method: lastPageRead()
  *
  *****************************************************************************/
-void ChapterModel::requestChapter(quint32 chapter)
+void ChapterModel::requestChapter(qint32 chapter)
 {
-  if (chapter > _chapterCount && _chapterCount != 0) {
+  if (_requestingChapter) {
     return;
   }
 
-  for (auto& c : _chapters) {
-    if (c.index == chapter) {
+  for (auto& c : _chaptersFetch) {
+    if (c.fetchChapterPages->chapter.id == chapter) {
+      qDebug() << "Chapter already loaded:" << chapter;
       return;
     }
   }
@@ -223,62 +231,39 @@ void ChapterModel::requestChapter(quint32 chapter)
   QJsonObject variablesObj;
 
   QJsonObject input;
-  input.insert("chapterId", _chapterId);
+  input.insert("chapterId", chapter);
   variablesObj.insert("input", input);
-  qDebug() << "input:" << input;
+
+  _requestingChapter = true;
+  emit requestingChapterChanged();
 
   NetworkManager::instance().postGraphQL(graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-    beginResetModel();
-    _chaptersFetch = graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
-    endResetModel();
-    qDebug() << "pageds count:" << _chaptersFetch.fetchChapterPages->chapter.pageCount;
-  });
-  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapter/" % QString::number(chapter) ), this,
-    [&](const auto& doc)
-  {
-    if (doc.isEmpty()) {
-      return;
-    }
-
-    auto insert_sorted = [&](auto& vec, const ChapterInfo& item) {
-      vec.insert(std::upper_bound(vec.begin(), vec.end(), item,
-            [](const auto& a, const auto&b){ return a.index < b.index; }), item);
-    };
-
     qint32 pageStart = 0;
     qint32 pageEnd = 0;
-    for (auto& chapter : _chapters) {
-      pageStart += chapter.pageCount;
+    for (auto& chapter : _chaptersFetch) {
+      pageStart += chapter.fetchChapterPages->chapter.pageCount;
     }
+    auto parsed = graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
+    _pageCount = parsed.fetchChapterPages->chapter.pageCount;
+    _chapterName = QString::fromStdString(parsed.fetchChapterPages->chapter.name);
+    _chapterId = parsed.fetchChapterPages->chapter.id;
+    _chapterCount = parsed.fetchChapterPages->chapter.sourceOrder;
 
-    const auto& entry = doc.object();
-    ChapterInfo info;
-    info.url          = entry["url"].toString();
-    info.name         = entry["name"].toString();
-    info.uploadDate   = entry["uploadDate"].toInt();
-    info.chapterNumber= entry["chapterNumber"].toInt();
-    info.read         = entry["read"].toBool();
-    info.index        = entry["index"].toInt();
-    info.pageCount    = entry["pageCount"].toInt();
-    _pageCount = info.pageCount;
-    chapterLoaded(entry["lastPageRead"].toInt());
+    pageEnd = parsed.fetchChapterPages->chapter.pageCount + pageStart - 1;
+
+    emit chapterIdChanged();
+    emit chapterNameChanged();
     emit pageCountChanged();
-
-    info.chapterCount = entry["chapterCount"].toInt();
-
-    _chapterCount = info.chapterCount;
-
-    pageEnd = info.pageCount + pageStart - 1;
 
     beginInsertRows({}, pageStart, pageEnd);
 
-    insert_sorted(_chapters, info);
+    _chaptersFetch.emplace_back(parsed);
 
     endInsertRows();
 
-    _chapterName = info.name;
-    emit chapterNameChanged();
+    _requestingChapter = false;
+    emit requestingChapterChanged();
   });
 }
 

@@ -6,7 +6,7 @@ import Tachidesk.Qtui
 Item {
   id: base
   property alias model: listView.model
-  signal chapterRead(int mangaId, int chapter)
+  signal chapterRead(int chapterId, int chapter)
   function imageLoaded() {
     if (lastReadPage && !positioned) {
       listView.currentIndex = lastReadPage
@@ -50,13 +50,13 @@ Item {
       model.updateChapter(indexIs)
     }
     onAtYEndChanged: {
-      if (!listviewLoaded) {
+      if (!model.pageCount) {
         return
       }
       if (listView.atYEnd) {
         const chapterIndex = model.getLastChapter()
-        chapterRead(model.mangaNumber, chapterIndex)
-        model.requestChapter(chapterIndex + 1)
+        chapterRead(model.chapterId, chapterIndex)
+        model.requestChapter(model.chapterId + 1)
       }
     }
 

@@ -369,8 +369,10 @@ void UpdatesModel::downloadChapter(int index) {
 
   emit dataChanged(createIndex(index, 0), createIndex(index, 0),
                    {RoleDownloadPrepairing});
+  qDebug() << "Downloading chapter" << entry.manga.id
+           << "chapter" << entry.sourceOrder;
   NetworkManager::instance().get(QStringLiteral("download/%1/chapter/%2")
-                                     .arg(entry.id)
+                                     .arg(entry.manga.id)
                                      .arg(entry.sourceOrder));
 }
 
@@ -379,17 +381,40 @@ void UpdatesModel::downloadChapter(int index) {
  * Method: chapterRead()
  *
  *****************************************************************************/
-void UpdatesModel::chapterRead(qint32 mangaId, int chapter) {
-  int i = 0;
-  for (auto &info : _entries.chapters.nodes) {
-    if (info.id == mangaId && info.sourceOrder == chapter) {
-      info.isRead = true;
-      NetworkManager::instance().patch(
-          "read", "true",
-          QStringLiteral("manga/%1/chapter/%2").arg(mangaId).arg(chapter));
-      emit dataChanged(createIndex(i, 0), createIndex(i, 0), {RoleRead});
-      break;
-    }
-    ++i;
-  }
+void UpdatesModel::chapterRead(qint32 Id, int chapter) {
+  QJsonObject variablesObj;
+  variablesObj.insert("chapterIdsToDelete", QJsonArray());
+  variablesObj.insert("deleteChapters", false);
+  variablesObj.insert("getBookmarked", false);
+  variablesObj.insert("getLastPageRead", true);
+  variablesObj.insert("getRead", true);
+  QJsonObject input;
+  QJsonArray idsArray;
+  idsArray.append(Id);
+  input.insert("ids", idsArray);
+  QJsonObject patchObj;
+  patchObj.insert("isRead", true);
+  patchObj.insert("lastPageRead", 0);
+  input.insert("patch", patchObj);
+  variablesObj.insert("input", input);
+  variablesObj.insert("mangaId", -1);
+  variablesObj.insert("trackProgress", false);
+
+  NetworkManager::instance().postGraphQL(graphql::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
+      auto it = std::find_if(_entries.chapters.nodes.begin(),
+                             _entries.chapters.nodes.end(),
+                             [&Id, &chapter](const auto &entry) {
+                               return entry.id == Id &&
+                                      entry.sourceOrder == chapter;
+                             });
+      if (it != _entries.chapters.nodes.end()) {
+        it->isRead = true;
+      }
+
+      size_t index = std::distance(_entries.chapters.nodes.begin(), it);
+      emit dataChanged(createIndex(index, 0), createIndex(index, 0), {RoleRead});
+  });
+
 }
