@@ -49,14 +49,25 @@ Item {
       const indexIs = indexAt(contentX,contentY + base.height - 10)
       model.updateChapter(indexIs)
     }
+    onAtYBeginningChanged: {
+      if (!model.pageCount || model.requestingChapter) {
+        return
+      }
+      console.log("at the start")
+      if (contentY <= 0) {
+        console.log("at the start, requesting previous chapter")
+        model.requestNext(false)
+      }
+    }
+
     onAtYEndChanged: {
-      if (!model.pageCount) {
+      if (!model.pageCount || model.requestingChapter) {
         return
       }
       if (listView.atYEnd) {
         const chapterIndex = model.getLastChapter()
         chapterRead(model.chapterId, chapterIndex)
-        model.requestChapter(model.chapterId + 1)
+        model.requestNext(true)
       }
     }
 
@@ -88,7 +99,7 @@ Item {
         model.updateChapter(indexIs)
         if (listView.atYend) {
           const chapterIndex = model.getLastChapter()
-          model.requestChapter(chapterIndex + 1)
+          model.requestNext(true)
         }
 
         mouse.accepted = false

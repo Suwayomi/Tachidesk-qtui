@@ -12,11 +12,21 @@ ApplicationWindow {
   width: 400
   visible: true
 
+  onVisibilityChanged: {
+    if (visibility === Window.FullScreen) {
+        Qt.callLater(() => {
+            width = Screen.width
+            height = Screen.height
+        });
+    }
+  }
+
   /*
    * @param {number} changeTo - change from full screen to windowed and visa versa
   */
   function changeVisiblity(changeTo : int) {
     if (changeTo === Window.FullScreen) {
+      androidUiHelper.enableImmersive()
       root.showFullScreen()
     }
     else {

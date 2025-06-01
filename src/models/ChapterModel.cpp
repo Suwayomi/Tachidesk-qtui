@@ -35,6 +35,31 @@ void ChapterModel::classBegin()
 void ChapterModel::componentComplete()
 {
   requestChapter(_chapterId);
+
+  QJsonObject chaptersVariablesObj;
+  QJsonObject conditionObj;
+  conditionObj.insert("mangaId", _mangaNumber);
+  chaptersVariablesObj.insert("condition", conditionObj);
+  QJsonArray orderArray;
+  {
+    QJsonObject order1;
+    order1.insert("by", "SOURCE_ORDER");
+    order1.insert("byType", "ASC");
+    orderArray.append(order1);
+  }
+  chaptersVariablesObj.insert("order", orderArray);
+
+  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_ID::GetOperationName(), std::move(chaptersVariablesObj),
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::query::GET_CHAPTERS_ID::parseResponse(std::move(data));
+      _chapters = std::move(parsed);
+
+      auto it = std::find_if(_chapters.chapters.nodes.begin(),
+        _chapters.chapters.nodes.end(),
+        [this](const auto& entry) {
+          return entry.id == _chapterId;
+        });
+    });
 }
 
 /******************************************************************************
@@ -200,11 +225,11 @@ void ChapterModel::updateChapter(qint32 page)
     return;
   }
   _chapterName = QString::fromStdString(entry->fetchChapterPages->chapter.name);
-  chapterNumberChanged();
   _pageCount = entry->fetchChapterPages->chapter.pageCount;
   _pageIndex = page - chapterNumber + 1;
   pageCountChanged();
   pageIndexChanged();
+  chapterNumberChanged();
 
   // NetworkManager::instance().patch("lastPageRead", page - chapterNumber,
   //     QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(entry->index));
@@ -212,10 +237,46 @@ void ChapterModel::updateChapter(qint32 page)
 
 /******************************************************************************
  *
+ * Method: requestNext()
+ *
+ *****************************************************************************/
+void ChapterModel::requestNext(bool forward)
+{
+  if (_chaptersFetch.empty()) {
+    return;
+  }
+
+  auto chapterId = !forward
+      ? _chaptersFetch.begin()->fetchChapterPages->chapter.id
+      : _chaptersFetch.back().fetchChapterPages->chapter.id;
+  auto it = std::find_if(
+      _chapters.chapters.nodes.begin(), _chapters.chapters.nodes.end(),
+      [chapterId=chapterId](const auto &entry) {
+        return entry.id == chapterId;
+      });
+
+  if (it == _chapters.chapters.nodes.end()) {
+    qDebug() << "Chapter not found in chapters list";
+    return;
+  }
+
+  auto index = std::distance(_chapters.chapters.nodes.begin(), it);
+  if ((index >= _chapters.chapters.nodes.size() - 1 && forward) ||
+      (index == 0 && !forward)) {
+    qDebug() << "No more chapters to fetch" << index;
+    return;
+  }
+  qint32 nextChapter =
+      _chapters.chapters.nodes[forward ? index + 1 : index - 1].id;
+  requestChapter(nextChapter, forward);
+}
+
+/******************************************************************************
+ *
  * Method: lastPageRead()
  *
  *****************************************************************************/
-void ChapterModel::requestChapter(qint32 chapter)
+void ChapterModel::requestChapter(qint32 chapter, bool forward)
 {
   if (_requestingChapter) {
     return;
@@ -238,11 +299,13 @@ void ChapterModel::requestChapter(qint32 chapter)
   emit requestingChapterChanged();
 
   NetworkManager::instance().postGraphQL(graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
-    [&](graphql::response::Value&& data) {
+    [&, forward=forward](graphql::response::Value&& data) {
     qint32 pageStart = 0;
     qint32 pageEnd = 0;
-    for (auto& chapter : _chaptersFetch) {
-      pageStart += chapter.fetchChapterPages->chapter.pageCount;
+    if (forward) {
+      for (auto& chapter : _chaptersFetch) {
+        pageStart += chapter.fetchChapterPages->chapter.pageCount;
+      }
     }
     auto parsed = graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
     _pageCount = parsed.fetchChapterPages->chapter.pageCount;
@@ -258,7 +321,10 @@ void ChapterModel::requestChapter(qint32 chapter)
 
     beginInsertRows({}, pageStart, pageEnd);
 
-    _chaptersFetch.emplace_back(parsed);
+    auto it = std::lower_bound(_chaptersFetch.begin(), _chaptersFetch.end(), parsed, [](const auto& a, const auto& b) {
+      return a.fetchChapterPages->chapter.sourceOrder < b.fetchChapterPages->chapter.sourceOrder;
+    });
+    _chaptersFetch.emplace(it, parsed);
 
     endInsertRows();
 

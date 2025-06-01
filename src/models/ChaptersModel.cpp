@@ -55,46 +55,29 @@ void ChaptersModel::requestChapters(bool onlineFetch)
   _loading = true;
   emit loadingChanged();
 
-  NetworkManager::instance().get(QUrl(u"manga"_qs % '/' % QString::number(_mangaNumber) % u"/chapters/?onlineFetch=" % (onlineFetch ? "true" : "false") ), this,
-    [&](const auto& doc)
+  QJsonObject variablesObj;
+  QJsonObject conditionObj;
+  conditionObj.insert("mangaId", _mangaNumber);
+  variablesObj.insert("condition", conditionObj);
+  QJsonArray orderArray;
   {
-    if (doc.isEmpty()) {
-      return;
-    }
+    QJsonObject order1;
+    order1.insert("by", "SOURCE_ORDER");
+    order1.insert("byType", "DESC");
+    orderArray.append(order1);
+  }
+  variablesObj.insert("order", orderArray);
 
-    bool reset = static_cast<quint32>(doc.array().size()) != _chapters.size();
-    if (reset) {
+  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_MANGA::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::query::GET_CHAPTERS_MANGA::parseResponse(std::move(data));
       beginResetModel();
-    }
-
-    _chapters.clear();
-
-    for (const auto& entry_arr : doc.array()) {
-      const auto& entry = entry_arr.toObject();
-      auto& info        = _chapters.emplace_back();
-      info.processChapter(entry);
-      if (!info.read) {
-        _lastReadChapter = info.index;
-      }
-    }
-    emit lastReadChapterChanged();
-
-    if (reset) {
+      _chapters = std::move(parsed);
       endResetModel();
-    }
-    else {
-      emit dataChanged(createIndex(0, 0), createIndex(_chapters.size(), 0));
-    }
 
-    if (!_cachedChapters && _autoUpdate) {
-      _cachedChapters = true;
-      requestChapters(true);
-    }
-    else {
       _loading = false;
       emit loadingChanged();
-    }
-  });
+    });
 }
 
 /******************************************************************************
@@ -123,7 +106,7 @@ int ChaptersModel::rowCount(const QModelIndex &parent) const {
     return 0;
   }
 
-  return _chapters.size();
+  return _chapters.chapters.nodes.size();
 }
 
 /******************************************************************************
@@ -139,17 +122,17 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
     return {};
   }
 
-  const auto& entry = _chapters[index.row()];
+  const auto& entry = _chapters.chapters.nodes[index.row()];
 
   switch (role)
   {
     case RoleUrl:
       {
-        return entry.url;
+        return QString::fromStdString(entry.realUrl.value_or(""));
       }
     case RoleName:
       {
-        return entry.name;
+        return QString::fromStdString(entry.name);
       }
     case RoleChapterNumber:
       {
@@ -157,34 +140,23 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
       }
     case RoleRead:
       {
-        return entry.read;
+        return entry.isRead;
       }
     case RoleChapterIndex:
       {
-        return entry.index;
+        return entry.sourceOrder;
       }
-    case RolePageCount:
-      {
-        return entry.pageCount;
-      }
-    case RoleChapterCount:
-      {
-        return entry.chapterCount;
-      }
-
-    case RoleLastPageRead:
-      {
-        return entry.lastPageRead;
-      }
-
     case RoleDownloaded:
       {
-        return entry.downloaded;
+        return entry.isDownloaded;
       }
-
     case RoleDownloadProgress:
       {
-        return entry.downloadProgress.value_or(-1);
+        //return entry.downloadProgress.value_or(-1);
+      }
+    case RoleChapterId:
+      {
+        return entry.id;
       }
     //case Role
     default:
@@ -200,16 +172,19 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
  *
  *****************************************************************************/
 QHash<int, QByteArray> ChaptersModel::roleNames() const {
-  static QHash<int, QByteArray> roles = { {RoleUrl,           "url"},
-                                          {RoleName,          "name"},
-                                          {RoleChapterNumber, "chapterNumber"},
-                                          {RoleRead,          "read"},
-                                          {RoleChapterIndex,  "chapterIndex"},
-                                          {RolePageCount,     "pageCount"},
-                                          {RoleDownloaded,    "downloaded"},
-                                          {RoleDownloadProgress, "progress"},
-                                          {RoleLastPageRead,  "lastPageRead"},
-                                          {RoleChapterCount,  "chapterCount"},};
+  static QHash<int, QByteArray> roles = {
+      {RoleUrl, "url"},
+      {RoleName, "name"},
+      {RoleChapterNumber, "chapterNumber"},
+      {RoleRead, "read"},
+      {RoleChapterIndex, "chapterIndex"},
+      {RoleChapterId, "chapterId"},
+      {RolePageCount, "pageCount"},
+      {RoleDownloaded, "downloaded"},
+      {RoleDownloadProgress, "progress"},
+      {RoleLastPageRead, "lastPageRead"},
+      {RoleChapterCount, "chapterCount"},
+  };
 
   return roles;
 }
@@ -219,50 +194,65 @@ QHash<int, QByteArray> ChaptersModel::roleNames() const {
  * Method: chapterRead()
  *
  *****************************************************************************/
-void ChaptersModel::chapterRead(quint64 chapter, bool read)
+void ChaptersModel::chapterRead(qint32 chapterId, bool read)
 {
-  auto c = std::lower_bound(_chapters.rbegin(), _chapters.rend(), chapter,
-      [](const auto& c, quint64 value) {
-        return c.index < value;
-      });
-  if (c == _chapters.rend()) {
-    return;
-  }
+  QJsonObject variablesObj;
+  variablesObj.insert("chapterIdsToDelete", QJsonArray());
+  variablesObj.insert("deleteChapters", false);
+  variablesObj.insert("getBookmarked", false);
+  variablesObj.insert("getLastPageRead", true);
+  variablesObj.insert("getRead", true);
+  QJsonObject input;
+  QJsonArray idsArray;
+  idsArray.append(chapterId);
+  input.insert("ids", idsArray);
+  QJsonObject patchObj;
+  patchObj.insert("isRead", read);
+  patchObj.insert("lastPageRead", 0);
+  input.insert("patch", patchObj);
+  variablesObj.insert("input", input);
+  variablesObj.insert("mangaId", -1);
+  variablesObj.insert("trackProgress", false);
 
-  c->read = read;
-  assert(chapter == c->index);
+  NetworkManager::instance().postGraphQL(graphql::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
+      auto it = std::find_if(_chapters.chapters.nodes.begin(),
+                             _chapters.chapters.nodes.end(),
+                             [&chapterId](const auto &entry) {
+                               return entry.id == chapterId;
+                             });
+      if (it != _chapters.chapters.nodes.end()) {
+        it->isRead = true;
+      }
 
-  NetworkManager::instance().patch("read", read ? "true" : "false",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(c->index));
-
-  auto index = (_chapters.rend() - c - 1);
-  emit dataChanged(createIndex(index, 0), createIndex(index, 0), { RoleRead });
-
-  emit lastReadChapterChanged();
+      size_t index = std::distance(_chapters.chapters.nodes.begin(), it);
+      emit dataChanged(createIndex(index, 0), createIndex(index, 0), {RoleRead});
+  });
 }
 
 /******************************************************************************
  *
- * Method: chapterRead()
+ * Method: previousChaptersRead()
  *
  *****************************************************************************/
 void ChaptersModel::previousChaptersRead(quint32 chapter, bool read)
 {
-  NetworkManager::instance().patch("markPrevRead", read ? "true" : "false",
-      QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+  // NetworkManager::instance().patch("markPrevRead", read ? "true" : "false",
+  //     QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
 
-  qint32 start = 0, end = 0;
-  for (auto& c : _chapters) {
-    if (c.index < chapter) {
-      c.read = read;
-      if (!start) {
-        start = end;
-      }
-    }
-    end++;
-  }
+  // qint32 start = 0, end = 0;
+  // for (auto& c : _chapters.chapters.nodes) {
+  //   if (c.index < chapter) {
+  //     c.read = read;
+  //     if (!start) {
+  //       start = end;
+  //     }
+  //   }
+  //   end++;
+  // }
 
-  emit dataChanged(createIndex(start, 0), createIndex(end, 0), { RoleRead });
+  // emit dataChanged(createIndex(start, 0), createIndex(end, 0), { RoleRead });
 }
 
 /******************************************************************************
@@ -280,11 +270,11 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
 
   auto downloadEndpoint = QStringLiteral("download/%1/chapter/%2");
   auto getChapter = [&](const auto& check) {
-    for (const auto& chapter : _chapters) {
-      if (check(chapter) || chapter.downloaded) {
+    for (const auto& chapter : _chapters.chapters.nodes) {
+      if (check(chapter) || chapter.isDownloaded) {
         continue;
       }
-      NetworkManager::instance().get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
+      // NetworkManager::instance().get(downloadEndpoint.arg(_mangaNumber).arg(chapter.index));
     }
   };
 
@@ -296,7 +286,7 @@ void ChaptersModel::downloadChapter(qint32 downloadOption, qint32 chapterIndex)
       }
     case DownloadUnread:
       {
-        getChapter([&](const auto& chapter){ return chapter.read; });
+        getChapter([&](const auto& chapter){ return chapter.isRead; });
         break;
       }
     case DownloadCustom:
@@ -316,12 +306,12 @@ void ChaptersModel::onDownloadsUpdated(const std::vector<QueueInfo>& queueInfo)
 {
   for (auto& info : queueInfo) {
     int row = 0;
-    for (auto& chapter : _chapters) {
+    for (auto& chapter : _chapters.chapters.nodes) {
       if (info.mangaId == _mangaNumber &&
           info.chapterInfo.chapterNumber == chapter.chapterNumber)
       {
-        chapter.downloadProgress = info.progress;
-        chapter.downloaded = info.progress >= 100;
+        //chapter.downloadProgress = info.progress;
+        //chapter.downloaded = info.progress >= 100;
         emit dataChanged(createIndex(row, 0), createIndex(row, 0), { RoleDownloadProgress, RoleDownloaded });
         break;
       }

@@ -395,3 +395,45 @@ mutation UPDATE_CHAPTERS($input: UpdateChaptersInput!, $getBookmarked: Boolean!,
     __typename
   }
 }
+
+query GET_CHAPTERS_MANGA($after: Cursor, $before: Cursor, $condition: ChapterConditionInput, $filter: ChapterFilterInput, $first: Int, $last: Int, $offset: Int, $order: [ChapterOrderInput!]) {
+  chapters(
+    after: $after
+    before: $before
+    condition: $condition
+    filter: $filter
+    first: $first
+    last: $last
+    offset: $offset
+    order: $order
+  ) {
+    nodes {
+      ...CHAPTER_LIST_FIELDS
+      __typename
+    }
+    pageInfo {
+      ...PAGE_INFO
+      __typename
+    }
+    totalCount
+    __typename
+  }
+}
+
+query GET_CHAPTERS_ID($after: Cursor, $before: Cursor, $condition: ChapterConditionInput, $filter: ChapterFilterInput, $first: Int, $last: Int, $offset: Int, $order: [ChapterOrderInput!]) {
+  chapters(
+    after: $after
+    before: $before
+    condition: $condition
+    filter: $filter
+    first: $first
+    last: $last
+    offset: $offset
+    order: $order
+  ) {
+    nodes {
+      id
+      __typename
+    }
+  }
+}

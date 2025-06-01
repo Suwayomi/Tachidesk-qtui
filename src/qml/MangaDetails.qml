@@ -27,8 +27,8 @@ Item {
     autoUpdate: settings.autoUpdate
   }
 
-  function markRead(mangaId, chapter) {
-    chaptersModel.chapterRead(chapter, true)
+  function markRead(chapterId, chapter) {
+    chaptersModel.chapterRead(chapterId, true)
   }
 
   Popup {
@@ -334,7 +334,7 @@ Item {
         }
       }
       swipe.onOpened: {
-        chaptersModel.chapterRead(chapterIndex, !read)
+        chaptersModel.chapterRead(chapterId, !read)
         swipe.close()
       }
       contentItem: Rectangle {

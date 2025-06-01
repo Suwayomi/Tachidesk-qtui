@@ -72,8 +72,6 @@ public:
   void patch(QHttpMultiPart *patchData, const QString &endpoint) {
     QNetworkRequest request;
     request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
-    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
-                         QNetworkRequest::PreferCache);
 
     auto reply = _man->sendCustomRequest(request, "PATCH", patchData);
     patchData->setParent(reply);
@@ -105,8 +103,6 @@ private:
   template <typename F> void getEndpoint(const QString &endpoint, F f) {
     QNetworkRequest request;
     request.setUrl(_host.resolved(_host.path() + QString("api/v1/")).resolved(endpoint));
-    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
-                         QNetworkRequest::PreferCache);
 
     QNetworkReply *reply = _man->get(request);
 

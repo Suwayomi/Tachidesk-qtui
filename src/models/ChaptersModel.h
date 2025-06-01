@@ -5,6 +5,7 @@
 #include <QQmlParserStatus>
 
 #include "common_structs.h"
+#include "graphql/tachideskClient.h"
 
 class DownloadsModel;
 
@@ -20,7 +21,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   std::shared_ptr<DownloadsModel> _downloads;
   bool _cachedChapters = false;
-  bool _loading = true;
+  bool _loading = false;
   bool _autoUpdate = false;
 
   qint32 _mangaNumber;
@@ -35,7 +36,8 @@ protected:
   virtual QHash<int, QByteArray> roleNames() const override;
 
 private:
-  std::vector<ChapterInfo> _chapters;
+  // std::vector<ChapterInfo> _chapters;
+  graphql::client::query::GET_CHAPTERS_MANGA::Response _chapters;
 
 public:
   enum DownloadOption {
@@ -56,6 +58,7 @@ public:
     RoleLastPageRead,
     RoleDownloaded,
     RoleDownloadProgress,
+    RoleChapterId,
   };
 
   ChaptersModel(QObject* parent = nullptr);
@@ -68,7 +71,7 @@ public:
      const QModelIndex &index,
      int role = Qt::DisplayRole) const override;
 
-  Q_INVOKABLE void chapterRead(quint64 chapter, bool read);
+  Q_INVOKABLE void chapterRead(qint32 chapter, bool read);
   Q_INVOKABLE void previousChaptersRead(quint32 chapter, bool read);
   Q_INVOKABLE void downloadChapter(qint32 downloadOption, qint32 chapterindex = 0);
   Q_INVOKABLE void requestChapters(bool onlineFetch);

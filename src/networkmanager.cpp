@@ -137,8 +137,6 @@ void NetworkManager::postGraphQL(
   QNetworkRequest request;
   request.setRawHeader("Content-Type", "application/json");
   request.setUrl(_host.resolved(QString("api/graphql/")));
-  request.setAttribute(
-    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QJsonObject requestObject;
   requestObject.insert("query", QString::fromStdString(graphql::client::qtui::GetRequestText()));
@@ -195,7 +193,8 @@ void NetworkManager::postGraphQL(
       callback(std::move(data));
     }
     catch (const std::exception& ex) {
-        qWarning() << "Failed to parse GraphQL response:" << ex.what();
+      qDebug() << responseData;
+      qWarning() << "Failed to parse GraphQL response:" << ex.what();
     }
   });
 
@@ -261,8 +260,6 @@ void NetworkManager::post(const QString &endpoint, const QUrlQuery &query)
 {
   QNetworkRequest request;
   request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
-  request.setAttribute(
-    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QByteArray dataParam;
 
@@ -302,8 +299,6 @@ void NetworkManager::get(
 {
   QNetworkRequest request;
   request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
-  request.setAttribute(
-    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QNetworkReply *reply = _man->get(request);
 
@@ -333,8 +328,6 @@ void NetworkManager::deleteResource(const QString &endpoint)
 {
   QNetworkRequest request;
   request.setUrl(_host.resolved(QString("api/v1/")).resolved(endpoint));
-  request.setAttribute(
-    QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
   QNetworkReply *reply = _man->deleteResource(request);
 
