@@ -238,21 +238,44 @@ void ChaptersModel::chapterRead(qint32 chapterId, bool read)
  *****************************************************************************/
 void ChaptersModel::previousChaptersRead(quint32 chapter, bool read)
 {
-  // NetworkManager::instance().patch("markPrevRead", read ? "true" : "false",
-  //     QStringLiteral("manga/%1/chapter/%2").arg(_mangaNumber).arg(chapter));
+  QJsonObject variablesObj;
+  variablesObj.insert("chapterIdsToDelete", QJsonArray());
+  variablesObj.insert("deleteChapters", false);
+  variablesObj.insert("getBookmarked", false);
+  variablesObj.insert("getLastPageRead", true);
+  variablesObj.insert("getRead", true);
+  QJsonObject input;
+  QJsonArray idsArray;
+  for (const auto& c : _chapters.chapters.nodes) {
+    if (c.sourceOrder < chapter) {
+      idsArray.append(c.id);
+    }
+  }
+  input.insert("ids", idsArray);
+  QJsonObject patchObj;
+  patchObj.insert("isRead", read);
+  patchObj.insert("lastPageRead", 0);
+  input.insert("patch", patchObj);
+  variablesObj.insert("input", input);
+  variablesObj.insert("mangaId", -1);
+  variablesObj.insert("trackProgress", false);
 
-  // qint32 start = 0, end = 0;
-  // for (auto& c : _chapters.chapters.nodes) {
-  //   if (c.index < chapter) {
-  //     c.read = read;
-  //     if (!start) {
-  //       start = end;
-  //     }
-  //   }
-  //   end++;
-  // }
+  NetworkManager::instance().postGraphQL(graphql::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+    [&](graphql::response::Value&& data) {
+      auto parsed = graphql::client::mutation::UPDATE_CHAPTERS::parseResponse(std::move(data));
 
-  // emit dataChanged(createIndex(start, 0), createIndex(end, 0), { RoleRead });
+      for (const auto& chapter : parsed.updateChapters->chapters) {
+        auto it = std::find_if(_chapters.chapters.nodes.begin(), _chapters.chapters.nodes.end(),
+          [&chapter](const auto &entry) {
+            return entry.id == chapter.id;
+            });
+        if (it != _chapters.chapters.nodes.end()) {
+          it->isRead = chapter.isRead;
+        }
+      }
+
+      emit dataChanged(createIndex(0, 0), createIndex(_chapters.chapters.nodes.size() - 1, 0), {RoleRead});
+  });
 }
 
 /******************************************************************************
