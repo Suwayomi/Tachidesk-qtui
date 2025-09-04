@@ -10,8 +10,12 @@ Item {
   }
 
   function back() {
+      console.log("going back")
     stack.item.depth() <= 1 ? stack.item.canClose = true : stack.item.canClose = false
-    stack.item.pop()
+    if (stack.item.depth() > 1) {
+      console.log("popping item")
+      stack.item.pop()
+    }
     stack.item.depth() > 1 ? stack.item.navigationVisible = false : stack.item.navigationVisible = true
   }
 

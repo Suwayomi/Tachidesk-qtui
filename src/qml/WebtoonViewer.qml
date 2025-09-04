@@ -18,11 +18,15 @@ Item {
   ListView {
     id: listView
     anchors.fill: parent
-    cacheBuffer: 10000
     maximumFlickVelocity: 10000
     //contentWidth:  pinchArea.width
     synchronousDrag: true
+    // Only keep ~4 screens worth of delegates alive
+    cacheBuffer: height * 4
+    // Reuse delegate items aggressively
+    // reuseItems: true
     delegate: WebtoonImage {
+      imageIndex: index
       onImageLoaded: base.imageLoaded()
     }
     // debug rectangle

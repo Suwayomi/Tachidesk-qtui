@@ -138,7 +138,7 @@ Item {
 
       Image {
         id: image
-        source: networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
+        source: "image://network/" + networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
         fillMode: Image.PreserveAspectFit
         sourceSize.width: parent.width * .33
       }

@@ -56,7 +56,7 @@ Rectangle {
           margins: 4
         }
         fillMode: Image.PreserveAspectCrop
-        source: thumbnailUrl
+        source: "image://network/" + thumbnailUrl
 
         visible: false
       }

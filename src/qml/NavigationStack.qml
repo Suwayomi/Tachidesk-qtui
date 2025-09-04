@@ -131,6 +131,7 @@ Item {
   BackGestureDetector {
     allowedToWork: stack.depth > 1
     onBackGestureDetected: {
+      console.log("Back gesture detected")
       stack.pop()
       stack.depth > 1 ? navigationVisible = false : navigationVisible = true
     }

@@ -36,7 +36,7 @@ Item {
           width: parent.height * .75
           height: parent.height
           Image {
-            source: thumbnailUrl
+            source: "image://network/" + thumbnailUrl
             fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
             anchors.margins: 2

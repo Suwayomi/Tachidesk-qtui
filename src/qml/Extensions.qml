@@ -90,7 +90,7 @@ Rectangle {
     delegate: RowLayout {
       width: layout.width
       Image {
-        source: iconUrl
+        source: "image://network/" + iconUrl
       }
       Text {
         Layout.alignment: Qt.AlignLeft

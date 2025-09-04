@@ -1,4 +1,3 @@
-
 #include "UpdatesModel.h"
 #include "DownloadsModel.h"
 
@@ -8,6 +7,10 @@
 #include <QQmlEngine>
 #include <qcoreapplication.h>
 #include <qurlquery.h>
+
+#include <graphqlservice/GraphQLResponse.h>
+#include <graphqlservice/GraphQLParse.h>
+#include <graphqlservice/JSONResponse.h>
 
 #include "../networkmanager.h"
 
@@ -23,7 +26,9 @@ UpdatesModel::UpdatesModel(QObject *parent) : QAbstractListModel(parent) {}
  * closed
  *
  *****************************************************************************/
-void UpdatesModel::closed() {}
+void UpdatesModel::closed() {
+  _updateStatusTimer.stop();
+}
 
 /******************************************************************************
  *
@@ -31,8 +36,15 @@ void UpdatesModel::closed() {}
  *
  *****************************************************************************/
 void UpdatesModel::onConnected() {
+  QJsonObject initMsg;
+  initMsg["type"] = "connection_init";
+  _webSocket.sendTextMessage(QJsonDocument(initMsg).toJson(QJsonDocument::Compact));
+
   connect(&_webSocket, &QWebSocket::textMessageReceived, this,
           &UpdatesModel::onTextMessageReceived);
+
+  // Start polling for updates
+  _updateStatusTimer.start();
 }
 
 /******************************************************************************
@@ -42,23 +54,90 @@ void UpdatesModel::onConnected() {
  *****************************************************************************/
 void UpdatesModel::onTextMessageReceived(const QString &message) {
   QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
+  QJsonObject obj = doc.object();
 
-  //{"statusMap":{"COMPLETE" : 26,"FAILED" : 69,"RUNNING" : 1,"PENDING" : 123},
-  //"running":true}
-  _running = doc["running"].toBool();
+  // Handle GraphQL subscription messages
+  QString type = obj["type"].toString();
 
-  auto statusMap = doc["statusMap"].toObject();
-  _complete = statusMap["COMPLETE"].toArray().count();
-  _complete += statusMap["FAILED"].toArray().count();
+  if (type == "connection_ack") {
+    qDebug() << "WebSocket connection acknowledged";
+    // Request initial status and set up periodic updates
+    requestUpdateStatus();
+    return;
+  }
 
-  _total = statusMap["FAILED"].toArray().count();
-  _total += statusMap["COMPLETE"].toArray().count();
-  _total += statusMap["RUNNING"].toArray().count();
-  _total += statusMap["PENDING"].toArray().count();
+  if (type == "next") {
+    QJsonObject payload = obj["payload"].toObject();
+    QJsonObject data = payload["data"].toObject();
 
-  emit totalChanged();
-  emit completeChanged();
-  emit runningChanged();
+    // Handle update status data from subscription
+    if (data.contains("libraryUpdateStatus")) {
+      handleLibraryUpdateStatus(data["libraryUpdateStatus"].toObject());
+    }
+    return;
+  }
+
+  // Handle direct GraphQL query response (when polling for status)
+  if (obj.contains("data")) {
+    QJsonObject data = obj["data"].toObject();
+    if (data.contains("libraryUpdateStatus")) {
+      handleLibraryUpdateStatus(data["libraryUpdateStatus"].toObject());
+    }
+  }
+}
+
+void UpdatesModel::handleLibraryUpdateStatus(const QJsonObject &statusObj) {
+  try {
+    // Convert JSON back to GraphQL Value for parsing
+    QJsonDocument tempDoc(statusObj);
+    std::string jsonString = tempDoc.toJson(QJsonDocument::Compact).toStdString();
+    graphql::response::Value statusValue = graphql::response::parseJSON(jsonString);
+
+    // Parse using the proper GET_UPDATE_STATUS response structure
+    auto status = graphql::client::Response<graphql::client::query::GET_UPDATE_STATUS::Response::libraryUpdateStatus_LibraryUpdateStatus>::parse(std::move(statusValue));
+
+    // Extract progress information from jobs info
+    _running = status.jobsInfo.isRunning;
+    _complete = status.jobsInfo.finishedJobs;
+    _total = status.jobsInfo.totalJobs;
+
+    emit totalChanged();
+    emit completeChanged();
+    emit runningChanged();
+
+  } catch (const std::exception& ex) {
+    qWarning() << "Failed to parse library update status:" << ex.what();
+    // Fallback to basic JSON parsing
+    if (statusObj.contains("jobsInfo")) {
+      QJsonObject jobsInfo = statusObj["jobsInfo"].toObject();
+      _running = jobsInfo["isRunning"].toBool();
+      _complete = jobsInfo["finishedJobs"].toInt();
+      _total = jobsInfo["totalJobs"].toInt();
+    }
+
+    emit totalChanged();
+    emit completeChanged();
+    emit runningChanged();
+  }
+}
+
+void UpdatesModel::requestUpdateStatus() {
+  // Query the current update status
+  NetworkManager::instance().postGraphQL(
+    graphql::client::query::GET_UPDATE_STATUS::GetOperationName(),
+    QJsonObject{},
+    [this](graphql::response::Value&& data) {
+      auto parsed = graphql::client::query::GET_UPDATE_STATUS::parseResponse(std::move(data));
+
+      _running = parsed.libraryUpdateStatus.jobsInfo.isRunning;
+      _complete = parsed.libraryUpdateStatus.jobsInfo.finishedJobs;
+      _total = parsed.libraryUpdateStatus.jobsInfo.totalJobs;
+
+      emit totalChanged();
+      emit completeChanged();
+      emit runningChanged();
+    }
+  );
 }
 
 void UpdatesModel::classBegin() {}
@@ -79,7 +158,7 @@ void UpdatesModel::componentComplete() {
           });
 
   auto resolved = NetworkManager::instance().resolvedPath().resolved(
-      QString("api/v1/update"));
+      QString("api/graphql"));
   bool ssl = !resolved.scheme().compare("https", Qt::CaseInsensitive);
   resolved.setScheme(ssl ? "wss" : "ws");
 
@@ -96,6 +175,10 @@ void UpdatesModel::componentComplete() {
           .toUtf8());
 
   _webSocket.open(request);
+
+  // Set up polling timer as fallback
+  _updateStatusTimer.setInterval(2000); // Poll every 2 seconds
+  connect(&_updateStatusTimer, &QTimer::timeout, this, &UpdatesModel::requestUpdateStatus);
 
   next();
 }
@@ -292,9 +375,12 @@ void UpdatesModel::next() {
 
   _isRequesting = true;
 
+  // Store the current page number for this request to handle out-of-order responses
+  const int currentPageNumber = _pageNumber++;
+
   QJsonObject variablesObj;
   variablesObj.insert("first", 50);
-  variablesObj.insert("offset", 50 * _pageNumber++);
+  variablesObj.insert("offset", 50 * currentPageNumber);
 
   QJsonObject filterObj;
   QJsonObject inLibraryObj;
@@ -317,7 +403,7 @@ void UpdatesModel::next() {
   variablesObj.insert("order", orderArray);
 
   NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_UPDATES::GetOperationName(), std::move(variablesObj),
-    [&](graphql::response::Value&& data) {
+    [this, currentPageNumber](graphql::response::Value&& data) {
       if (!downloads) {
         downloads = std::make_shared<DownloadsModel>();
         downloads->setupWebsocket();
@@ -334,10 +420,22 @@ void UpdatesModel::next() {
         endResetModel();
       }
       else {
-        beginInsertRows({}, _entries.chapters.nodes.size(),
-                        _entries.chapters.nodes.size() + parsed.chapters.nodes.size() - 1);
-        std::copy(parsed.chapters.nodes.begin(), parsed.chapters.nodes.end(), std::back_inserter(_entries.chapters.nodes));
-        endInsertRows();
+        // Calculate the correct insertion position based on page number
+        const int insertPosition = currentPageNumber * 50;
+
+        // Only insert if we haven't already processed this page and position is valid
+        if (insertPosition <= static_cast<int>(_entries.chapters.nodes.size())) {
+          beginInsertRows({}, insertPosition, insertPosition + parsed.chapters.nodes.size() - 1);
+
+          // Insert at the correct position using move semantics
+          auto insertIterator = _entries.chapters.nodes.begin() + insertPosition;
+          for (auto&& node : parsed.chapters.nodes) {
+            insertIterator = _entries.chapters.nodes.insert(insertIterator, std::move(node));
+            ++insertIterator;
+          }
+
+          endInsertRows();
+        }
       }
     });
 }

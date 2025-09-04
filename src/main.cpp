@@ -1,15 +1,13 @@
 //do whatever with this code,
 //but qt has some licenses.
 
-#include <QApplication>
 #include <QCommandLineParser>
 #include <QUrl>
-#include <QFontDatabase>
 
 #include "App.h"
-#include "commandline.h"
 
 #include <csignal>
+#include <qloggingcategory.h>
 
 int main(int argc, char *argv[])
 {
@@ -22,18 +20,15 @@ int main(int argc, char *argv[])
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
 
-#ifndef Q_OS_ANDROID
-  QApplication app(argc, argv);
-#else
-  QGuiApplication app(argc, argv);
-#endif
+  QLoggingCategory::setFilterRules(
+    "qt.network.ssl=true\n"      // if you don’t care about SSL noise
+    "qt.network.http2=false\n"     // or false, to see HTTP/2 negotiation
+    "qt.network.auth=true\n"
+    "qt.network.accessmanager=true\n"
+    "qt.diskcache=true"
+);
 
-  if (QFontDatabase::addApplicationFont(":/Tachidesk/Qtui/libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf") < 0) {
-    assert(false);
-  }
-
-  CommandLine commandline(&app);
-  App _app(commandline);
+  App app(argc, argv);
 
   // Start
   return app.exec();

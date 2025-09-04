@@ -71,12 +71,11 @@ const graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* ChapterModel
     quint32 index, quint32& chapterNumber) const
 {
   for (const auto& chapter : _chaptersFetch) {
-    if (index < chapter.fetchChapterPages->chapter.pageCount + chapterNumber) {
+    if (index < chapter.fetchChapterPages->pages.size() + chapterNumber) {
       return &chapter;
     }
-    chapterNumber += chapter.fetchChapterPages->chapter.pageCount;
+    chapterNumber += chapter.fetchChapterPages->pages.size();
   }
-  qDebug() << "not found!" << index << "returning last chapter";
   return &_chaptersFetch.back();
 }
 
@@ -103,7 +102,7 @@ int ChapterModel::rowCount(const QModelIndex &parent) const {
   }
   qint32 pages = 0;
   for (auto& chapter : _chaptersFetch) {
-    pages += chapter.fetchChapterPages->chapter.pageCount - 1;
+    pages += chapter.fetchChapterPages->pages.size();
   }
 
   return pages;
@@ -119,6 +118,7 @@ QVariant ChapterModel::data(const QModelIndex &index, int role) const {
        (index.row() >= 0) &&
        (index.row() < rowCount())) || _chaptersFetch.empty())
   {
+    qDebug() << "Invalid index or empty chaptersFetch" << index;
     return {};
   }
 
@@ -242,7 +242,7 @@ void ChapterModel::updateChapter(qint32 page)
  *****************************************************************************/
 void ChapterModel::requestNext(bool forward)
 {
-  if (_chaptersFetch.empty()) {
+  if (_chaptersFetch.empty() || _requestingChapter) {
     return;
   }
 
@@ -319,14 +319,23 @@ void ChapterModel::requestChapter(qint32 chapter, bool forward)
     emit chapterNameChanged();
     emit pageCountChanged();
 
-    beginInsertRows({}, pageStart, pageEnd);
+    if (_chaptersFetch.empty()) {
+      beginResetModel();
+      _chaptersFetch.emplace_back(parsed);
+      endResetModel();
+    }
+    else {
+      beginInsertRows({}, pageStart, pageEnd);
 
-    auto it = std::lower_bound(_chaptersFetch.begin(), _chaptersFetch.end(), parsed, [](const auto& a, const auto& b) {
-      return a.fetchChapterPages->chapter.sourceOrder < b.fetchChapterPages->chapter.sourceOrder;
-    });
-    _chaptersFetch.emplace(it, parsed);
+      auto it = std::lower_bound(_chaptersFetch.begin(), _chaptersFetch.end(), parsed, [](const auto& a, const auto& b) {
+        return a.fetchChapterPages->chapter.id < b.fetchChapterPages->chapter.id;
+      });
+      qDebug() << "Inserting chapter at index" << std::distance(_chaptersFetch.begin(), it)
+               << "for chapter" << parsed.fetchChapterPages->chapter.id << "pages start and end:" << pageStart << pageEnd;
+      _chaptersFetch.emplace(it, parsed);
 
-    endInsertRows();
+      endInsertRows();
+    }
 
     _requestingChapter = false;
     emit requestingChapterChanged();

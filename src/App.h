@@ -1,5 +1,4 @@
-#ifndef IRCCHAT_H
-#define IRCCHAT_H
+#pragma once
 
 #include <QSettings>
 #include <QTimer>
@@ -8,25 +7,29 @@
 #include "commandline.h"
 #include "networkmanager.h"
 #include "settings.h"
+#include "utils/QmlReloader.h"
 
 #include <memory>
+#include <QApplication>
 
 
-class App : public QObject
+class App : public QApplication
 {
   Q_OBJECT
 
   std::shared_ptr<Settings> _settings;
 
-  NetworkManager _nm;
+  CommandLine _commandLine;
 
-  const CommandLine& _commandLine;
+  NetworkManager _nm;
 
   // QML engine
   QPointer<QQmlApplicationEngine> _engine;
 
+  std::shared_ptr<QmlReloader> _qmlReloader;
+
 public:
-  App(const CommandLine& cmd, QObject * parent = 0);
+  App(int argc, char *argv[]);
   ~App();
 
   Q_INVOKABLE void reload();
@@ -39,4 +42,3 @@ private:
   void initalize();
 };
 
-#endif //IRCCHAT_H

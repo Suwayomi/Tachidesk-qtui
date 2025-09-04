@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 #include <QQmlParserStatus>
 #include <QWebSocket>
+#include <QTimer>
 
 #include "ChaptersModel.h"
 #include "graphql/tachideskClient.h"
@@ -21,6 +22,7 @@ class UpdatesModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(qint32 complete MEMBER _complete NOTIFY completeChanged)
 
   QWebSocket _webSocket;
+  QTimer _updateStatusTimer;
   std::shared_ptr<DownloadsModel> downloads;
   std::map<quint32, std::shared_ptr<QueueInfo>> _queueInfo;
   graphql::client::query::GET_CHAPTERS_UPDATES::Response _entries;
@@ -89,4 +91,8 @@ public slots:
   void closed();
   void onTextMessageReceived(const QString& message);
   void onDownloadsUpdated(const std::vector<QueueInfo>& info);
+
+private slots:
+  void handleLibraryUpdateStatus(const QJsonObject& statusObj);
+  void requestUpdateStatus();
 };

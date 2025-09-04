@@ -437,3 +437,45 @@ query GET_CHAPTERS_ID($after: Cursor, $before: Cursor, $condition: ChapterCondit
     }
   }
 }
+
+fragment DOWNLOAD_TYPE_FIELDS on DownloadType {
+  chapter {
+    id
+    name
+    sourceOrder
+    isDownloaded
+    __typename
+  }
+  manga {
+    id
+    title
+    downloadCount
+    __typename
+  }
+  progress
+  state
+  tries
+  __typename
+}
+
+fragment DOWNLOAD_UPDATES_FIELDS on DownloadUpdates {
+  state
+  omittedUpdates
+  updates {
+    type
+    download {
+      ...DOWNLOAD_TYPE_FIELDS
+      position
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+subscription DOWNLOAD_STATUS_SUBSCRIPTION($input: DownloadChangedInput!) {
+  downloadStatusChanged(input: $input) {
+    ...DOWNLOAD_UPDATES_FIELDS
+    __typename
+  }
+}

@@ -5,24 +5,35 @@
 #include <qstringbuilder.h>
 #include <QQmlContext>
 #include <QAuthenticator>
+#include <QFontDatabase>
 
 #include "App.h"
+#include "networkimageprovider.h"
 
-App::App(const CommandLine& cmd, QObject * parent)
-  : QObject(parent)
+App::App(int argc, char *argv[])
+  : QApplication(argc, argv)
   , _settings(std::make_shared<Settings>())
+  , _commandLine(this)
   , _nm(_settings,
-          cmd.isSet(CommandLine::hostname)
-            ? cmd.value(CommandLine::hostname)
+          _commandLine.isSet(CommandLine::hostname)
+            ? _commandLine.value(CommandLine::hostname)
             : _settings->hostname(),
           this)
-  , _commandLine(cmd)
   , _engine(new QQmlApplicationEngine(this))
+  , _qmlReloader(std::make_shared<QmlReloader>(_engine, this))
 {
   initalize();
 }
 
 App::~App() {
+  qDebug() << "App destructor called";
+  disconnect();
+  _engine->deleteLater();
+  _qmlReloader->deleteLater();
+  _settings.reset();
+  _nm.deleteLater();
+  qDebug() << "App destructor finished";
+  exit(0);
 }
 
 /****************************************************************************
@@ -54,10 +65,27 @@ void App::reload()
  ***************************************************************************/
 void App::initalize()
 {
+  if (QFontDatabase::addApplicationFont(":/Tachidesk/Qtui/libs/QmlBridgeForMaterialDesignIcons/materialdesignicons-webfont.ttf") < 0) {
+    assert(false);
+  }
+
+  connect(this, &QApplication::applicationStateChanged,
+    [&](Qt::ApplicationState state)
+    {
+      qDebug() << "Application state changed to" << state;
+      if (state == Qt::ApplicationActive) {
+        // try to reload QML
+        _engine->load(QUrl(u"qrc:/main.qml"_qs));
+        qDebug() << "Reloaded QML";
+      }
+    }
+  );
+
   // Global context variables to inject into QML
   const std::pair<const char*, QObject*> contextVars[] = {
     { "networkManager", &_nm},
     { "settings", _settings.get()},
+    { "qmlReloader", _qmlReloader.get()},
     { "app", this },
   };
   auto context = _engine->rootContext();
@@ -68,6 +96,14 @@ void App::initalize()
   _engine->setNetworkAccessManagerFactory(&_nm);
   _engine->addImportPath(QStringLiteral("qrc:/"));
   _engine->load(makeUrl(QStringLiteral("main.qml")));
+  auto *imageProvider = new NetworkImageProvider(_nm.username(), _nm.password());
+  _engine->addImageProvider(QLatin1String("network"), imageProvider);
+
+  connect(_engine, &QQmlApplicationEngine::quit, this, &QCoreApplication::quit);
+
+  connect(this, &QCoreApplication::aboutToQuit, []() {
+    qDebug() << "Application is about to quit!";
+  });
 }
 
 void App::disconnect() {

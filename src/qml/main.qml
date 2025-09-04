@@ -42,7 +42,9 @@ ApplicationWindow {
   property variant rootWindow: root
 
   onClosing: (close) => {
+    console.log("ApplicationWindow closing")
     if (Qt.platform.os !== "android" || ac.canExit()) {
+      console.log("ApplicationWindow closing accepted")
       close.accepted = true
       Qt.quit()
       return

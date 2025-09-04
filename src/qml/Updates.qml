@@ -84,7 +84,7 @@ Rectangle {
           width: parent.height * .75
           height: parent.height
           Image {
-            source: thumbnailUrl
+            source: "image://network/" + thumbnailUrl
             fillMode: Image.PreserveAspectCrop
             anchors.fill: parent
             anchors.margins: 2
@@ -141,7 +141,7 @@ Rectangle {
               text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
               horizontalAlignment: Text.AlignCenter
               verticalAlignment: Text.AlignVCenter
-              font.family: "Material Design Icons"
+              font.family: "Material Designer Icons"
               color: "#F5F5F5"
               anchors.centerIn: parent
               font.bold: true
