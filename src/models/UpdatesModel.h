@@ -94,5 +94,6 @@ public slots:
 
 private slots:
   void handleLibraryUpdateStatus(const QJsonObject& statusObj);
+  void processChapterUpdateProgress(const QJsonObject& download);
   void requestUpdateStatus();
 };

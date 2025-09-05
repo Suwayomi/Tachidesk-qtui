@@ -7,9 +7,17 @@ Rectangle {
 
   property int minimumWidth: 75
   property int maximumWidth: 175
+  property bool isLoading: true
   signal reachedEnd()
   function onMangaChanged() {
     libraryModel.refreshLibrary()
+  }
+  
+  Connections {
+    target: libraryModel
+    function onModelReset() {
+      isLoading = libraryModel.rowCount() === 0
+    }
   }
 
   function getGridWidth() {
@@ -30,7 +38,7 @@ Rectangle {
   GridView {
     id: grid
     anchors.fill: parent
-    model: libraryModel
+    model: isLoading ? 12 : libraryModel
     cellWidth: getGridWidth()
     cellHeight: getGridHeight()
     clip: true
@@ -40,12 +48,25 @@ Rectangle {
       listviewLoaded = true
     }
     onAtYEndChanged: {
-      if (!listviewLoaded || !flicking) {
+      if (!listviewLoaded || !flicking || isLoading) {
         return
       }
       reachedEnd()
     }
-    delegate: Item {
+    delegate: isLoading ? placeholderDelegate : mangaDelegate
+  }
+  
+  Component {
+    id: placeholderDelegate
+    LibraryCardPlaceholder {
+      width: grid.cellWidth
+      height: grid.cellHeight
+    }
+  }
+  
+  Component {
+    id: mangaDelegate
+    Item {
       width: grid.cellWidth
       height: grid.cellHeight
 

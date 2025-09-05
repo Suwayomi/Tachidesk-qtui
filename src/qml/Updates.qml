@@ -9,6 +9,15 @@ import "../../libs/QmlBridgeForMaterialDesignIcons/Icon.js" as MdiFont
 
 Rectangle {
 
+  property bool isLoading: updatesModel.rowCount() === 0 || updatesModel.running
+  Connections {
+    target: updatesModel
+    function onModelReset() {
+      console.log("updates model reset, isLoading:", updatesModel.rowCount() === 0)
+      isLoading = updatesModel.rowCount() === 0 || updatesModel.running
+    }
+  }
+
   color: "#212121"
 
   UpdatesModel {
@@ -46,19 +55,32 @@ Rectangle {
       top: progressbar.bottom
     }
     spacing: 4
-    model: updatesModel
+    model: isLoading ? 8 : updatesModel
 
     property bool listviewLoaded: false
     Component.onCompleted: {
       listviewLoaded = true
     }
     onAtYEndChanged: {
-      if (!listviewLoaded) {
+      if (!listviewLoaded || isLoading) {
         return
       }
       updatesModel.next()
     }
-    delegate: Item {
+    delegate: isLoading ? placeholderDelegate : updateDelegate
+  }
+
+  Component {
+    id: placeholderDelegate
+    LibraryCardPlaceholder {
+      height: 100
+      width: downloadView.width
+    }
+  }
+
+  Component {
+    id: updateDelegate
+    Item {
       id: item
       height: 100
       width: downloadView.width
@@ -127,53 +149,41 @@ Rectangle {
           }
         }
 
-        Item {
-          height: parent.height
+        ProgressComponent {
           width: 30
-          Rectangle {
-            radius: 15
-            color: "#0492c2"
-            width: 30
-            height: 30
-            anchors.centerIn: parent
-            visible: !downloadPrepairing && (downloadProgress < 0 || downloadProgress >= 100)
-            Text {
-              text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
-              horizontalAlignment: Text.AlignCenter
-              verticalAlignment: Text.AlignVCenter
-              font.family: "Material Designer Icons"
-              color: "#F5F5F5"
-              anchors.centerIn: parent
-              font.bold: true
-              font.pixelSize: 20
-              fontSizeMode: Text.Fit
-            }
-            MouseArea {
-              anchors.fill: parent
-              onClicked: updatesModel.downloadChapter(index)
-            }
+          height: 30
+          progress: downloadProgress
+          preparingForDownload: downloadPrepairing
+          state: {
+            if (downloaded) return "FINISHED"
+            if (downloadPrepairing) return "QUEUED"
+            if (downloadProgress > 0 && downloadProgress < 100) return "DOWNLOADING"
+            return "IDLE"
           }
-          RadialBarShape {
-            height: parent.height
-            width: parent.width
-            visible: downloadPrepairing || (downloadProgress > 0 && downloadProgress < 100)
-            progressColor: "#e6436d"
-            value: downloadProgress
-            spanAngle: 270
-            dialType: RadialBarShape.DialType.FullDial
-            backgroundColor: "#6272a4"
-            penStyle: Qt.FlatCap
-            dialColor: "transparent"
+
+          onDownloadRequested: {
+            console.log("Download requested for chapter:", chapterId, "at index:", index)
+            updatesModel.downloadChapter(index)
+          }
+
+          onViewRequested: {
+            // Open the chapter view
+            var viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"), {
+              mangaNumber: mangaId,
+              chapter:     chapterIndex,
+              chapterId:   chapterId
+            })
+            viewer.chapterRead.connect(markRead)
           }
         }
       }
     }
+  }
 
-    PullToRefreshHandler {
-      id: pulldown_handler
-      onPulldownrelease: {
-        updatesModel.refresh()
-      }
+  PullToRefreshHandler {
+    id: pulldown_handler
+    onPulldownrelease: {
+      updatesModel.refresh()
     }
   }
 }

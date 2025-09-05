@@ -43,6 +43,20 @@ void UpdatesModel::onConnected() {
   connect(&_webSocket, &QWebSocket::textMessageReceived, this,
           &UpdatesModel::onTextMessageReceived);
 
+  // Subscribe to download status updates
+  QTimer::singleShot(1000, this, [this]() {
+    QJsonObject subscribeMsg;
+    subscribeMsg["id"] = "download-subscription";
+    subscribeMsg["type"] = "start";
+    
+    QJsonObject payload;
+    payload["query"] = "subscription { downloadStatusChanged(input: { maxUpdates: 100 }) { updates { type download { progress state chapter { id } } } } }";
+    subscribeMsg["payload"] = payload;
+    
+    _webSocket.sendTextMessage(QJsonDocument(subscribeMsg).toJson(QJsonDocument::Compact));
+    qDebug() << "Subscribed to download status updates";
+  });
+
   // Start polling for updates
   _updateStatusTimer.start();
 }
@@ -70,6 +84,23 @@ void UpdatesModel::onTextMessageReceived(const QString &message) {
     QJsonObject payload = obj["payload"].toObject();
     QJsonObject data = payload["data"].toObject();
 
+    // Handle download status updates from subscription
+    if (data.contains("downloadStatusChanged")) {
+      QJsonObject downloadStatus = data["downloadStatusChanged"].toObject();
+      QJsonArray updates = downloadStatus["updates"].toArray();
+
+      for (const QJsonValue& updateValue : updates) {
+        QJsonObject update = updateValue.toObject();
+        QString updateType = update["type"].toString();
+        QJsonObject download = update["download"].toObject();
+
+        // Process download updates
+        if (updateType == "PROGRESS" || updateType == "QUEUED" || updateType == "FINISHED") {
+          processChapterUpdateProgress(download);
+        }
+      }
+    }
+
     // Handle update status data from subscription
     if (data.contains("libraryUpdateStatus")) {
       handleLibraryUpdateStatus(data["libraryUpdateStatus"].toObject());
@@ -83,6 +114,64 @@ void UpdatesModel::onTextMessageReceived(const QString &message) {
     if (data.contains("libraryUpdateStatus")) {
       handleLibraryUpdateStatus(data["libraryUpdateStatus"].toObject());
     }
+  }
+}
+
+void UpdatesModel::processChapterUpdateProgress(const QJsonObject& download) {
+  // Find the chapter in the _entries that matches the download
+  int chapterId = download["chapter"].toObject()["id"].toInt();
+  float progress = download["progress"].toDouble();
+  QString state = download["state"].toString();
+
+  qDebug() << "Processing download update:"
+           << "Chapter ID:" << chapterId
+           << "Progress:" << progress
+           << "State:" << state;
+
+  // Find the index of the chapter in _entries
+  auto it = std::find_if(_entries.chapters.nodes.begin(),
+                          _entries.chapters.nodes.end(),
+                          [chapterId](const auto& entry) {
+                            return entry.id == chapterId;
+                          });
+
+  if (it != _entries.chapters.nodes.end()) {
+    size_t index = std::distance(_entries.chapters.nodes.begin(), it);
+    int mangaId = it->manga.id;
+
+    // Ensure we have a queue info entry for this chapter
+    auto queueIt = _queueInfo.find(mangaId);
+    if (queueIt == _queueInfo.end()) {
+      _queueInfo[mangaId] = std::make_shared<QueueInfo>();
+      qDebug() << "Created new QueueInfo for manga ID:" << mangaId;
+    }
+
+    auto& queueInfo = _queueInfo[mangaId];
+    queueInfo->progress = progress;
+    queueInfo->downloadPrepairing = (state == "QUEUED");
+    queueInfo->chapterInfo.downloaded = (progress >= 100 || state == "FINISHED");
+
+    // If download is complete, update the entry's isDownloaded flag
+    if (progress >= 100 || state == "FINISHED") {
+      qDebug() << "Marking chapter as downloaded in entries";
+      it->isDownloaded = true;
+    }
+
+    qDebug() << "Updated download info:"
+             << "Manga ID:" << mangaId
+             << "Progress:" << queueInfo->progress
+             << "Preparing:" << queueInfo->downloadPrepairing
+             << "Downloaded:" << queueInfo->chapterInfo.downloaded
+             << "Entry downloaded:" << it->isDownloaded;
+
+    // Emit data changed signal to update the view
+    emit dataChanged(
+        createIndex(index, 0),
+        createIndex(index, 0),
+        {RoleDownloadProgress, RoleDownloadPrepairing, RoleDownloaded}
+    );
+  } else {
+    qWarning() << "Could not find chapter with ID:" << chapterId << "in updates entries";
   }
 }
 
@@ -189,22 +278,39 @@ void UpdatesModel::componentComplete() {
  *
  *****************************************************************************/
 void UpdatesModel::onDownloadsUpdated(const std::vector<QueueInfo> &queueInfo) {
-  for (auto &info : queueInfo) {
-    auto source = _queueInfo.find(info.mangaId);
-    if (!source->second) {
-      source->second = std::make_shared<QueueInfo>(info);
-      source->second->chapterInfo.downloaded = info.progress >= 100;
-      source->second->downloadPrepairing = false;
+  for (const auto &info : queueInfo) {
+    qDebug() << "Download update received:"
+             << "Manga ID:" << info.mangaId
+             << "Progress:" << info.progress
+             << "State:" << info.state;
 
-      auto it = std::find_if(_entries.chapters.nodes.begin(),
-                             _entries.chapters.nodes.end(),
-                             [&info](const auto &entry) {
-                               return entry.manga.id == info.mangaId;
-                             });
+    // Update or create queue info entry
+    _queueInfo[info.mangaId] = std::make_shared<QueueInfo>(info);
+    _queueInfo[info.mangaId]->chapterInfo.downloaded = (info.progress >= 100);
+    _queueInfo[info.mangaId]->downloadPrepairing = (info.state == "QUEUED");
+
+    // Find the corresponding chapter in the entries and update the view
+    auto it = std::find_if(_entries.chapters.nodes.begin(),
+                           _entries.chapters.nodes.end(),
+                           [&info](const auto &entry) {
+                             return entry.manga.id == info.mangaId;
+                           });
+    
+    if (it != _entries.chapters.nodes.end()) {
       size_t index = std::distance(_entries.chapters.nodes.begin(), it);
+      qDebug() << "Updating view for chapter at index:" << index;
+      
+      // If download is complete, update the entry's isDownloaded flag
+      if (info.progress >= 100 && info.state == "FINISHED") {
+        qDebug() << "Marking chapter as downloaded in entries";
+        it->isDownloaded = true;
+      }
+      
       emit dataChanged(
           createIndex(index, 0), createIndex(index, 0),
           {RoleDownloadProgress, RoleDownloaded, RoleDownloadPrepairing});
+    } else {
+      qDebug() << "Could not find chapter for manga ID:" << info.mangaId;
     }
   }
 }
@@ -291,7 +397,14 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   // }
 
   case RoleDownloaded: {
-    return entry.isDownloaded;
+    // Check if chapter is downloaded OR if it's completed downloading (100% progress)
+    if (entry.isDownloaded) {
+      return true;
+    }
+    if (queueInfo != _queueInfo.end() && queueInfo->second) {
+      return queueInfo->second->chapterInfo.downloaded || queueInfo->second->progress >= 100;
+    }
+    return false;
   }
 
   case RoleFetchedAt: {
@@ -299,17 +412,27 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
   }
 
   case RoleDownloadProgress: {
+    // If already downloaded, return 100%
+    if (entry.isDownloaded) {
+      return 100;
+    }
+    // Otherwise return current download progress
     if (queueInfo == _queueInfo.end() || !queueInfo->second) {
       return -1;
     }
     return queueInfo->second->progress;
   }
-  case RoleDownloadPrepairing:
+  case RoleDownloadPrepairing: {
+    // If already downloaded, not preparing
+    if (entry.isDownloaded) {
+      return false;
+    }
+    // Check queue info for preparing state
     if (queueInfo == _queueInfo.end() || !queueInfo->second) {
       return false;
     }
     return queueInfo->second->downloadPrepairing;
-    //return !entry.isDownloaded; //.downloadPrepairing.value_or(false);
+  }
 
   default:
     return {};
@@ -457,21 +580,45 @@ void UpdatesModel::refresh() {
  *
  *****************************************************************************/
 void UpdatesModel::downloadChapter(int index) {
-  auto &entry = _entries.chapters.nodes[index];
-  if (entry.isDownloaded) {
+  if (index < 0 || index >= _entries.chapters.nodes.size()) {
+    qWarning() << "Invalid chapter index:" << index;
     return;
   }
-  // mark as downloaded so we don't download more than once
-  entry.isDownloaded = true;
-  // entry.downloadPrepairing = true;
 
-  emit dataChanged(createIndex(index, 0), createIndex(index, 0),
-                   {RoleDownloadPrepairing});
-  qDebug() << "Downloading chapter" << entry.manga.id
-           << "chapter" << entry.sourceOrder;
-  NetworkManager::instance().get(QStringLiteral("download/%1/chapter/%2")
-                                     .arg(entry.manga.id)
-                                     .arg(entry.sourceOrder));
+  const auto &entry = _entries.chapters.nodes[index];
+  
+  if (entry.isDownloaded) {
+    qDebug() << "Chapter is already downloaded:" << entry.id;
+    return;
+  }
+  
+  qDebug() << "Requesting download for chapter:"
+           << "Chapter ID:" << entry.id
+           << "Manga ID:" << entry.manga.id
+           << "Title:" << entry.name.c_str();
+
+  // Use GraphQL mutation to enqueue the chapter for download
+  QJsonObject variablesObj;
+  variablesObj.insert("id", entry.id);
+
+  NetworkManager::instance().postGraphQL(
+    "mutation EnqueueChapterDownload($id: Int!) { enqueueChapterDownload(input: { id: $id }) { clientMutationId } }",
+    std::move(variablesObj),
+    [this, index](graphql::response::Value&& data) {
+      qDebug() << "Download enqueued successfully for chapter at index:" << index;
+      
+      // Mark as preparing for download
+      auto mangaId = _entries.chapters.nodes[index].manga.id;
+      if (_queueInfo.find(mangaId) == _queueInfo.end()) {
+        _queueInfo[mangaId] = std::make_shared<QueueInfo>();
+      }
+      _queueInfo[mangaId]->downloadPrepairing = true;
+      _queueInfo[mangaId]->progress = 0;
+      
+      emit dataChanged(createIndex(index, 0), createIndex(index, 0),
+                       {RoleDownloadPrepairing});
+    }
+  );
 }
 
 /******************************************************************************
