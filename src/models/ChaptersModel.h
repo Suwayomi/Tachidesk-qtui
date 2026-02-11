@@ -37,7 +37,7 @@ protected:
 
 private:
   // std::vector<ChapterInfo> _chapters;
-  graphql::client::query::GET_CHAPTERS_MANGA::Response _chapters;
+  graphql::qtui::client::query::GET_CHAPTERS_MANGA::Response _chapters;
 
 public:
   enum DownloadOption {

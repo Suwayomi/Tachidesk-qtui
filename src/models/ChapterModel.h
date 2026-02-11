@@ -21,8 +21,8 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   Q_PROPERTY(qint32 chapterId     MEMBER _chapterId      NOTIFY chapterIdChanged)
   Q_PROPERTY(bool requestingChapter MEMBER _requestingChapter NOTIFY requestingChapterChanged)
 
-  std::vector<graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response> _chaptersFetch;
-  graphql::client::query::GET_CHAPTERS_ID::Response _chapters;
+  std::vector<graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::Response> _chaptersFetch;
+  graphql::qtui::client::query::GET_CHAPTERS_ID::Response _chapters;
 
   qint32 _mangaNumber;
   qint32 _chapterNumber;
@@ -33,7 +33,7 @@ class ChapterModel : public QAbstractListModel, public QQmlParserStatus
   qint32 _chapterId = 0;
   bool _requestingChapter = false;
 
-  const graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* getChapterFetchByRow(quint32 index, quint32& chapterNumber) const;
+  const graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* getChapterFetchByRow(quint32 index, quint32& chapterNumber) const;
 protected:
 
   void classBegin() override;

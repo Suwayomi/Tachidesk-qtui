@@ -68,9 +68,9 @@ void ChaptersModel::requestChapters(bool onlineFetch)
   }
   variablesObj.insert("order", orderArray);
 
-  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_MANGA::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_MANGA::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::query::GET_CHAPTERS_MANGA::parseResponse(std::move(data));
+      auto parsed = graphql::qtui::client::query::GET_CHAPTERS_MANGA::parseResponse(std::move(data));
       beginResetModel();
       _chapters = std::move(parsed);
       endResetModel();
@@ -214,9 +214,9 @@ void ChaptersModel::chapterRead(qint32 chapterId, bool read)
   variablesObj.insert("mangaId", -1);
   variablesObj.insert("trackProgress", false);
 
-  NetworkManager::instance().postGraphQL(graphql::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
+      auto parsed = graphql::qtui::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
       auto it = std::find_if(_chapters.chapters.nodes.begin(),
                              _chapters.chapters.nodes.end(),
                              [&chapterId](const auto &entry) {
@@ -260,9 +260,9 @@ void ChaptersModel::previousChaptersRead(quint32 chapter, bool read)
   variablesObj.insert("mangaId", -1);
   variablesObj.insert("trackProgress", false);
 
-  NetworkManager::instance().postGraphQL(graphql::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::mutation::UPDATE_CHAPTERS::parseResponse(std::move(data));
+      auto parsed = graphql::qtui::client::mutation::UPDATE_CHAPTERS::parseResponse(std::move(data));
 
       for (const auto& chapter : parsed.updateChapters->chapters) {
         auto it = std::find_if(_chapters.chapters.nodes.begin(), _chapters.chapters.nodes.end(),

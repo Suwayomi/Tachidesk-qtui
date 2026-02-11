@@ -49,9 +49,9 @@ void ChapterModel::componentComplete()
   }
   chaptersVariablesObj.insert("order", orderArray);
 
-  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CHAPTERS_ID::GetOperationName(), std::move(chaptersVariablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_ID::GetOperationName(), std::move(chaptersVariablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::query::GET_CHAPTERS_ID::parseResponse(std::move(data));
+      auto parsed = graphql::qtui::client::query::GET_CHAPTERS_ID::parseResponse(std::move(data));
       _chapters = std::move(parsed);
 
       auto it = std::find_if(_chapters.chapters.nodes.begin(),
@@ -67,7 +67,7 @@ void ChapterModel::componentComplete()
  * Method: getChapterByRow()
  *
  *****************************************************************************/
-const graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* ChapterModel::getChapterFetchByRow(
+const graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::Response* ChapterModel::getChapterFetchByRow(
     quint32 index, quint32& chapterNumber) const
 {
   for (const auto& chapter : _chaptersFetch) {
@@ -298,7 +298,7 @@ void ChapterModel::requestChapter(qint32 chapter, bool forward)
   _requestingChapter = true;
   emit requestingChapterChanged();
 
-  NetworkManager::instance().postGraphQL(graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
     [&, forward=forward](graphql::response::Value&& data) {
     qint32 pageStart = 0;
     qint32 pageEnd = 0;
@@ -307,7 +307,7 @@ void ChapterModel::requestChapter(qint32 chapter, bool forward)
         pageStart += chapter.fetchChapterPages->chapter.pageCount;
       }
     }
-    auto parsed = graphql::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
+    auto parsed = graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::parseResponse(std::move(data));
     _pageCount = parsed.fetchChapterPages->chapter.pageCount;
     _chapterName = QString::fromStdString(parsed.fetchChapterPages->chapter.name);
     _chapterId = parsed.fetchChapterPages->chapter.id;

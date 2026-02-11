@@ -112,9 +112,9 @@ void LibraryModel::refreshLibrary() {
   QJsonObject variablesObj;
   variablesObj.insert("id", 0);
 
-  NetworkManager::instance().postGraphQL(graphql::client::query::GET_CATEGORY_MANGAS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CATEGORY_MANGAS::GetOperationName(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
-      auto parsed = graphql::client::query::GET_CATEGORY_MANGAS::parseResponse(std::move(data));
+      auto parsed = graphql::qtui::client::query::GET_CATEGORY_MANGAS::parseResponse(std::move(data));
       beginResetModel();
       _entries = std::move(parsed);
       endResetModel();

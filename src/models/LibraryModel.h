@@ -10,7 +10,7 @@ class LibraryModel : public QAbstractListModel, public QQmlParserStatus
   QML_ELEMENT
   Q_INTERFACES(QQmlParserStatus)
 
-  graphql::client::query::GET_CATEGORY_MANGAS::Response _entries;
+  graphql::qtui::client::query::GET_CATEGORY_MANGAS::Response _entries;
 
 protected:
   virtual QHash<int, QByteArray> roleNames() const override;

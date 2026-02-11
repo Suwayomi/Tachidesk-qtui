@@ -115,8 +115,8 @@ void DownloadsModel::onTextMessageReceived(const QString &message) {
     variables["input"] = input;
     payload["variables"] = variables;
     payload["extensions"] = QJsonObject();
-    payload["operationName"] = QString::fromStdString(graphql::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetOperationName());
-    payload["query"] = QString::fromStdString(graphql::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetRequestText());
+    payload["operationName"] = QString::fromStdString(graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetOperationName());
+    payload["query"] = QString::fromStdString(graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetRequestText());
     subscribeMsg["id"] = QUuid::createUuid().toString(QUuid::WithoutBraces);
     subscribeMsg["type"] = "subscribe";
     subscribeMsg["payload"] = payload;
@@ -134,8 +134,8 @@ void DownloadsModel::onTextMessageReceived(const QString &message) {
   graphql::response::Value gqlResponse =
       graphql::response::parseJSON(doc["payload"].toObject().value("data").toString().toStdString());
   graphql::response::Value data = std::move(gqlResponse);
-  graphql::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::Response parsed =
-      graphql::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::parseResponse(
+  graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::Response parsed =
+      graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::parseResponse(
           std::move(data));
   qDebug() << "DownloadsModel: parsed response" << (int)parsed.downloadStatusChanged.state;
 

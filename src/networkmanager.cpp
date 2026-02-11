@@ -139,7 +139,7 @@ void NetworkManager::postGraphQL(
   request.setUrl(_host.resolved(QString("api/graphql/")));
 
   QJsonObject requestObject;
-  requestObject.insert("query", QString::fromStdString(graphql::client::qtui::GetRequestText()));
+  requestObject.insert("query", QString::fromStdString(graphql::qtui::client::GetRequestText()));
   requestObject.insert("operationName", QString::fromStdString(query));
   requestObject["variables"] = value;
 
