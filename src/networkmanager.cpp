@@ -132,14 +132,14 @@ void NetworkManager::endpointReply() { emit receivedReply(processReply()); }
  *
  ********************************************************************/
 void NetworkManager::postGraphQL(
-    const std::string &query, QJsonObject &&value,
+    const std::string &query, const std::string &requestText, QJsonObject &&value,
     std::function<void(graphql::response::Value &&)> callback) {
   QNetworkRequest request;
   request.setRawHeader("Content-Type", "application/json");
   request.setUrl(_host.resolved(QString("api/graphql/")));
 
   QJsonObject requestObject;
-  requestObject.insert("query", QString::fromStdString(graphql::qtui::client::GetRequestText()));
+  requestObject.insert("query", QString::fromStdString(requestText));
   requestObject.insert("operationName", QString::fromStdString(query));
   requestObject["variables"] = value;
 

@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(
   Qt6
   COMPONENTS Core
+             CorePrivate
              Gui
              Quick
              Network
@@ -104,6 +105,7 @@ target_link_libraries(tachidesk-qtui
   PRIVATE
     Qt6::Quick
     Qt6::Core
+    Qt6::CorePrivate
     Qt6::Widgets
     Qt6::Gui
     Qt6::WebSockets

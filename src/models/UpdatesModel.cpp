@@ -50,7 +50,14 @@ void UpdatesModel::onConnected() {
     subscribeMsg["type"] = "start";
 
     QJsonObject payload;
-    payload["query"] = "subscription { downloadStatusChanged(input: { maxUpdates: 100 }) { updates { type download { progress state chapter { id } } } } }";
+    QJsonObject input;
+    input["maxUpdates"] = 100; // max updates to receive
+    QJsonObject variables;
+    variables["input"] = input;
+    payload["variables"] = variables;
+    payload["extensions"] = QJsonObject();
+    payload["operationName"] = QString::fromStdString(graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetOperationName());
+    payload["query"] = QString::fromStdString(graphql::qtui::client::subscription::DOWNLOAD_STATUS_SUBSCRIPTION::GetRequestText());
     subscribeMsg["payload"] = payload;
 
     _webSocket.sendTextMessage(QJsonDocument(subscribeMsg).toJson(QJsonDocument::Compact));
@@ -214,6 +221,7 @@ void UpdatesModel::requestUpdateStatus() {
   // Query the current update status
   NetworkManager::instance().postGraphQL(
     graphql::qtui::client::query::GET_UPDATE_STATUS::GetOperationName(),
+    graphql::qtui::client::query::GET_UPDATE_STATUS::GetRequestText(),
     QJsonObject{},
     [this](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::query::GET_UPDATE_STATUS::parseResponse(std::move(data));
@@ -404,6 +412,7 @@ QVariant UpdatesModel::data(const QModelIndex &index, int role) const {
     if (queueInfo != _queueInfo.end() && queueInfo->second) {
       return queueInfo->second->chapterInfo.downloaded || queueInfo->second->progress >= 100;
     }
+    qDebug() << "queueIfno? " << (queueInfo != _queueInfo.end());
     return false;
   }
 
@@ -525,7 +534,7 @@ void UpdatesModel::next() {
   }
   variablesObj.insert("order", orderArray);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_UPDATES::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_UPDATES::GetOperationName(), graphql::qtui::client::query::GET_CHAPTERS_UPDATES::GetRequestText(), std::move(variablesObj),
     [this, currentPageNumber](graphql::response::Value&& data) {
       if (!downloads) {
         downloads = std::make_shared<DownloadsModel>();
@@ -602,6 +611,7 @@ void UpdatesModel::downloadChapter(int index) {
   variablesObj.insert("id", entry.id);
 
   NetworkManager::instance().postGraphQL(
+    "EnqueueChapterDownload",
     "mutation EnqueueChapterDownload($id: Int!) { enqueueChapterDownload(input: { id: $id }) { clientMutationId } }",
     std::move(variablesObj),
     [this, index](graphql::response::Value&& data) {
@@ -645,7 +655,7 @@ void UpdatesModel::chapterRead(qint32 Id, int chapter) {
   variablesObj.insert("mangaId", -1);
   variablesObj.insert("trackProgress", false);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetRequestText(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
       auto it = std::find_if(_entries.chapters.nodes.begin(),

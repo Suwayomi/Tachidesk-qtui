@@ -10,13 +10,17 @@ Item {
   }
 
   function back() {
-      console.log("going back")
-    stack.item.depth() <= 1 ? stack.item.canClose = true : stack.item.canClose = false
+      console.log("going back, depth:", stack.item.depth())
     if (stack.item.depth() > 1) {
-      console.log("popping item")
+      console.log("popping item, depth > 1")
       stack.item.pop()
+      stack.item.navigationVisible = false
     }
-    stack.item.depth() > 1 ? stack.item.navigationVisible = false : stack.item.navigationVisible = true
+    else {
+      console.log("cannot pop, depth = 1, setting canClose = true")
+      stack.item.canClose = true
+      stack.item.navigationVisible = true
+    }
   }
 
   function canExit() {

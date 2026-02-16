@@ -118,297 +118,299 @@ Item {
     color: "#F5F5F5"
   }
 
-  Column {
-    id: detailsColumn
-    spacing: 8
-    leftPadding: 4
-    rightPadding: 4
-    topPadding: 4
-    width: parent.width
-    height: {
-      var heightLimit = parent.height * 3/8
-      if (heightLimit < detailsColumn.childrenRect.height) {
-        return heightLimit
-      }
-      return detailsColumn.childrenRect.height + 4 // 4 margin
-    }
+  Item {
+    anchors.fill: parent
 
-    RowLayout {
+    ColumnLayout {
+      id: detailsColumn
+      spacing: 8
       width: parent.width
 
-      Image {
-        id: image
-        source: "image://network/" + networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
-        fillMode: Image.PreserveAspectFit
-        sourceSize.width: parent.width * .33
-      }
-      ColumnLayout {
+      RowLayout {
         Layout.fillWidth: true
-        Text {
+        Layout.preferredHeight: 150
+
+        Image {
+          id: image
+          source: "image://network/" + networkManager.resolvedPath() + "api/v1/manga/%1/thumbnail".arg(mangaNumber)
+          fillMode: Image.PreserveAspectFit
+          Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+          horizontalAlignment: Image.AlignLeft
+          verticalAlignment: Image.AlignTop
+          Layout.preferredWidth: parent.width * .33
+          Layout.maximumWidth: parent.width * .33
+        }
+        ColumnLayout {
           Layout.fillWidth: true
-          font.pixelSize: 20
-          fontSizeMode: Text.Fit
-          text: details.data.title
-        }
-        Text {
-          Layout.fillWidth: true
-          font.pixelSize: 20
-          fontSizeMode: Text.Fit
-          text: details.data.author
-        }
-        Text {
-          Layout.fillWidth: true
-          font.pixelSize: 20
-          fontSizeMode: Text.Fit
-          text: details.data.artist
-        }
-        Text {
-          Layout.fillWidth: true
-          fontSizeMode: Text.Fit
-          font.pixelSize: 10
-          text: "%1 - %2".arg(details.data.status).arg(details.data.source.name)
-          color: "#222222"
-        }
-      }
-    }
-
-    Text {
-      text: details.data.description
-      elide: Text.ElideRight
-      width: parent.width
-      maximumLineCount: 2
-      MouseArea {
-        anchors.fill: parent
-        onClicked: {
-          if (!doWrap) {
-            parent.wrapMode = Text.WordWrap
-            parent.maximumLineCount = 40
-            doWrap = true
-          } else {
-            parent.wrapMode = Text.NoWrap
-            parent.maximumLineCount = 2
-            doWrap = false
-          }
-        }
-      }
-    }
-
-    Row {
-      width: parent.width
-      height: 20
-      spacing: 4
-      Repeater {
-        model: details.data.genre
-        delegate: Text {
-          text: modelData
-          wrapMode: Text.WordWrap
-        }
-      }
-    }
-
-    RowLayout {
-      width: parent.width - 8
-      height: 50
-      Layout.margins: 4
-      anchors {
-        left: parent.left
-        leftMargin: 4
-      }
-
-      Button {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        font.family: "Material Design Icons"
-        text: details.data.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
-        onClicked:  {
-          mangaChanged()
-          details.data.inLibrary ? details.removeFromLibrary() : details.addToLibrary()
-        }
-      }
-      Button {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        text: qsTr("View in Browser")
-        onClicked: details.openUrl()
-      }
-      Button {
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        text: qsTr("Download")
-        onClicked: popup.open()
-      }
-    }
-
-    RowLayout {
-      width: parent.width
-      height: chaptersModel.loading ? 50 : 0
-      Text {
-        text: qsTr("loading new chapters...")
-        visible: chaptersModel.loading
-        Layout.alignment: Qt.AlignRight
-        font.pixelSize: 20
-        Layout.fillWidth: true
-        Layout.leftMargin: 4
-      }
-      BusyIndicator {
-        id: busyIndicator
-        running: chaptersModel.loading
-        Layout.alignment: Qt.AlignLeft
-        Layout.rightMargin: 4
-      }
-    }
-  }
-
-  ListView {
-    id: chapterView
-    clip: true
-    anchors {
-      bottom: parent.bottom
-      left: parent.left
-      right: parent.right
-    }
-    height: {
-      return base.height - detailsColumn.childrenRect.height - 4
-    }
-
-    model: chaptersModel
-    delegate: SwipeDelegate {
-      width: chapterView.width
-      height: 60
-
-      property bool timerTriggered: false
-      Timer {
-        id: longPressTimer
-
-        interval: 800 //your press-and-hold interval here
-        repeat: false
-        running: false
-
-        onTriggered: {
-          timerTriggered = true;
-          chapterNumberPopup = chapterIndex
-          console.log("long press chapter is: ", read)
-          chapterReadPopup = read
-          popupChapter.open()
-        }
-      }
-      onClicked: {
-        if (!timerTriggered) {
-          const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
-                                       { mangaNumber: details.mangaNumber,
-                                       chapter: chapterIndex,
-                                       chapterId: chapterId })
-          viewer.chapterRead.connect(markRead)
-        }
-        timerTriggered = false;
-      }
-      onPressedChanged: {
-        if ( pressed && !swipe.position ) {
-          longPressTimer.running = true;
-        } else {
-          longPressTimer.running = false;
-        }
-      }
-      swipe.onPositionChanged: longPressTimer.running = false;
-      swipe.right: Rectangle {
-        id: rightLabel
-        color: "#2E7D32"
-        width: parent.width
-        height: parent.height
-        anchors.right: parent.right
-        Text {
-          id: icon
-          anchors {
-            right: parent.right
-            rightMargin: 12
-            top: parent.top
-            bottom: parent.bottom
-          }
-
-          text: read ? MdiFont.Icon.eyeOff : MdiFont.Icon.eye
-          font.family: "Material Design Icons"
-          font.pixelSize: 20
-          horizontalAlignment: Text.AlignHCenter
-          verticalAlignment: Text.AlignVCenter
-          color: "#F5F5F5"
-        }
-      }
-      swipe.onOpened: {
-        chaptersModel.chapterRead(chapterId, !read)
-        swipe.close()
-      }
-      contentItem: Rectangle {
-        color: "#212121"
-        border {
-          width: 1
-          color: "#F5F5F5"
-        }
-        Text {
-          anchors {
-            left: parent.left
-            right: downloadedText.left
-            top: parent.top
-            bottom: parent.bottom
-            margins: 4
-          }
-          text: name
-          color: read ? "grey" : "#F5F5F5"
-          horizontalAlignment: Text.AlignCenter
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: 12
-          font.pixelSize: 24
-          fontSizeMode: Text.Fit
-        }
-        Item {
-          id: downloadedText
-          anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-          }
-
-          width: parent.height * .75
+          Layout.alignment: Qt.AlignTop | Qt.AlignLeft
           Text {
-            id: downloadStatus
-            visible: progress < 0 || progress >= 100
-            anchors.fill: parent
-            font.family: "Material Design Icons"
-            color: "#F5F5F5"
-            text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
-            horizontalAlignment: Text.AlignRight
-            verticalAlignment: Text.AlignVCenter
-            rightPadding: 12
-            font.pixelSize: 24
+            Layout.fillWidth: true
+            font.pixelSize: 20
+            fontSizeMode: Text.Fit
+            text: details.data.title
           }
-          RadialBarShape {
-            anchors {
-              centerIn: parent
-            }
-            height: parent.height * .90
-            width: parent.width * .90
-            visible: progress > 0 && progress < 100
-            progressColor: "#e6436d"
-            value: progress
-            spanAngle: 270
-            dialType: RadialBarShape.DialType.FullDial
-            backgroundColor: "#6272a4"
-            penStyle: Qt.FlatCap
-            dialColor: "transparent"
+          Text {
+            Layout.fillWidth: true
+            font.pixelSize: 20
+            fontSizeMode: Text.Fit
+            text: details.data.author
           }
-          MouseArea {
-            anchors.fill: parent
-            onClicked: {
-              chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterIndex)
+          Text {
+            Layout.fillWidth: true
+            font.pixelSize: 20
+            fontSizeMode: Text.Fit
+            text: details.data.artist
+          }
+          Text {
+            Layout.fillWidth: true
+            fontSizeMode: Text.Fit
+            font.pixelSize: 10
+            text: "%1 - %2".arg(details.data.status).arg(details.data.source.name)
+            color: "#222222"
+          }
+        }
+      }
+
+      Text {
+        text: details.data.description
+        elide: Text.ElideRight
+        width: parent.width
+        maximumLineCount: 2
+        Layout.fillWidth: true
+        Layout.preferredHeight: implicitHeight
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+            if (!doWrap) {
+              parent.wrapMode = Text.WordWrap
+              parent.maximumLineCount = 40
+              doWrap = true
+            } else {
+              parent.wrapMode = Text.NoWrap
+              parent.maximumLineCount = 2
+              doWrap = false
             }
           }
         }
       }
+
+      Row {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 20
+        spacing: 4
+        Repeater {
+          model: details.data.genre
+          delegate: Text {
+            text: modelData
+            wrapMode: Text.WordWrap
+          }
+        }
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 50
+        Layout.margins: 4
+        anchors {
+          left: parent.left
+          leftMargin: 4
+        }
+
+        Button {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          font.family: "Material Design Icons"
+          text: details.data.inLibrary ? qsTr("%1\nIn Library").arg(MdiFont.Icon.heart) : qsTr("%1\nAdd to Library").arg(MdiFont.Icon.heartPlusOutline)
+          onClicked:  {
+            mangaChanged()
+            details.data.inLibrary ? details.removeFromLibrary() : details.addToLibrary()
+          }
+        }
+        Button {
+          Layout.fillHeight: true
+          Layout.fillWidth: true
+          text: qsTr("View in Browser")
+          onClicked: details.openUrl()
+        }
+        Button {
+          Layout.fillHeight: true
+          Layout.fillWidth: true
+          text: qsTr("Download")
+          onClicked: popup.open()
+        }
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 50
+        Text {
+          text: qsTr("loading new chapters...")
+          visible: chaptersModel.loading
+          Layout.alignment: Qt.AlignRight
+          font.pixelSize: 20
+          Layout.fillWidth: true
+          Layout.leftMargin: 4
+        }
+        BusyIndicator {
+          id: busyIndicator
+          running: chaptersModel.loading
+          Layout.alignment: Qt.AlignLeft
+          Layout.rightMargin: 4
+        }
+      }
     }
 
-    PullToRefreshHandler {
-      id: pulldown_handler
-      onPulldownrelease: {
-        chaptersModel.requestChapters(true)
+    ListView {
+      id: chapterView
+      clip: true
+      anchors {
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+      }
+      height: {
+        return base.height - detailsColumn.childrenRect.height - 4
+      }
+
+      model: chaptersModel
+      delegate: SwipeDelegate {
+        width: chapterView.width
+        height: 60
+
+        property bool timerTriggered: false
+        Timer {
+          id: longPressTimer
+
+          interval: 800 //your press-and-hold interval here
+          repeat: false
+          running: false
+
+          onTriggered: {
+            timerTriggered = true;
+            chapterNumberPopup = chapterIndex
+            console.log("long press chapter is: ", read)
+            chapterReadPopup = read
+            popupChapter.open()
+          }
+        }
+        onClicked: {
+          if (!timerTriggered) {
+            const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
+                                         { mangaNumber: details.mangaNumber,
+                                         chapter: chapterIndex,
+                                         chapterId: chapterId })
+            viewer.chapterRead.connect(markRead)
+          }
+          timerTriggered = false;
+        }
+        onPressedChanged: {
+          if ( pressed && !swipe.position ) {
+            longPressTimer.running = true;
+          } else {
+            longPressTimer.running = false;
+          }
+        }
+        swipe.onPositionChanged: longPressTimer.running = false;
+        swipe.right: Rectangle {
+          id: rightLabel
+          color: "#2E7D32"
+          width: parent.width
+          height: parent.height
+          anchors.right: parent.right
+          Text {
+            id: icon
+            anchors {
+              right: parent.right
+              rightMargin: 12
+              top: parent.top
+              bottom: parent.bottom
+            }
+
+            text: read ? MdiFont.Icon.eyeOff : MdiFont.Icon.eye
+            font.family: "Material Design Icons"
+            font.pixelSize: 20
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: "#F5F5F5"
+          }
+        }
+        swipe.onOpened: {
+          chaptersModel.chapterRead(chapterId, !read)
+          swipe.close()
+        }
+        contentItem: Rectangle {
+          color: "#212121"
+          border {
+            width: 1
+            color: "#F5F5F5"
+          }
+          Text {
+            anchors {
+              left: parent.left
+              right: downloadedText.left
+              top: parent.top
+              bottom: parent.bottom
+              margins: 4
+            }
+            text: name
+            color: read ? "grey" : "#F5F5F5"
+            horizontalAlignment: Text.AlignCenter
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 12
+            font.pixelSize: 24
+            fontSizeMode: Text.Fit
+          }
+          Item {
+            id: downloadedText
+            anchors {
+              right: parent.right
+              top: parent.top
+              bottom: parent.bottom
+            }
+
+            width: parent.height * .75
+            Text {
+              id: downloadStatus
+              visible: progress < 0 || progress >= 100
+              anchors.fill: parent
+              font.family: "Material Design Icons"
+              color: "#F5F5F5"
+              text: downloaded ? MdiFont.Icon.checkCircle : MdiFont.Icon.downloadCircleOutline
+              horizontalAlignment: Text.AlignRight
+              verticalAlignment: Text.AlignVCenter
+              rightPadding: 12
+              font.pixelSize: 24
+            }
+            RadialBarShape {
+              anchors {
+                centerIn: parent
+              }
+              height: parent.height * .90
+              width: parent.width * .90
+              visible: progress > 0 && progress < 100
+              progressColor: "#e6436d"
+              value: progress
+              spanAngle: 270
+              dialType: RadialBarShape.DialType.FullDial
+              backgroundColor: "#6272a4"
+              penStyle: Qt.FlatCap
+              dialColor: "transparent"
+            }
+            MouseArea {
+              anchors.fill: parent
+              onClicked: {
+                chaptersModel.downloadChapter(ChaptersModel.DownloadCustom, chapterIndex)
+              }
+            }
+          }
+        }
+      }
+
+      PullToRefreshHandler {
+        id: pulldown_handler
+        onPulldownrelease: {
+          chaptersModel.requestChapters(true)
+        }
       }
     }
   }
@@ -437,7 +439,8 @@ Item {
       onClicked: {
         const viewer = navigatePage(Qt.resolvedUrl("Viewer.qml"),
                                      { mangaNumber: details.mangaNumber,
-                                       chapter: chaptersModel.lastReadChapter })
+                                       chapter: chaptersModel.lastReadChapter,
+                                       chapterId: chaptersModel.lastChapterId })
         viewer.chapterRead.connect((chapter) => {
           chaptersModel.chapterRead(chapter, true)
         })

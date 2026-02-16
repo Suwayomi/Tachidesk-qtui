@@ -68,7 +68,7 @@ void ChaptersModel::requestChapters(bool onlineFetch)
   }
   variablesObj.insert("order", orderArray);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_MANGA::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_MANGA::GetOperationName(), graphql::qtui::client::query::GET_CHAPTERS_MANGA::GetRequestText(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::query::GET_CHAPTERS_MANGA::parseResponse(std::move(data));
       beginResetModel();
@@ -76,6 +76,17 @@ void ChaptersModel::requestChapters(bool onlineFetch)
       endResetModel();
 
       _loading = false;
+
+      for (const auto& chapter : _chapters.chapters.nodes) {
+        if (chapter.isRead) {
+          break;
+        }
+        _lastReadChapter = chapter.sourceOrder;
+        _lastChapterId = chapter.id;
+      }
+
+      emit lastReadChapterChanged();
+      emit lastChapterIdChanged();
       emit loadingChanged();
     });
 }
@@ -119,6 +130,7 @@ QVariant ChaptersModel::data(const QModelIndex &index, int role) const {
        (index.row() >= 0) &&
        (index.row() < rowCount())))
   {
+    qDebug() << "Invalid index" << index.row() << "for model with" << rowCount() << "rows";
     return {};
   }
 
@@ -214,7 +226,7 @@ void ChaptersModel::chapterRead(qint32 chapterId, bool read)
   variablesObj.insert("mangaId", -1);
   variablesObj.insert("trackProgress", false);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetRequestText(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::mutation::UPDATE_LIBRARY::parseResponse(std::move(data));
       auto it = std::find_if(_chapters.chapters.nodes.begin(),
@@ -260,7 +272,7 @@ void ChaptersModel::previousChaptersRead(quint32 chapter, bool read)
   variablesObj.insert("mangaId", -1);
   variablesObj.insert("trackProgress", false);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetOperationName(), graphql::qtui::client::mutation::UPDATE_CHAPTERS::GetRequestText(), std::move(variablesObj),
     [&](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::mutation::UPDATE_CHAPTERS::parseResponse(std::move(data));
 

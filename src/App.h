@@ -12,6 +12,20 @@
 #include <memory>
 #include <QApplication>
 
+#ifdef Q_OS_ANDROID
+class QAndroidService;
+class QJniObject;
+#endif
+
+#ifdef Q_OS_ANDROID
+class QAndroidService;
+class QJniObject;
+#endif
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+#include <QtCore/private/qandroidextras_p.h>
+#endif
+
 
 class App : public QApplication
 {
@@ -28,15 +42,16 @@ class App : public QApplication
 
   std::shared_ptr<QmlReloader> _qmlReloader;
 
-public:
+ public:
   App(int argc, char *argv[]);
   ~App();
 
   Q_INVOKABLE void reload();
-signals:
+
+ signals:
   void sendMessage(const QString& msg);
 
-private:
+ private:
   QUrl makeUrl(const QString& path) const;
   void disconnect();
   void initalize();

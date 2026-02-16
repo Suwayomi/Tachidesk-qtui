@@ -16,6 +16,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   Q_PROPERTY(qint32 mangaNumber     MEMBER _mangaNumber     NOTIFY mangaNumberChanged)
   Q_PROPERTY(qint32 lastReadChapter MEMBER _lastReadChapter NOTIFY lastReadChapterChanged)
+  Q_PROPERTY(qint32 lastChapterId   MEMBER _lastChapterId   NOTIFY lastChapterIdChanged)
   Q_PROPERTY(bool   loading         MEMBER _loading         NOTIFY loadingChanged)
   Q_PROPERTY(bool   autoUpdate      MEMBER _autoUpdate      NOTIFY autoUpdateChanged)
 
@@ -26,6 +27,7 @@ class ChaptersModel : public QAbstractListModel, public QQmlParserStatus
 
   qint32 _mangaNumber;
   qint32 _lastReadChapter = 0;
+  qint32 _lastChapterId = 0;
 
 protected:
 
@@ -79,6 +81,7 @@ public:
 signals:
    void mangaNumberChanged();
    void lastReadChapterChanged();
+   void lastChapterIdChanged();
    void loadingChanged();
    void autoUpdateChanged();
 

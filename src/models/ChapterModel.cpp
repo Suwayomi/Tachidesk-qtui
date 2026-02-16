@@ -49,7 +49,7 @@ void ChapterModel::componentComplete()
   }
   chaptersVariablesObj.insert("order", orderArray);
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_ID::GetOperationName(), std::move(chaptersVariablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::query::GET_CHAPTERS_ID::GetOperationName(), graphql::qtui::client::query::GET_CHAPTERS_ID::GetRequestText(), std::move(chaptersVariablesObj),
     [&](graphql::response::Value&& data) {
       auto parsed = graphql::qtui::client::query::GET_CHAPTERS_ID::parseResponse(std::move(data));
       _chapters = std::move(parsed);
@@ -298,7 +298,7 @@ void ChapterModel::requestChapter(qint32 chapter, bool forward)
   _requestingChapter = true;
   emit requestingChapterChanged();
 
-  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), std::move(variablesObj),
+  NetworkManager::instance().postGraphQL(graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::GetOperationName(), graphql::qtui::client::mutation::GET_CHAPTER_PAGES_FETCH::GetRequestText(), std::move(variablesObj),
     [&, forward=forward](graphql::response::Value&& data) {
     qint32 pageStart = 0;
     qint32 pageEnd = 0;

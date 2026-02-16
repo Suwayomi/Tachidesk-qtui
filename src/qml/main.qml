@@ -70,6 +70,7 @@ ApplicationWindow {
     }
 
     Keys.onReleased: (event) => {
+      console.log("key pressed: " + event.key)
       switch (event.key) {
         case Qt.Key_Backspace:
           if (event.modifiers & Qt.ControlModifier)
@@ -78,6 +79,7 @@ ApplicationWindow {
           }
           break;
         case Qt.Key_Back:
+          console.log("back key released")
           ac.back()
           break;
         default:

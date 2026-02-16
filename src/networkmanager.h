@@ -58,7 +58,7 @@ public:
 
   const auto &password() const { return _password; }
 
-  void postGraphQL(const std::string &query, QJsonObject&& variables, std::function<void(graphql::response::Value &&)> callback);
+  void postGraphQL(const std::string &query, const std::string &requestText, QJsonObject&& variables, std::function<void(graphql::response::Value &&)> callback);
   void get(const QUrl& uri, QObject* context, const Callback& callback);
   void get(const QString &endpoint);
   void get(const QString &endpoint,
